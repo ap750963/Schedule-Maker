@@ -1,10 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ScholarTime - Schedule Builder</title>
+    
+    <!-- Modern Font Loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -36,23 +44,26 @@
         }
       }
     </script>
-    <style>
-      body {
-        background-color: #f8fafc !important;
-        color: #111827 !important;
+    
+    <style type="text/tailwindcss">
+      @layer base {
+        body {
+          @apply bg-gray-50 text-slate-900 antialiased font-sans;
+          background-color: #f8fafc !important;
+        }
       }
-      #root {
-        min-height: 100vh;
+      @layer components {
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
       @keyframes modal-pop {
         0% { transform: scale(0.95); opacity: 0; }
         100% { transform: scale(1); opacity: 1; }
       }
-      .animate-modal { animation: modal-pop 0.2s ease-out forwards; }
+      .animate-modal { animation: modal-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
     </style>
+
     <script type="importmap">
 {
   "imports": {
@@ -71,7 +82,7 @@
 }
 </script>
   </head>
-  <body class="bg-gray-50 text-gray-900 antialiased">
+  <body>
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>
   </body>
