@@ -1,0 +1,5 @@
+{
+  "name": "ScholarTime",
+  "description": "A modern, mobile-first schedule builder application for managing classes, subjects, and faculties with an intuitive step-by-step wizard and grid editor.",
+  "requestFramePermissions": []
+}
