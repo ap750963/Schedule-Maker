@@ -129,7 +129,10 @@ export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSche
       {/* Custom Confirmation Modal */}
       {scheduleToDelete && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300">
-            <div className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl p-8 animate-modal border border-slate-100">
+            <div 
+              className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl p-8 animate-modal border border-slate-100"
+              onClick={(e) => e.stopPropagation()}
+            >
                 <div className="flex flex-col items-center text-center space-y-4">
                     <div className="h-20 w-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-2">
                         <AlertCircle size={40} strokeWidth={2.5} />
