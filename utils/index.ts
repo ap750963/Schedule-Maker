@@ -64,6 +64,18 @@ export const getColorClasses = (colorName?: string) => {
   return styles[color] || styles['gray'];
 };
 
+// Solid Pastel Palette for Card UI
+export const getSolidColorClasses = (colorName?: string) => {
+  const c = colorName || 'gray';
+  return {
+    bg: `bg-${c}-200 dark:bg-${c}-900`,
+    text: `text-${c}-900 dark:text-${c}-100`,
+    subtext: `text-${c}-700 dark:text-${c}-300`,
+    border: `border-${c}-300 dark:border-${c}-700`,
+    hover: `hover:bg-${c}-300 dark:hover:bg-${c}-800`
+  };
+};
+
 export const getSubjectColorName = (subjects: Subject[], subjectId: string): string => {
   const subj = subjects.find(s => s.id === subjectId);
   if (subj?.color) return subj.color;

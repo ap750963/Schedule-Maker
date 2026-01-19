@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Schedule, ViewState, DEFAULT_PERIODS } from './types.ts';
+import { Schedule, ViewState } from './types.ts';
 import { Home } from './views/Home.tsx';
 import { Wizard } from './views/Wizard.tsx';
 import { Editor } from './views/Editor.tsx';
 import { MultiSemesterEditor } from './views/MultiSemesterEditor.tsx';
 import { FacultyWiseView } from './views/FacultyWiseView.tsx';
 import { applyTheme } from './utils/index.ts';
-
-const EXTERNAL_BUSY_ID = 'external-busy';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
@@ -18,39 +16,20 @@ const App: React.FC = () => {
   const [theme, setTheme] = useState<string>(() => localStorage.getItem('scholarTime_theme') || 'teal');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => localStorage.getItem('scholarTime_darkMode') === 'true');
 
-  // Load Schedules & Ensure External Schedule Exists
+  // Load Schedules
   useEffect(() => {
     const saved = localStorage.getItem('scholarTime_schedules');
-    let loadedSchedules: Schedule[] = [];
     if (saved) {
       try {
-        loadedSchedules = JSON.parse(saved);
+        setSchedules(JSON.parse(saved));
       } catch (e) {
         console.error("Failed to parse schedules", e);
       }
     }
-
-    // Ensure External Busy schedule exists
-    if (!loadedSchedules.find(s => s.id === EXTERNAL_BUSY_ID)) {
-        const externalSchedule: Schedule = {
-            id: EXTERNAL_BUSY_ID,
-            details: { className: 'External', section: '', session: '', semester: '0' },
-            subjects: [],
-            faculties: [],
-            periods: DEFAULT_PERIODS,
-            timeSlots: [],
-            lastModified: Date.now()
-        };
-        loadedSchedules.push(externalSchedule);
-    }
-
-    setSchedules(loadedSchedules);
   }, []);
 
   useEffect(() => {
-    if (schedules.length > 0) {
-        localStorage.setItem('scholarTime_schedules', JSON.stringify(schedules));
-    }
+    localStorage.setItem('scholarTime_schedules', JSON.stringify(schedules));
   }, [schedules]);
 
   // Theme Effects

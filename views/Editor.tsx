@@ -76,16 +76,16 @@ export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-8 relative z-10 scroll-smooth">
-        {/* Grid Container - Removed heavy background, allowing floating glass effect */}
-        <div className="overflow-x-auto pb-4 -mx-6 px-6 no-scrollbar">
-          <ScheduleGrid 
-            schedule={currentSchedule} 
-            periods={periods} 
-            onCellClick={(day, periodId) => setEditingSlot({day, period: periodId})}
-            onPeriodClick={setEditingPeriod}
-            onAddPeriod={() => setEditingPeriod({ id: 0, label: 'New Hour', time: '09:00 - 10:00' })}
-          />
+      <div className="flex-1 overflow-y-auto p-2 sm:p-6 space-y-8 relative z-10 scroll-smooth">
+        {/* Grid Component handles its own horizontal scroll */}
+        <div id="schedule-grid" className="w-full">
+            <ScheduleGrid 
+                schedule={currentSchedule} 
+                periods={periods} 
+                onCellClick={(day, periodId) => setEditingSlot({day, period: periodId})}
+                onPeriodClick={setEditingPeriod}
+                onAddPeriod={() => setEditingPeriod({ id: 0, label: 'New Hour', time: '09:00 - 10:00' })}
+            />
         </div>
         
         <FacultyTable stats={facultyStats} />

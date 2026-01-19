@@ -1,7 +1,7 @@
 import React from 'react';
-import { Coffee, Edit2, Plus, User, Clock, MoreHorizontal } from 'lucide-react';
-import { DAYS, Period, Subject, Schedule, TimeSlot } from '../../types';
-import { getColorClasses, getSubjectColorName, getFacultyInitials } from '../../utils';
+import { Plus, Coffee, AlertCircle } from 'lucide-react';
+import { DAYS, Period, Schedule } from '../../types';
+import { getSubjectColorName, getSolidColorClasses } from '../../utils';
 
 interface ScheduleGridProps {
   schedule: Schedule;
@@ -10,8 +10,6 @@ interface ScheduleGridProps {
   onPeriodClick: (period: Period) => void;
   onAddPeriod: () => void;
 }
-
-const BREAK_LETTERS = ['B', 'R', 'E', 'A', 'K', 'S'];
 
 export const ScheduleGrid: React.FC<ScheduleGridProps> = ({ 
   schedule, periods, onCellClick, onPeriodClick, onAddPeriod 
@@ -22,150 +20,130 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   const getSub = (id: string) => schedule.subjects.find(s => s.id === id);
 
   return (
-    <div id="schedule-grid" className="min-w-fit h-full flex flex-col p-4">
-      {/* Header Row */}
-      <div className="flex gap-2 mb-3 sticky top-0 z-40">
-        {/* Empty corner for Days */}
-        <div className="w-16 shrink-0 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 flex items-center justify-center shadow-sm">
-          <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Day</span>
-        </div>
-
-        {/* Time Periods */}
+    <div className="w-full overflow-auto bg-gray-50/50 dark:bg-slate-900/50 p-4 sm:p-6 rounded-[3rem] scrollbar-hide">
+      <div 
+        className="grid gap-4 min-w-max"
+        style={{
+           // First col: Day (80px), Others: Periods (min 160px), Last: Add Button (60px)
+           gridTemplateColumns: `80px repeat(${periods.length}, minmax(160px, 1fr)) 60px`
+        }}
+      >
+        {/* === HEADER ROW === */}
+        {/* Corner Spacer */}
+        <div className="sticky left-0 top-0 z-30 bg-gray-50/0 backdrop-blur-sm rounded-xl"></div>
+        
+        {/* Period Headers */}
         {periods.map(p => (
-          <div 
-            key={p.id} 
-            onClick={() => onPeriodClick(p)} 
-            className={`
-              shrink-0 relative group cursor-pointer transition-all duration-300 hover:-translate-y-1
-              bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 shadow-sm hover:shadow-lg
-              ${p.isBreak ? 'w-12 bg-gray-50/50 dark:bg-slate-800/50' : 'w-40'}
-            `}
-          >
-            {p.isBreak ? (
-              <div className="h-full flex flex-col items-center justify-center gap-1 py-3">
-                <Coffee size={14} className="text-gray-400 dark:text-slate-500 mb-0.5" />
-                <span className="text-[8px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest rotate-90 mt-1">Break</span>
-                <Edit2 size={10} className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2"/>
-              </div>
-            ) : (
-              <div className="flex flex-col h-full items-center justify-center gap-0.5 py-3 px-1">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Clock size={10} className="text-gray-400 dark:text-slate-500" />
-                  <span className="text-[9px] font-bold text-gray-500 dark:text-slate-400 font-mono tracking-tighter uppercase">{p.label}</span>
-                </div>
-                <div className="bg-white/50 dark:bg-slate-700/50 rounded-lg px-2 py-1 border border-white/40 dark:border-slate-600/30 shadow-sm group-hover:bg-white dark:group-hover:bg-slate-600 transition-colors">
-                    <span className="text-[10px] font-black text-gray-700 dark:text-slate-200">{p.time}</span>
-                </div>
-                <Edit2 size={10} className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity absolute top-1 right-1"/>
-              </div>
-            )}
-          </div>
+           <div 
+             key={p.id} 
+             onClick={() => onPeriodClick(p)}
+             className="sticky top-0 z-20 flex flex-col items-center justify-end pb-4 bg-gray-50/90 dark:bg-slate-900/90 backdrop-blur-sm group cursor-pointer"
+           >
+              {p.isBreak ? (
+                  <div className="flex flex-col items-center opacity-50">
+                     <Coffee size={14} className="mb-1" />
+                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">Break</span>
+                  </div>
+              ) : (
+                  <>
+                    <span className="text-[10px] font-black text-blue-400 dark:text-blue-300 uppercase tracking-widest mb-1 group-hover:text-blue-600 transition-colors">
+                        {/* Ordinal numbers logic or just ID if simple */}
+                        {p.id}{p.id === 1 ? 'ST' : p.id === 2 ? 'ND' : p.id === 3 ? 'RD' : 'TH'}
+                    </span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
+                        {p.time.split('-')[0].trim()}
+                    </span>
+                  </>
+              )}
+           </div>
         ))}
         
-        {/* Add Period Button */}
-        <div className="w-12 shrink-0 flex items-center justify-center">
-          <button 
-            onClick={onAddPeriod} 
-            className="h-10 w-10 rounded-xl bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 hover:bg-primary-500 hover:text-white dark:hover:bg-primary-500 text-gray-400 dark:text-slate-500 transition-all shadow-sm hover:shadow-glow hover:scale-110 flex items-center justify-center"
-          >
-            <Plus size={18} strokeWidth={3} />
-          </button>
+        {/* Add Period Header */}
+        <div className="sticky top-0 z-20 flex items-end justify-center pb-4 bg-gray-50/90 dark:bg-slate-900/90 backdrop-blur-sm">
+             <button onClick={onAddPeriod} className="p-2 text-gray-300 hover:text-primary-500 transition-colors"><Plus size={20} /></button>
         </div>
-      </div>
 
-      {/* Grid Rows */}
-      <div className="flex flex-col gap-2">
+
+        {/* === DATA ROWS === */}
         {DAYS.map((day, dIdx) => (
-          <div key={day} className="flex gap-2 min-h-[8rem] group/row">
-            {/* Day Label (Sticky) */}
-            <div className="sticky left-0 z-30 w-16 shrink-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-[1.5rem] flex items-center justify-center shadow-card group-hover/row:scale-105 transition-transform duration-300">
-              <div className="rotate-[-90deg] text-base font-black text-gray-300 dark:text-slate-600 uppercase tracking-[0.3em] group-hover/row:text-primary-500 transition-colors whitespace-nowrap drop-shadow-sm">
-                {day}
-              </div>
-            </div>
+            <React.Fragment key={day}>
+               {/* Day Label Column */}
+               <div className="sticky left-0 z-10 bg-white dark:bg-slate-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center h-40 w-20">
+                   <span className="text-xs font-black text-gray-800 dark:text-white uppercase tracking-[0.2em] -rotate-90">{day}</span>
+               </div>
 
-            {/* Slots */}
-            {periods.map((period, pIdx) => {
-              if (period.isBreak) {
-                const letter = BREAK_LETTERS[dIdx] || '•';
-                return (
-                  <div key={`${day}-${period.id}`} className="w-12 shrink-0 flex items-center justify-center select-none">
-                    <span className="text-lg font-black text-gray-200 dark:text-slate-700 font-sans">{letter}</span>
-                  </div>
-                );
-              }
+               {/* Slots */}
+               {periods.map((period, pIdx) => {
+                   if (period.isBreak) {
+                       return (
+                           <div key={period.id} className="h-40 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-slate-700/50 flex flex-col items-center justify-center opacity-50">
+                               <div className="w-1 h-full bg-gray-100 dark:bg-slate-700 rounded-full" />
+                           </div>
+                       );
+                   }
 
-              // Handle Multi-hour Practical spanning
-              if (pIdx > 0) {
-                const prev = findSlot(day, periods[pIdx-1].id);
-                if (prev?.type === 'Practical' && (prev.duration || 1) > 1) return null;
-              }
+                   // Check previous span
+                   if (pIdx > 0) {
+                       const prevP = periods[pIdx - 1];
+                       if (!prevP.isBreak) {
+                           const prevSlot = findSlot(day, prevP.id);
+                           if (prevSlot && prevSlot.type === 'Practical' && (prevSlot.duration || 1) > 1) {
+                               return null; // Consumed by span
+                           }
+                       }
+                   }
 
-              const slot = findSlot(day, period.id);
-              const color = getSubjectColorName(schedule.subjects, slot?.subjectId || '');
-              const styles = getColorClasses(color);
+                   const slot = findSlot(day, period.id);
+                   const colSpan = slot?.type === 'Practical' ? (slot.duration || 1) : 1;
+                   
+                   if (!slot) {
+                       return (
+                           <div 
+                               key={period.id} 
+                               onClick={() => onCellClick(day, period.id)}
+                               className="h-40 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:border-blue-200 dark:hover:border-blue-800 transition-all cursor-pointer flex items-center justify-center group"
+                           >
+                               <Plus size={24} className="text-gray-200 dark:text-slate-700 group-hover:text-blue-300 transition-colors" />
+                           </div>
+                       );
+                   }
 
-              return (
-                <div 
-                  key={`${day}-${period.id}`} 
-                  onClick={() => onCellClick(day, period.id)} 
-                  className={`
-                    shrink-0 relative transition-all duration-300
-                    ${slot?.type === 'Practical' && (slot.duration || 1) > 1 ? 'w-[calc(20rem+0.5rem)]' : 'w-40'}
-                  `}
-                >
-                  <div className={`
-                    h-full w-full rounded-[1.5rem] flex flex-col relative overflow-hidden backdrop-blur-md border transition-all duration-300
-                    ${slot 
-                      ? `${styles.bg} ${styles.border} ${styles.hover} shadow-sm` 
-                      : 'bg-white/20 dark:bg-slate-800/20 border-white/20 dark:border-slate-700/20 border-dashed hover:border-primary-300/50 hover:bg-white/40 dark:hover:bg-slate-700/40 justify-center items-center group/cell'
-                    }
-                  `}>
-                    {slot ? (
-                      <div className="p-3 h-full flex flex-col justify-between relative z-10">
-                        {/* Top: Tag + Code */}
-                        <div className="flex justify-between items-start mb-1">
-                          <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm backdrop-blur-sm ${styles.pill}`}>
-                            {slot.type === 'Practical' ? 'Lab' : 'Theory'}
-                          </span>
-                          <span className={`text-[9px] font-bold opacity-60 ${styles.text}`}>
-                            {getSub(slot.subjectId)?.code}
-                          </span>
-                        </div>
+                   const colorName = getSubjectColorName(schedule.subjects, slot.subjectId);
+                   const styles = getSolidColorClasses(colorName);
+                   const sub = getSub(slot.subjectId);
 
-                        {/* Middle: Subject Name */}
-                        <h4 className={`text-sm font-black leading-tight line-clamp-2 drop-shadow-sm ${styles.text}`}>
-                          {getSub(slot.subjectId)?.name}
-                        </h4>
+                   return (
+                       <div 
+                           key={period.id}
+                           onClick={() => onCellClick(day, period.id)}
+                           className={`
+                               h-40 rounded-[2rem] p-5 flex flex-col justify-between cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg
+                               ${styles.bg} ${styles.text}
+                           `}
+                           style={{ gridColumn: `span ${colSpan}` }}
+                       >
+                           {/* Header: Subject Name */}
+                           <div className="font-bold text-lg leading-tight line-clamp-2">
+                               {sub?.name || 'Unknown'}
+                           </div>
 
-                        {/* Bottom: Faculty */}
-                        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-black/5 dark:border-white/5">
-                          <div className={`p-0.5 rounded-full ${styles.pill}`}>
-                            <User size={8} className={styles.icon} strokeWidth={3} />
-                          </div>
-                          <span className={`text-[10px] font-bold truncate ${styles.lightText}`}>
-                            {getFacultyInitials(schedule.faculties, slot.facultyIds)}
-                          </span>
-                        </div>
+                           {/* Footer: Details */}
+                           <div className="mt-auto space-y-1">
+                               <div className={`text-xs font-bold uppercase tracking-wide opacity-80 ${styles.subtext}`}>
+                                   {slot.type === 'Practical' ? 'Lab Session' : sub?.code || 'No Code'}
+                               </div>
+                               <div className={`text-sm font-black ${styles.text} flex items-center justify-between`}>
+                                   <span>{schedule.details.section ? `RM ${schedule.details.section}` : 'RM --'}</span>
+                                   {/* Placeholder for Room or Faculty Initials */}
+                               </div>
+                           </div>
+                       </div>
+                   );
+               })}
 
-                        {/* Decorative Background Icon */}
-                        <div className="absolute -bottom-4 -right-4 opacity-[0.03] text-black dark:text-white pointer-events-none transform rotate-12">
-                           <User size={60} />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="opacity-0 group-hover/cell:opacity-100 transition-all duration-300 transform group-hover/cell:scale-110 flex flex-col items-center">
-                        <div className="h-8 w-8 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center text-primary-500 mb-1 shadow-sm">
-                          <Plus size={16} strokeWidth={3} />
-                        </div>
-                        <span className="text-[8px] font-black text-primary-500 uppercase tracking-widest">Add</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+               {/* Filler for Add Button Column */}
+               <div className="h-40 bg-transparent" />
+            </React.Fragment>
         ))}
       </div>
     </div>

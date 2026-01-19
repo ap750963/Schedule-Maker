@@ -8,10 +8,22 @@ export interface Subject {
   color?: string;
 }
 
+export interface ExternalSlot {
+  id: string;
+  day: string;
+  periodId: number;
+  details: {
+    department: string;
+    semester: string;
+    subject: string;
+  }
+}
+
 export interface Faculty {
   id: string;
   name: string;
   initials: string;
+  externalSlots?: ExternalSlot[];
 }
 
 export interface ClassDetails {
@@ -35,13 +47,8 @@ export interface TimeSlot {
   startTime: string;
   subjectId: string;
   facultyIds: string[]; 
-  type: 'Theory' | 'Practical' | 'Busy';
+  type: 'Theory' | 'Practical';
   duration?: number;
-  externalDetails?: {
-    dept: string;
-    semester: string;
-    subject: string;
-  };
 }
 
 export interface Schedule {
