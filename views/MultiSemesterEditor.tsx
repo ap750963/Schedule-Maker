@@ -20,7 +20,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   const [localSchedules, setLocalSchedules] = useState<Schedule[]>(JSON.parse(JSON.stringify(schedules)));
   const [isExporting, setIsExporting] = useState(false);
   
-  // Separate academic schedules from the external busy container
   const { academicSchedules, externalSchedule } = useMemo(() => {
     const academic = localSchedules.filter(s => s.id !== EXTERNAL_BUSY_ID).sort((a, b) => {
         const semA = parseInt(a.details.semester) || 0;
@@ -31,7 +30,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     return { academicSchedules: academic, externalSchedule: external };
   }, [localSchedules]);
 
-  // Merge faculties from all academic schedules to use in the external row
   const allFaculties = useMemo(() => {
     const map = new Map<string, Faculty>();
     localSchedules.forEach(s => {
@@ -63,10 +61,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   const checkConflict = (scheduleId: string, day: string, periodId: number, facultyId: string) => {
     for (const s of localSchedules) {
         if (s.id === scheduleId) continue;
-        
-        // Find ALL slots in this schedule for this time
         const slots = s.timeSlots.filter(ts => ts.day === day && ts.period === periodId);
-        
         for (const slot of slots) {
             if (slot.facultyIds.includes(facultyId)) {
                 if (s.id === EXTERNAL_BUSY_ID) {
@@ -85,8 +80,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
       if (!editingCell || !tempSlot.facultyIds) return {};
       const conflicts: Record<string, string> = {};
       tempSlot.facultyIds.forEach(fid => {
-          // If we are editing an external slot, we need to check if we conflict with ITSELF if we are not careful,
-          // but checkConflict skips 'scheduleId' so it's fine.
           const conf = checkConflict(editingCell.scheduleId, editingCell.day, editingCell.periodId, fid);
           if (conf) conflicts[fid] = conf;
       });
@@ -97,11 +90,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     const period = masterPeriods.find(p => p.id === periodId);
     if (period?.isBreak) return;
 
-    // For standard schedule, there is only one slot. For external, we can have multiple.
-    // existingSlot is passed if we clicked a specific bubble in External row.
-    // If we clicked the empty cell area in External row, existingSlot is undefined -> Create New.
-    
-    // For academic schedules, we always try to find the one slot if we didn't pass one explicitly (though usually one per cell)
     const slotToEdit = existingSlot || (schedule.id !== EXTERNAL_BUSY_ID ? findSlot(schedule, day, periodId) : undefined);
     
     setTempSlot(slotToEdit || {
@@ -125,17 +113,11 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
         let newSlots = [...sch.timeSlots];
         
         if (sch.id === EXTERNAL_BUSY_ID) {
-            // For External Busy, we support multiple slots per cell.
-            // If we are editing an existing slot (it has an ID), remove the old version.
             if (data.id) {
                 newSlots = newSlots.filter(s => s.id !== data.id);
             }
         } else {
-            // For Academic Schedules, enforce one slot per cell.
-            // Remove any slot at this position.
             newSlots = newSlots.filter(s => !(s.day === editingCell.day && s.period === editingCell.periodId));
-            
-            // Handle spanning practical removal
             if (data.type === 'Practical' && (data.duration || 1) > 1) {
                  const pIndex = masterPeriods.findIndex(p => p.id === editingCell.periodId);
                  if (pIndex !== -1 && pIndex < masterPeriods.length - 1) {
@@ -169,19 +151,14 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     if (!editingCell) return;
     setLocalSchedules(prev => prev.map(sch => {
         if (sch.id !== editingCell.scheduleId) return sch;
-        
         let newSlots = [...sch.timeSlots];
-        
         if (sch.id === EXTERNAL_BUSY_ID) {
-            // Delete specific slot by ID
              if (tempSlot.id) {
                 newSlots = newSlots.filter(s => s.id !== tempSlot.id);
             }
         } else {
-            // Delete by position
             newSlots = newSlots.filter(s => !(s.day === editingCell.day && s.period === editingCell.periodId));
         }
-        
         return { ...sch, timeSlots: newSlots, lastModified: Date.now() };
     }));
     setEditingCell(null);
@@ -190,14 +167,12 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   const handleSavePeriod = (updatedPeriod: Period, start: string, end: string) => {
       const timeString = `${start} - ${end}`;
       let newPeriods = [...masterPeriods];
-      
       if (updatedPeriod.id === 0) { 
           const maxId = Math.max(0, ...newPeriods.map(p => p.id));
           newPeriods.push({ ...updatedPeriod, id: maxId + 1, time: timeString });
       } else { 
           newPeriods = newPeriods.map(p => p.id === updatedPeriod.id ? { ...updatedPeriod, time: timeString } : p);
       }
-      
       setLocalSchedules(prev => prev.map(s => ({
           ...s,
           periods: newPeriods,
@@ -240,55 +215,51 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   } : null;
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans relative overflow-hidden transition-colors duration-300">
-        {/* Ambient Background Blobs */}
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-100 dark:bg-primary-900/30 rounded-full blur-3xl opacity-40 pointer-events-none" />
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/20 rounded-full blur-3xl opacity-40 pointer-events-none" />
-
+    <div className="h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans transition-colors duration-300">
         {/* Header */}
-        <div className="px-6 py-6 z-50 flex items-center justify-between shrink-0 flex-wrap gap-4 bg-white/10 dark:bg-slate-900/10 backdrop-blur-sm border-b border-white/20 dark:border-slate-800/50">
-            <div className="flex items-center gap-4">
-                <button onClick={onBack} className="h-12 w-12 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-full shadow-soft flex items-center justify-center text-gray-500 dark:text-slate-300 hover:text-primary-600 hover:scale-110 transition-all border border-white/50 dark:border-slate-700/50">
-                    <ArrowLeft size={22} />
+        <div className="px-4 py-4 z-50 flex items-center justify-between shrink-0 flex-wrap gap-2 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
+            <div className="flex items-center gap-2">
+                <button onClick={onBack} className="h-8 w-8 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-500 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all">
+                    <ArrowLeft size={16} />
                 </button>
                 <div>
-                    <h2 className="text-3xl font-black text-gray-900 dark:text-white leading-none tracking-tight">Department Master</h2>
-                    <p className="text-sm font-bold text-gray-500 dark:text-slate-400 mt-1">
+                    <h2 className="text-lg font-black text-gray-900 dark:text-white leading-none tracking-tight">Department Master</h2>
+                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 mt-0.5">
                         {academicSchedules[0]?.details.className} • {academicSchedules[0]?.details.session}
                     </p>
                 </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+            <div className="flex items-center gap-2 ml-auto">
                  <Button 
                     onClick={handleExport} 
                     variant="secondary" 
-                    icon={<Download size={18} />} 
+                    icon={<Download size={14} />} 
                     disabled={isExporting}
                     size="sm"
-                    className="rounded-2xl border-white/50 bg-white/50 backdrop-blur-sm hover:bg-white/80"
+                    className="rounded-lg border-gray-200 dark:border-slate-700"
                  >
-                    <span className="hidden xs:inline">{isExporting ? 'Generating...' : 'Export PDF'}</span>
+                    <span className="hidden xs:inline">{isExporting ? 'Generating...' : 'Export'}</span>
                     <span className="xs:hidden">{isExporting ? '...' : 'PDF'}</span>
                  </Button>
-                 <Button onClick={() => onSaveAll(localSchedules)} icon={<Save size={18} />} size="sm" className="shadow-glow rounded-2xl px-6">
-                    Save All
+                 <Button onClick={() => onSaveAll(localSchedules)} icon={<Save size={14} />} size="sm" className="shadow-glow rounded-lg px-4">
+                    Save
                  </Button>
             </div>
         </div>
 
-        <div className="flex-1 overflow-auto p-6 relative z-10 scroll-smooth">
-            <div id="master-grid" className="min-w-fit space-y-8">
-                <table className="w-full border-separate border-spacing-2">
+        <div className="flex-1 overflow-auto p-4 relative z-10 scroll-smooth bg-gray-100 dark:bg-slate-950">
+            <div id="master-grid" className="min-w-fit space-y-4">
+                <table className="w-full border-separate border-spacing-1">
                     <thead className="sticky top-0 z-40">
                         <tr>
-                            <th className="sticky left-0 top-0 z-50 p-0 w-20 align-bottom">
-                                <div className="h-14 mb-2 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 flex items-center justify-center shadow-sm">
-                                    <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Day</span>
+                            <th className="sticky left-0 top-0 z-50 p-0 w-16 align-bottom">
+                                <div className="h-10 mb-1 bg-gray-800 dark:bg-slate-800 rounded-lg flex items-center justify-center shadow-sm border border-gray-700 dark:border-slate-700">
+                                    <span className="text-[10px] font-black text-white dark:text-slate-200 uppercase tracking-widest">Day</span>
                                 </div>
                             </th>
-                            <th className="sticky left-[5.5rem] top-0 z-50 p-0 w-20 align-bottom">
-                                <div className="h-14 mb-2 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 flex items-center justify-center shadow-sm">
-                                    <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Sem</span>
+                            <th className="sticky left-[4.25rem] top-0 z-50 p-0 w-14 align-bottom">
+                                <div className="h-10 mb-1 bg-gray-800 dark:bg-slate-800 rounded-lg flex items-center justify-center shadow-sm border border-gray-700 dark:border-slate-700">
+                                    <span className="text-[10px] font-black text-white dark:text-slate-200 uppercase tracking-widest">Sem</span>
                                 </div>
                             </th>
                             {masterPeriods.map(p => (
@@ -298,34 +269,34 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                     onClick={() => setEditingPeriod(p)}
                                 >
                                     <div className={`
-                                        mb-2 mx-auto flex flex-col items-center justify-center gap-1 rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 shadow-sm backdrop-blur-xl transition-all hover:-translate-y-1 hover:shadow-lg relative
-                                        ${p.isBreak ? 'bg-gray-50/50 dark:bg-slate-800/50 w-16 min-h-[5rem]' : 'bg-white/40 dark:bg-slate-800/40 w-48 min-h-[5rem] py-2'}
+                                        mb-1 mx-auto flex flex-col items-center justify-center gap-0.5 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm transition-all hover:-translate-y-0.5 relative
+                                        ${p.isBreak ? 'bg-gray-200 dark:bg-slate-800 w-10 min-h-[3.5rem]' : 'bg-white dark:bg-slate-800 w-36 min-h-[3.5rem] py-1'}
                                     `}>
                                         {p.isBreak ? (
                                             <>
-                                                <Coffee size={16} className="text-gray-400 dark:text-slate-500 mb-1" />
-                                                <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest rotate-90">Break</span>
+                                                <Coffee size={12} className="text-gray-400 dark:text-slate-500" />
+                                                <span className="text-[8px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest rotate-90 mt-1">Break</span>
                                             </>
                                         ) : (
                                             <>
                                                 <div className="text-[10px] font-bold text-gray-500 dark:text-slate-400 font-mono tracking-tighter uppercase">{p.label}</div>
-                                                <div className="bg-white/50 dark:bg-slate-700/50 rounded-xl px-2 py-1 border border-white/40 dark:border-slate-600/30">
-                                                    <span className="text-[10px] font-black text-gray-700 dark:text-slate-200">{p.time}</span>
+                                                <div className="bg-gray-100 dark:bg-slate-700/50 rounded-md px-1.5">
+                                                    <span className="text-[9px] font-black text-gray-700 dark:text-slate-200">{p.time}</span>
                                                 </div>
-                                                <Edit2 size={10} className="absolute top-2 right-2 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                <Edit2 size={8} className="absolute top-1 right-1 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                                             </>
                                         )}
                                     </div>
                                 </th>
                             ))}
-                            <th className="sticky top-0 z-40 p-0 w-16 align-bottom">
-                                <div className="h-14 w-14 mb-2 mx-auto">
+                            <th className="sticky top-0 z-40 p-0 w-10 align-bottom">
+                                <div className="h-10 w-10 mb-1 mx-auto">
                                     <button 
                                         onClick={handleAddPeriod}
-                                        className="h-full w-full rounded-[1.5rem] bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 hover:bg-primary-500 hover:text-white dark:hover:bg-primary-500 text-gray-400 dark:text-slate-500 transition-all shadow-sm hover:shadow-glow hover:scale-110 flex items-center justify-center"
+                                        className="h-full w-full rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-all shadow-sm flex items-center justify-center"
                                         title="Add Time Slot"
                                     >
-                                        <Plus size={24} strokeWidth={3} />
+                                        <Plus size={16} strokeWidth={3} />
                                     </button>
                                 </div>
                             </th>
@@ -334,7 +305,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                     <tbody>
                         {DAYS.map((day, dayIndex) => (
                             <React.Fragment key={day}>
-                                {/* Academic Schedules */}
                                 {academicSchedules.map((sch, index) => (
                                     <tr key={`${day}-${sch.id}`} className="group/row">
                                         {index === 0 && (
@@ -342,18 +312,18 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                 rowSpan={academicSchedules.length + (externalSchedule ? 1 : 0)} 
                                                 className="sticky left-0 z-30 p-0 align-top"
                                             >
-                                                <div className="w-20 h-[calc(100%-0.5rem)] bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-[2rem] flex items-center justify-center shadow-card mt-0 mr-2 group-hover/row:scale-[1.02] transition-transform">
-                                                    <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }} className="text-lg font-black text-gray-300 dark:text-slate-600 uppercase tracking-[0.3em] group-hover/row:text-primary-500 transition-colors">
+                                                <div className="w-16 h-[calc(100%-0.25rem)] bg-gray-800 dark:bg-slate-800 rounded-xl flex items-center justify-center shadow-md mt-0 mr-1 border border-gray-700 dark:border-slate-700">
+                                                    <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }} className="text-sm font-black text-gray-400 dark:text-slate-400 uppercase tracking-[0.2em]">
                                                         {day}
                                                     </div>
                                                 </div>
                                             </td>
                                         )}
                                         
-                                        <td className="sticky left-[5.5rem] z-30 p-0 align-top">
-                                            <div className="w-20 h-full min-h-[8rem] bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-[1.5rem] flex flex-col items-center justify-center shadow-sm">
-                                                <div className="font-black text-gray-800 dark:text-slate-200 text-xl">{sch.details.semester}</div>
-                                                <div className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Sem</div>
+                                        <td className="sticky left-[4.25rem] z-30 p-0 align-top">
+                                            <div className="w-14 h-full min-h-[6rem] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl flex flex-col items-center justify-center shadow-sm">
+                                                <div className="font-black text-gray-800 dark:text-slate-200 text-lg">{sch.details.semester}</div>
+                                                <div className="text-[8px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Sem</div>
                                             </div>
                                         </td>
 
@@ -368,7 +338,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                             className="p-0 align-middle text-center"
                                                         >
                                                             <div className="flex items-center justify-center">
-                                                                <span className="text-2xl font-black text-gray-200 dark:text-slate-700 select-none">
+                                                                <span className="text-xl font-black text-gray-300 dark:text-slate-700 select-none">
                                                                     {letter}
                                                                 </span>
                                                             </div>
@@ -378,11 +348,10 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                 return null;
                                             }
 
-                                            // Check previous period for spanning practicals
                                             if (pIdx > 0) {
                                                 const prevSlot = findSlot(sch, day, masterPeriods[pIdx - 1].id);
                                                 if (prevSlot?.type === 'Practical' && (prevSlot.duration || 1) > 1) {
-                                                    return <td key={period.id} className="p-0 hidden" />; // Hidden cell logic
+                                                    return <td key={period.id} className="p-0 hidden" />;
                                                 }
                                             }
 
@@ -400,18 +369,17 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                     <div 
                                                         onClick={() => handleCellClick(sch, day, period.id)}
                                                         className={`
-                                                            h-full min-h-[8rem] rounded-[1.5rem] transition-all duration-300 cursor-pointer border relative overflow-hidden group/cell
+                                                            h-full min-h-[6rem] rounded-xl transition-all duration-300 cursor-pointer border relative overflow-hidden group/cell
                                                             ${slot 
-                                                                ? `${styles.bg} ${styles.border} hover:shadow-lg hover:scale-[1.02] shadow-sm` 
-                                                                : 'bg-white/20 dark:bg-slate-800/20 border-white/20 dark:border-slate-700/20 border-dashed hover:border-primary-300/50 hover:bg-white/40 dark:hover:bg-slate-700/40'
+                                                                ? `${styles.bg} ${styles.border} hover:shadow-md hover:scale-[1.01] shadow-sm` 
+                                                                : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700/50 hover:border-primary-300 hover:bg-gray-50 dark:hover:bg-slate-700/50'
                                                             }
                                                         `}
                                                     >
                                                         {slot && subject ? (
-                                                            <div className="p-4 h-full flex flex-col justify-between relative z-10">
-                                                                {/* Header */}
-                                                                <div className="flex justify-between items-start mb-1">
-                                                                    <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm backdrop-blur-sm ${styles.pill}`}>
+                                                            <div className="p-2 h-full flex flex-col justify-between relative z-10">
+                                                                <div className="flex justify-between items-start mb-0.5">
+                                                                    <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow-sm backdrop-blur-sm ${styles.pill}`}>
                                                                         {slot.type === 'Practical' ? 'Lab' : 'Theory'}
                                                                     </span>
                                                                     <span className={`text-[9px] font-bold opacity-60 ${styles.text}`}>
@@ -419,36 +387,33 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                                     </span>
                                                                 </div>
 
-                                                                {/* Body */}
-                                                                <div className={`text-sm font-black leading-tight line-clamp-2 drop-shadow-sm ${styles.text}`}>
+                                                                <div className={`text-xs font-black leading-tight line-clamp-2 drop-shadow-sm ${styles.text}`}>
                                                                     {subject.name}
                                                                 </div>
 
-                                                                {/* Footer */}
-                                                                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-black/5 dark:border-white/5">
-                                                                    <div className={`p-1 rounded-full ${styles.pill}`}>
-                                                                        <User size={10} className={styles.icon} strokeWidth={3} />
+                                                                <div className="flex items-center gap-1 mt-1 pt-1 border-t border-black/5 dark:border-white/5">
+                                                                    <div className={`p-0.5 rounded-full ${styles.pill}`}>
+                                                                        <User size={8} className={styles.icon} strokeWidth={3} />
                                                                     </div>
-                                                                    <span className={`text-[10px] font-bold truncate ${styles.lightText}`}>
+                                                                    <span className={`text-[9px] font-bold truncate ${styles.lightText}`}>
                                                                         {getFacultyInitials(sch.faculties, slot.facultyIds)}
                                                                     </span>
                                                                 </div>
 
-                                                                 {/* Conflict Indicator */}
                                                                 {(() => {
                                                                     const hasConflict = slot.facultyIds.some(fid => {
                                                                         return checkConflict(sch.id, day, period.id, fid) !== null;
                                                                     });
                                                                     return hasConflict ? (
                                                                          <div className="absolute top-1 right-1">
-                                                                            <AlertTriangle size={12} className="text-red-500 animate-pulse" />
+                                                                            <AlertTriangle size={10} className="text-red-500 animate-pulse" />
                                                                          </div>
                                                                     ) : null;
                                                                 })()}
                                                             </div>
                                                         ) : (
-                                                            <div className="h-full flex flex-col items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-all">
-                                                                <div className="h-8 w-8 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center text-primary-500 mb-1 shadow-sm">
+                                                            <div className="h-full flex flex-col items-center justify-center opacity-40 group-hover/cell:opacity-100 transition-all">
+                                                                <div className="h-8 w-8 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-primary-500 mb-1 shadow-sm">
                                                                     <Plus size={16} strokeWidth={3} />
                                                                 </div>
                                                             </div>
@@ -461,55 +426,53 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                     </tr>
                                 ))}
 
-                                {/* External Busy Row - Revised to show all busy slots */}
                                 {externalSchedule && (
                                     <tr className="group/row">
-                                        <td className="sticky left-[5.5rem] z-30 p-0 align-top">
-                                            <div className="w-20 h-full min-h-[8rem] bg-slate-100/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-[1.5rem] flex flex-col items-center justify-center shadow-sm">
-                                                <div className="font-black text-slate-500 dark:text-slate-400 text-xs text-center leading-tight">External<br/>Dept</div>
+                                        <td className="sticky left-[4.25rem] z-30 p-0 align-top">
+                                            <div className="w-14 h-full min-h-[6rem] bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl flex flex-col items-center justify-center shadow-sm">
+                                                <div className="font-black text-gray-400 dark:text-slate-500 text-[9px] text-center leading-tight">External<br/>Dept</div>
                                             </div>
                                         </td>
                                         {masterPeriods.map((period) => {
                                             if (period.isBreak) return null;
                                             
-                                            // Find all slots for this cell
                                             const busySlots = externalSchedule.timeSlots.filter(s => s.day === day && s.period === period.id);
 
                                             return (
                                                 <td key={period.id} className="p-0 align-top h-full">
                                                     <div 
                                                         className={`
-                                                            h-full min-h-[8rem] rounded-[1.5rem] transition-all duration-300 border relative overflow-hidden flex flex-col
-                                                            bg-slate-50/40 dark:bg-slate-900/40 border-slate-200/40 dark:border-slate-800/40 border-dashed hover:border-slate-300 hover:bg-slate-100/40 dark:hover:bg-slate-800/40
+                                                            h-full min-h-[6rem] rounded-xl transition-all duration-300 border relative overflow-hidden flex flex-col
+                                                            bg-gray-50 dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700
                                                         `}
                                                     >
                                                         {busySlots.length > 0 ? (
-                                                            <div className="p-2 flex-1 flex flex-col gap-2 overflow-y-auto max-h-[12rem] no-scrollbar">
+                                                            <div className="p-1 flex-1 flex flex-col gap-1 overflow-y-auto max-h-[10rem] no-scrollbar">
                                                                 {busySlots.map(slot => (
                                                                     <div 
                                                                         key={slot.id}
                                                                         onClick={() => handleCellClick(externalSchedule, day, period.id, slot)}
-                                                                        className="bg-slate-200/80 dark:bg-slate-700/80 rounded-xl p-2 cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors border border-slate-300/50 dark:border-slate-600/50"
+                                                                        className="bg-white dark:bg-slate-800 rounded-lg p-1.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border border-gray-200 dark:border-slate-700 shadow-sm"
                                                                     >
-                                                                        <div className="flex justify-between items-start mb-1">
-                                                                             <span className="text-[8px] font-black uppercase tracking-wider bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded-full text-slate-600 dark:text-slate-300">
+                                                                        <div className="flex justify-between items-start mb-0.5">
+                                                                             <span className="text-[7px] font-black uppercase tracking-wider bg-gray-100 dark:bg-black/20 px-1 py-px rounded-full text-gray-500 dark:text-gray-400">
                                                                                  {slot.externalDetails?.dept || 'External'}
                                                                              </span>
                                                                              <div className="flex gap-1">
                                                                                  {slot.facultyIds.some(fid => checkConflict(EXTERNAL_BUSY_ID, day, period.id, fid)) && (
-                                                                                     <AlertTriangle size={10} className="text-red-500" />
+                                                                                     <AlertTriangle size={8} className="text-red-500" />
                                                                                  )}
                                                                              </div>
                                                                         </div>
-                                                                        <div className="text-[10px] font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1">
+                                                                        <div className="text-[9px] font-bold text-gray-800 dark:text-slate-200 leading-tight mb-0.5">
                                                                             {slot.externalDetails?.subject} {slot.externalDetails?.semester ? `(${slot.externalDetails.semester})` : ''}
                                                                         </div>
-                                                                        <div className="flex flex-wrap gap-1">
+                                                                        <div className="flex flex-wrap gap-0.5">
                                                                             {slot.facultyIds.map(fid => {
                                                                                 const fac = allFaculties.find(f => f.id === fid);
                                                                                 const conflict = checkConflict(EXTERNAL_BUSY_ID, day, period.id, fid);
                                                                                 return (
-                                                                                    <span key={fid} className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md border flex items-center gap-0.5 ${conflict ? 'bg-red-100 text-red-700 border-red-200' : 'bg-white/50 text-slate-600 border-slate-300/50'}`}>
+                                                                                    <span key={fid} className={`text-[7px] font-bold px-1 py-px rounded-md border flex items-center gap-0.5 ${conflict ? 'bg-red-50 text-red-600 border-red-100' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
                                                                                         {fac?.initials || '??'}
                                                                                     </span>
                                                                                 );
@@ -517,23 +480,22 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                                         </div>
                                                                     </div>
                                                                 ))}
-                                                                {/* Small add button at bottom of list */}
                                                                 <button 
                                                                     onClick={() => handleCellClick(externalSchedule, day, period.id)}
-                                                                    className="w-full py-1.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center gap-1 transition-colors"
+                                                                    className="w-full py-1 rounded-lg border border-dashed border-gray-300 dark:border-slate-600 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center gap-1 transition-colors"
                                                                 >
-                                                                    <Plus size={12} strokeWidth={3} />
+                                                                    <Plus size={10} strokeWidth={3} />
                                                                 </button>
                                                             </div>
                                                         ) : (
                                                             <div 
                                                                 onClick={() => handleCellClick(externalSchedule, day, period.id)}
-                                                                className="h-full flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-all cursor-pointer"
+                                                                className="h-full flex flex-col items-center justify-center opacity-40 hover:opacity-100 transition-all cursor-pointer"
                                                             >
-                                                                <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700/50 rounded-full flex items-center justify-center text-slate-500 mb-1 shadow-sm">
-                                                                    <UserX size={16} strokeWidth={2.5} />
+                                                                <div className="h-6 w-6 bg-gray-200 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-400 dark:text-slate-500 mb-0.5">
+                                                                    <UserX size={12} strokeWidth={2.5} />
                                                                 </div>
-                                                                <span className="text-[8px] font-bold uppercase text-slate-400">Add Busy</span>
+                                                                <span className="text-[7px] font-bold uppercase text-gray-400 dark:text-slate-500">Add Busy</span>
                                                             </div>
                                                         )}
                                                     </div>
@@ -552,7 +514,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
             <div className="h-20" />
         </div>
 
-        {/* Modals */}
         {editingCell && mergedScheduleForModal && (
             <ClassModal 
                 data={tempSlot}

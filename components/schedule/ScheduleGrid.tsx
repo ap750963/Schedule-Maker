@@ -24,9 +24,9 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   return (
     <div id="schedule-grid" className="min-w-fit h-full flex flex-col p-4">
       {/* Header Row */}
-      <div className="flex gap-4 mb-4 sticky top-0 z-40">
+      <div className="flex gap-2 mb-3 sticky top-0 z-40">
         {/* Empty corner for Days */}
-        <div className="w-20 shrink-0 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-700/30 flex items-center justify-center shadow-sm">
+        <div className="w-16 shrink-0 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 flex items-center justify-center shadow-sm">
           <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Day</span>
         </div>
 
@@ -37,49 +37,49 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
             onClick={() => onPeriodClick(p)} 
             className={`
               shrink-0 relative group cursor-pointer transition-all duration-300 hover:-translate-y-1
-              bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-700/30 shadow-sm hover:shadow-lg
-              ${p.isBreak ? 'w-16 bg-gray-50/50 dark:bg-slate-800/50' : 'w-48'}
+              bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 shadow-sm hover:shadow-lg
+              ${p.isBreak ? 'w-12 bg-gray-50/50 dark:bg-slate-800/50' : 'w-40'}
             `}
           >
             {p.isBreak ? (
-              <div className="h-full flex flex-col items-center justify-center gap-1 py-4">
-                <Coffee size={16} className="text-gray-400 dark:text-slate-500 mb-1" />
-                <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest rotate-90 mt-2">Break</span>
+              <div className="h-full flex flex-col items-center justify-center gap-1 py-3">
+                <Coffee size={14} className="text-gray-400 dark:text-slate-500 mb-0.5" />
+                <span className="text-[8px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest rotate-90 mt-1">Break</span>
                 <Edit2 size={10} className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2"/>
               </div>
             ) : (
-              <div className="flex flex-col h-full items-center justify-center gap-1 py-4 px-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <Clock size={12} className="text-gray-400 dark:text-slate-500" />
-                  <span className="text-[10px] font-bold text-gray-500 dark:text-slate-400 font-mono tracking-tighter uppercase">{p.label}</span>
+              <div className="flex flex-col h-full items-center justify-center gap-0.5 py-3 px-1">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Clock size={10} className="text-gray-400 dark:text-slate-500" />
+                  <span className="text-[9px] font-bold text-gray-500 dark:text-slate-400 font-mono tracking-tighter uppercase">{p.label}</span>
                 </div>
-                <div className="bg-white/50 dark:bg-slate-700/50 rounded-xl px-3 py-1.5 border border-white/40 dark:border-slate-600/30 shadow-sm group-hover:bg-white dark:group-hover:bg-slate-600 transition-colors">
-                    <span className="text-xs font-black text-gray-700 dark:text-slate-200">{p.time}</span>
+                <div className="bg-white/50 dark:bg-slate-700/50 rounded-lg px-2 py-1 border border-white/40 dark:border-slate-600/30 shadow-sm group-hover:bg-white dark:group-hover:bg-slate-600 transition-colors">
+                    <span className="text-[10px] font-black text-gray-700 dark:text-slate-200">{p.time}</span>
                 </div>
-                <Edit2 size={12} className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2"/>
+                <Edit2 size={10} className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity absolute top-1 right-1"/>
               </div>
             )}
           </div>
         ))}
         
         {/* Add Period Button */}
-        <div className="w-16 shrink-0 flex items-center justify-center">
+        <div className="w-12 shrink-0 flex items-center justify-center">
           <button 
             onClick={onAddPeriod} 
-            className="h-14 w-14 rounded-[1.5rem] bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 hover:bg-primary-500 hover:text-white dark:hover:bg-primary-500 text-gray-400 dark:text-slate-500 transition-all shadow-sm hover:shadow-glow hover:scale-110 flex items-center justify-center"
+            className="h-10 w-10 rounded-xl bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 hover:bg-primary-500 hover:text-white dark:hover:bg-primary-500 text-gray-400 dark:text-slate-500 transition-all shadow-sm hover:shadow-glow hover:scale-110 flex items-center justify-center"
           >
-            <Plus size={24} strokeWidth={3} />
+            <Plus size={18} strokeWidth={3} />
           </button>
         </div>
       </div>
 
       {/* Grid Rows */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         {DAYS.map((day, dIdx) => (
-          <div key={day} className="flex gap-4 min-h-[10rem] group/row">
+          <div key={day} className="flex gap-2 min-h-[8rem] group/row">
             {/* Day Label (Sticky) */}
-            <div className="sticky left-0 z-30 w-20 shrink-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-[2rem] flex items-center justify-center shadow-card group-hover/row:scale-105 transition-transform duration-300">
-              <div className="rotate-[-90deg] text-lg font-black text-gray-300 dark:text-slate-600 uppercase tracking-[0.3em] group-hover/row:text-primary-500 transition-colors whitespace-nowrap drop-shadow-sm">
+            <div className="sticky left-0 z-30 w-16 shrink-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-[1.5rem] flex items-center justify-center shadow-card group-hover/row:scale-105 transition-transform duration-300">
+              <div className="rotate-[-90deg] text-base font-black text-gray-300 dark:text-slate-600 uppercase tracking-[0.3em] group-hover/row:text-primary-500 transition-colors whitespace-nowrap drop-shadow-sm">
                 {day}
               </div>
             </div>
@@ -89,8 +89,8 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
               if (period.isBreak) {
                 const letter = BREAK_LETTERS[dIdx] || '•';
                 return (
-                  <div key={`${day}-${period.id}`} className="w-16 shrink-0 flex items-center justify-center select-none">
-                    <span className="text-2xl font-black text-gray-200 dark:text-slate-700 font-sans">{letter}</span>
+                  <div key={`${day}-${period.id}`} className="w-12 shrink-0 flex items-center justify-center select-none">
+                    <span className="text-lg font-black text-gray-200 dark:text-slate-700 font-sans">{letter}</span>
                   </div>
                 );
               }
@@ -111,54 +111,54 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                   onClick={() => onCellClick(day, period.id)} 
                   className={`
                     shrink-0 relative transition-all duration-300
-                    ${slot?.type === 'Practical' && (slot.duration || 1) > 1 ? 'w-[calc(24rem+1rem)]' : 'w-48'}
+                    ${slot?.type === 'Practical' && (slot.duration || 1) > 1 ? 'w-[calc(20rem+0.5rem)]' : 'w-40'}
                   `}
                 >
                   <div className={`
-                    h-full w-full rounded-[2rem] flex flex-col relative overflow-hidden backdrop-blur-md border transition-all duration-300
+                    h-full w-full rounded-[1.5rem] flex flex-col relative overflow-hidden backdrop-blur-md border transition-all duration-300
                     ${slot 
                       ? `${styles.bg} ${styles.border} ${styles.hover} shadow-sm` 
                       : 'bg-white/20 dark:bg-slate-800/20 border-white/20 dark:border-slate-700/20 border-dashed hover:border-primary-300/50 hover:bg-white/40 dark:hover:bg-slate-700/40 justify-center items-center group/cell'
                     }
                   `}>
                     {slot ? (
-                      <div className="p-5 h-full flex flex-col justify-between relative z-10">
+                      <div className="p-3 h-full flex flex-col justify-between relative z-10">
                         {/* Top: Tag + Code */}
-                        <div className="flex justify-between items-start mb-2">
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm backdrop-blur-sm ${styles.pill}`}>
+                        <div className="flex justify-between items-start mb-1">
+                          <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm backdrop-blur-sm ${styles.pill}`}>
                             {slot.type === 'Practical' ? 'Lab' : 'Theory'}
                           </span>
-                          <span className={`text-[10px] font-bold opacity-60 ${styles.text}`}>
+                          <span className={`text-[9px] font-bold opacity-60 ${styles.text}`}>
                             {getSub(slot.subjectId)?.code}
                           </span>
                         </div>
 
                         {/* Middle: Subject Name */}
-                        <h4 className={`text-base font-black leading-tight line-clamp-2 drop-shadow-sm ${styles.text}`}>
+                        <h4 className={`text-sm font-black leading-tight line-clamp-2 drop-shadow-sm ${styles.text}`}>
                           {getSub(slot.subjectId)?.name}
                         </h4>
 
                         {/* Bottom: Faculty */}
-                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-black/5 dark:border-white/5">
-                          <div className={`p-1 rounded-full ${styles.pill}`}>
-                            <User size={10} className={styles.icon} strokeWidth={3} />
+                        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-black/5 dark:border-white/5">
+                          <div className={`p-0.5 rounded-full ${styles.pill}`}>
+                            <User size={8} className={styles.icon} strokeWidth={3} />
                           </div>
-                          <span className={`text-xs font-bold truncate ${styles.lightText}`}>
+                          <span className={`text-[10px] font-bold truncate ${styles.lightText}`}>
                             {getFacultyInitials(schedule.faculties, slot.facultyIds)}
                           </span>
                         </div>
 
                         {/* Decorative Background Icon */}
                         <div className="absolute -bottom-4 -right-4 opacity-[0.03] text-black dark:text-white pointer-events-none transform rotate-12">
-                           <User size={80} />
+                           <User size={60} />
                         </div>
                       </div>
                     ) : (
                       <div className="opacity-0 group-hover/cell:opacity-100 transition-all duration-300 transform group-hover/cell:scale-110 flex flex-col items-center">
-                        <div className="h-10 w-10 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center text-primary-500 mb-2 shadow-sm">
-                          <Plus size={20} strokeWidth={3} />
+                        <div className="h-8 w-8 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center text-primary-500 mb-1 shadow-sm">
+                          <Plus size={16} strokeWidth={3} />
                         </div>
-                        <span className="text-[10px] font-black text-primary-500 uppercase tracking-widest">Add Class</span>
+                        <span className="text-[8px] font-black text-primary-500 uppercase tracking-widest">Add</span>
                       </div>
                     )}
                   </div>
