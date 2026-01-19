@@ -16,10 +16,11 @@ interface CustomSelectProps {
   placeholder?: string;
   icon?: React.ReactNode;
   disabled?: boolean;
+  dropdownMode?: 'absolute' | 'relative';
 }
 
 export const CustomSelect: React.FC<CustomSelectProps> = ({
-  label, value, onChange, options, placeholder = 'Select...', icon, disabled
+  label, value, onChange, options, placeholder = 'Select...', icon, disabled, dropdownMode = 'absolute'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,7 +63,10 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 max-h-60 overflow-auto no-scrollbar animate-fade-in-up origin-top p-2">
+        <div className={`
+          ${dropdownMode === 'absolute' ? 'absolute z-50 shadow-xl' : 'relative z-10 shadow-inner bg-gray-50 dark:bg-slate-900/50'}
+          mt-2 w-full bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 max-h-60 overflow-auto no-scrollbar animate-fade-in-up origin-top p-2
+        `}>
           {options.length === 0 ? (
             <div className="p-4 text-center text-gray-400 dark:text-slate-500 text-sm font-bold">No options available</div>
           ) : (

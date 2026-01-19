@@ -87,11 +87,11 @@ export const ClassModal: React.FC<ClassModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/10 dark:bg-black/50 backdrop-blur-sm" onClick={onClose}>
         <div className="flex min-h-full items-center justify-center p-4">
             <div 
-                className="bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] shadow-2xl animate-fade-in-up border border-gray-100 dark:border-slate-700 relative my-8" 
+                className="bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] shadow-2xl animate-fade-in-up border border-gray-100 dark:border-slate-700 relative my-8 overflow-hidden" 
                 onClick={e => e.stopPropagation()}
             >
                 {/* Modal Header */}
-                <div className="px-8 py-6 border-b border-gray-50 dark:border-slate-700/50 flex justify-between items-start bg-gray-50/50 dark:bg-slate-700/20 rounded-t-[2.5rem]">
+                <div className="px-8 py-6 border-b border-gray-50 dark:border-slate-700/50 flex justify-between items-start bg-gray-50/50 dark:bg-slate-700/20">
                     <div>
                         <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                             {tempSlotData.subjectId ? 'Edit Class' : 'Add Class'}
@@ -227,6 +227,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                             placeholder="+ Add Faculty"
                             options={facultyOptions}
                             icon={<Plus size={20} strokeWidth={3} />}
+                            dropdownMode="relative"
                             onChange={(val) => {
                                 if (!val) return;
                                 setTempSlotData(prev => {
