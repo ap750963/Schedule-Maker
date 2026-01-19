@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Coffee, AlertCircle } from 'lucide-react';
+import { Plus, Coffee } from 'lucide-react';
 import { DAYS, Period, Schedule } from '../../types';
 import { getSubjectColorName, getSolidColorClasses } from '../../utils';
 
@@ -20,7 +20,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   const getSub = (id: string) => schedule.subjects.find(s => s.id === id);
 
   return (
-    <div className="w-full overflow-auto bg-gray-50/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-[2.5rem] scrollbar-hide">
+    <div className="w-full overflow-auto bg-gray-50/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-[3rem] scrollbar-hide">
       <div 
         className="grid gap-3 min-w-max"
         style={{
@@ -67,7 +67,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         {DAYS.map((day, dIdx) => (
             <React.Fragment key={day}>
                {/* Day Label Column */}
-               <div className="sticky left-0 z-10 bg-white dark:bg-slate-800 rounded-[1.5rem] shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center h-32 w-14">
+               <div className="sticky left-0 z-10 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center h-32 w-14">
                    <span className="text-[10px] font-black text-gray-800 dark:text-white uppercase tracking-[0.2em] -rotate-90">{day}</span>
                </div>
 
@@ -75,7 +75,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                {periods.map((period, pIdx) => {
                    if (period.isBreak) {
                        return (
-                           <div key={period.id} className="h-32 rounded-[1.5rem] border-2 border-dashed border-gray-100 dark:border-slate-700/50 flex flex-col items-center justify-center opacity-50">
+                           <div key={period.id} className="h-32 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-slate-700/50 flex flex-col items-center justify-center opacity-50">
                                <div className="w-1 h-full bg-gray-100 dark:bg-slate-700 rounded-full" />
                            </div>
                        );
@@ -100,7 +100,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                            <div 
                                key={period.id} 
                                onClick={() => onCellClick(day, period.id)}
-                               className="h-32 rounded-[1.5rem] border-2 border-dashed border-gray-100 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:border-blue-200 dark:hover:border-blue-800 transition-all cursor-pointer flex items-center justify-center group"
+                               className="h-32 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:border-blue-200 dark:hover:border-blue-800 transition-all cursor-pointer flex items-center justify-center group"
                            >
                                <Plus size={20} className="text-gray-200 dark:text-slate-700 group-hover:text-blue-300 transition-colors" />
                            </div>
@@ -116,7 +116,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                            key={period.id}
                            onClick={() => onCellClick(day, period.id)}
                            className={`
-                               h-32 rounded-[1.5rem] p-3.5 flex flex-col justify-between cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg
+                               h-32 rounded-[2rem] p-3.5 flex flex-col justify-between cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg
                                ${styles.bg} ${styles.text}
                            `}
                            style={{ gridColumn: `span ${colSpan}` }}

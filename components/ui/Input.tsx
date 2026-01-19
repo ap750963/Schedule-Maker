@@ -18,14 +18,14 @@ export const Input: React.FC<InputProps> = ({ label, icon, error, className = ''
             border-2 border-gray-100 dark:border-slate-700
             focus:border-primary-500 dark:focus:border-primary-500 focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900/30 focus:outline-none
             disabled:bg-gray-50 disabled:text-gray-500 dark:disabled:bg-slate-900 dark:disabled:text-gray-600
-            ${icon ? 'pr-10' : 'pr-4'} pl-4 py-3
+            ${icon ? 'pr-10' : 'pr-4'} pl-6 py-3
             placeholder:text-gray-300 dark:placeholder:text-slate-600
-            transition-all rounded-2xl shadow-sm
+            transition-all rounded-full shadow-sm
           `}
           {...props}
         />
         {icon && (
-          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400 dark:text-slate-500 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors">
+          <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 dark:text-slate-500 group-focus-within:text-primary-500 dark:group-focus-within:text-primary-400 transition-colors">
             {React.cloneElement(icon as React.ReactElement, { size: 18 })}
           </div>
         )}

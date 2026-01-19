@@ -71,7 +71,7 @@ export const Home: React.FC<HomeProps> = ({
       <div className="p-5 max-w-lg mx-auto w-full space-y-4 relative z-10">
         {schedules.length === 0 && (
           <div className="text-center py-16 px-4">
-            <div className="bg-white dark:bg-slate-800 h-32 w-32 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-soft border border-gray-100 dark:border-slate-700 relative overflow-hidden group">
+            <div className="bg-white dark:bg-slate-800 h-32 w-32 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 shadow-soft border border-gray-100 dark:border-slate-700 relative overflow-hidden group">
                <div className="absolute inset-0 bg-gradient-to-tr from-primary-50 to-transparent dark:from-primary-900/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <Sparkles className="h-12 w-12 text-primary-400 relative z-10" />
             </div>
@@ -83,8 +83,8 @@ export const Home: React.FC<HomeProps> = ({
 
         {schedules.length > 0 && (
             <div className="grid grid-cols-1 gap-3 mb-6">
-                <Button onClick={onOpenMaster} fullWidth variant="secondary" icon={<Grid size={16} />} className="shadow-sm border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 py-3 text-sm">Master Department View</Button>
-                <Button onClick={onOpenFacultyWise} fullWidth variant="secondary" icon={<Users size={16} />} className="shadow-sm border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 py-3 text-sm">Faculty Timetables</Button>
+                <Button onClick={onOpenMaster} fullWidth variant="secondary" icon={<Grid size={16} />} className="shadow-sm border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 py-3 text-sm rounded-full">Master Department View</Button>
+                <Button onClick={onOpenFacultyWise} fullWidth variant="secondary" icon={<Users size={16} />} className="shadow-sm border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 py-3 text-sm rounded-full">Faculty Timetables</Button>
             </div>
         )}
 
@@ -102,7 +102,7 @@ export const Home: React.FC<HomeProps> = ({
                       {/* Interactive Card Surface */}
                       <div 
                         onClick={() => onSelectSchedule(schedule.id)} 
-                        className="bg-white dark:bg-slate-800 p-5 rounded-[1.8rem] shadow-card hover:shadow-soft hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-700 cursor-pointer relative overflow-hidden"
+                        className="bg-white dark:bg-slate-800 p-5 rounded-[2.5rem] shadow-card hover:shadow-soft hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-700 cursor-pointer relative overflow-hidden"
                       >
                           <div className="absolute top-0 right-0 w-24 h-24 bg-primary-50 dark:bg-primary-900/10 rounded-bl-[3rem] -mr-6 -mt-6 pointer-events-none transition-transform group-hover:scale-110" />
                           
@@ -145,14 +145,14 @@ export const Home: React.FC<HomeProps> = ({
 
       {schedules.length > 0 && (
         <div className="fixed bottom-6 right-6 z-30">
-          <button onClick={onCreateNew} className="h-14 w-14 bg-primary-600 rounded-2xl text-white shadow-glow flex items-center justify-center hover:bg-primary-700 hover:scale-110 active:scale-95 transition-all"><Plus size={24} strokeWidth={2.5} /></button>
+          <button onClick={onCreateNew} className="h-14 w-14 bg-primary-600 rounded-full text-white shadow-glow flex items-center justify-center hover:bg-primary-700 hover:scale-110 active:scale-95 transition-all"><Plus size={24} strokeWidth={2.5} /></button>
         </div>
       )}
 
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300" onClick={() => setShowSettings(false)}>
-            <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2rem] shadow-2xl p-6 animate-modal border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 animate-modal border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-5 px-1">
                     <h3 className="text-lg font-black text-slate-900 dark:text-white">Appearance</h3>
                     <button onClick={() => setShowSettings(false)} className="h-8 w-8 bg-gray-50 dark:bg-slate-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300">
@@ -162,7 +162,7 @@ export const Home: React.FC<HomeProps> = ({
 
                 <div className="space-y-5">
                     {/* Dark Mode Toggle */}
-                    <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-2xl flex items-center justify-between">
+                    <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-full flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="h-8 w-8 bg-white dark:bg-slate-600 rounded-full flex items-center justify-center text-slate-700 dark:text-white shadow-sm">
                                 {isDarkMode ? <Moon size={16} /> : <Sun size={16} />}
@@ -190,7 +190,7 @@ export const Home: React.FC<HomeProps> = ({
                                     <button 
                                         key={theme}
                                         onClick={() => onSetTheme(theme)}
-                                        className="aspect-square rounded-xl flex items-center justify-center transition-transform active:scale-95 hover:scale-105 relative"
+                                        className="aspect-square rounded-full flex items-center justify-center transition-transform active:scale-95 hover:scale-105 relative"
                                         style={{ backgroundColor: `rgb(${rgb})` }}
                                     >
                                         {currentTheme === theme && (
@@ -212,7 +212,7 @@ export const Home: React.FC<HomeProps> = ({
       {scheduleToDelete && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300">
             <div 
-              className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2rem] shadow-2xl p-6 animate-modal border border-slate-100 dark:border-slate-700"
+              className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 animate-modal border border-slate-100 dark:border-slate-700"
               onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex flex-col items-center text-center space-y-3">
@@ -232,7 +232,7 @@ export const Home: React.FC<HomeProps> = ({
                             variant="danger" 
                             fullWidth 
                             onClick={confirmDelete}
-                            className="rounded-xl py-3 text-sm text-red-700 bg-red-50 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/30 dark:text-red-300 dark:border-red-900/50"
+                            className="rounded-full py-3 text-sm text-red-700 bg-red-50 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/30 dark:text-red-300 dark:border-red-900/50"
                         >
                             Delete Permanently
                         </Button>
@@ -240,7 +240,7 @@ export const Home: React.FC<HomeProps> = ({
                             variant="ghost" 
                             fullWidth 
                             onClick={() => setScheduleToDelete(null)}
-                            className="rounded-xl py-3 text-sm text-slate-500 font-bold dark:text-slate-400"
+                            className="rounded-full py-3 text-sm text-slate-500 font-bold dark:text-slate-400"
                         >
                             Cancel
                         </Button>

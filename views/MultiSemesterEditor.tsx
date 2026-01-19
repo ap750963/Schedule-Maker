@@ -37,7 +37,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
         s.faculties.forEach(f => {
             if (!map.has(f.id)) map.set(f.id, f);
             else {
-                 // Merge external slots if any exist in duplications to preserve latest state
                  const existing = map.get(f.id)!;
                  if ((f.externalSlots?.length || 0) > (existing.externalSlots?.length || 0)) {
                      map.set(f.id, f);
@@ -64,7 +63,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   };
 
   const checkConflict = (scheduleId: string, day: string, periodId: number, facultyId: string) => {
-    // 1. Internal Conflict (Other loaded schedules)
     for (const s of localSchedules) {
         if (s.id === scheduleId) continue;
         const slot = s.timeSlots.find(ts => ts.day === day && ts.period === periodId);
@@ -72,8 +70,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
             return `${s.details.semester} Sem (Internal)`;
         }
     }
-
-    // 2. External Conflict (Marked busy in other depts)
     const faculty = allFaculties.find(f => f.id === facultyId);
     if (faculty?.externalSlots) {
         const extSlot = faculty.externalSlots.find(s => s.day === day && s.periodId === periodId);
@@ -81,7 +77,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
             return `${extSlot.details.department} - ${extSlot.details.semester} Sem (${extSlot.details.subject})`;
         }
     }
-
     return null;
   };
 
@@ -98,13 +93,11 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   const facultyStats = useMemo(() => {
     return allFaculties.map(fac => {
         let total = 0;
-        // Internal Hours
         localSchedules.forEach(s => {
              s.timeSlots
                 .filter(slot => slot.facultyIds.includes(fac.id))
                 .forEach(slot => { total += (slot.duration || 1); });
         });
-        // External Hours
         if (fac.externalSlots) {
             total += fac.externalSlots.length;
         }
@@ -133,9 +126,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     
     setLocalSchedules(prev => prev.map(sch => {
         if (sch.id !== editingCell.scheduleId) return sch;
-
         let newSlots = sch.timeSlots.filter(s => !(s.day === editingCell.day && s.period === editingCell.periodId));
-        
         if (data.type === 'Practical' && (data.duration || 1) > 1) {
              const pIndex = masterPeriods.findIndex(p => p.id === editingCell.periodId);
              if (pIndex !== -1 && pIndex < masterPeriods.length - 1) {
@@ -145,7 +136,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                  }
              }
         }
-
         if (data.subjectId && data.facultyIds?.length) {
             newSlots.push({
                 ...data as TimeSlot,
@@ -153,10 +143,8 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                 startTime: masterPeriods.find(p => p.id === editingCell.periodId)?.time || ''
             });
         }
-
         return { ...sch, timeSlots: newSlots, lastModified: Date.now() };
     }));
-
     setEditingCell(null);
   };
 
@@ -173,14 +161,12 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   const handleSavePeriod = (updatedPeriod: Period, start: string, end: string) => {
       const timeString = `${start} - ${end}`;
       let newPeriods = [...masterPeriods];
-      
       if (updatedPeriod.id === 0) { 
           const maxId = Math.max(0, ...newPeriods.map(p => p.id));
           newPeriods.push({ ...updatedPeriod, id: maxId + 1, time: timeString });
       } else { 
           newPeriods = newPeriods.map(p => p.id === updatedPeriod.id ? { ...updatedPeriod, time: timeString } : p);
       }
-      
       setLocalSchedules(prev => prev.map(s => ({
           ...s,
           periods: newPeriods,
@@ -202,26 +188,15 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   };
 
   const handleAddPeriod = () => {
-     setEditingPeriod({
-         id: 0,
-         label: `Hour ${masterPeriods.length + 1}`,
-         time: '09:00 - 10:00',
-         isBreak: false
-     });
+     setEditingPeriod({ id: 0, label: `Hour ${masterPeriods.length + 1}`, time: '09:00 - 10:00', isBreak: false });
   };
 
-  // External Engagement Handlers
   const handleSaveExternalBusy = (facultyIds: string[], day: string, periodId: number, details: { department: string; semester: string; subject: string }) => {
       setLocalSchedules(prev => prev.map(sch => ({
           ...sch,
           faculties: sch.faculties.map(f => {
               if (facultyIds.includes(f.id)) {
-                  const newSlot = {
-                      id: generateId(),
-                      day,
-                      periodId,
-                      details
-                  };
+                  const newSlot = { id: generateId(), day, periodId, details };
                   return { ...f, externalSlots: [...(f.externalSlots || []), newSlot] };
               }
               return f;
@@ -248,7 +223,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   };
 
   const currentEditingSchedule = localSchedules.find(s => s.id === editingCell?.scheduleId);
-  // Merge all faculties for the modal selection
   const mergedScheduleForModal = currentEditingSchedule ? {
       ...currentEditingSchedule,
       faculties: allFaculties
@@ -277,7 +251,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                     variant="secondary" 
                     icon={<Building size={14} />} 
                     size="sm" 
-                    className="hidden sm:inline-flex border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-900/20 dark:border-rose-900/50 dark:text-rose-300"
+                    className="hidden sm:inline-flex border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-900/20 dark:border-rose-900/50 dark:text-rose-300 rounded-full"
                  >
                     Busy Slots
                  </Button>
@@ -291,11 +265,12 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                     icon={<Download size={16} />} 
                     disabled={isExporting}
                     size="sm"
+                    className="rounded-full"
                  >
                     <span className="hidden xs:inline">{isExporting ? 'Generating...' : 'Export PDF'}</span>
                     <span className="xs:hidden">{isExporting ? '...' : 'PDF'}</span>
                  </Button>
-                 <Button onClick={() => onSaveAll(localSchedules)} icon={<Save size={16} />} size="sm" className="shadow-glow">
+                 <Button onClick={() => onSaveAll(localSchedules)} icon={<Save size={16} />} size="sm" className="shadow-glow rounded-full">
                     Save All
                  </Button>
             </div>
@@ -303,7 +278,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
 
         <div className="flex-1 overflow-auto bg-gray-50/50 dark:bg-slate-950/50 p-4 pb-20">
             <div id="master-grid" className="min-w-fit space-y-8 p-2 bg-white/60 dark:bg-slate-800/60">
-                <div className="bg-white dark:bg-slate-800 shadow-card rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 min-w-max">
+                <div className="bg-white dark:bg-slate-800 shadow-card rounded-[2.5rem] overflow-hidden border border-gray-200 dark:border-slate-700 min-w-max">
                     <table className="w-full border-collapse">
                         <thead className="bg-gray-50/90 dark:bg-slate-800/90 backdrop-blur sticky top-0 z-40 shadow-sm">
                             <tr>
@@ -325,7 +300,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="text-[10px] font-bold text-gray-700 dark:text-slate-200 font-mono bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded inline-block group-hover:bg-gray-200 dark:group-hover:bg-slate-600 transition-colors">
+                                                <div className="text-[10px] font-bold text-gray-700 dark:text-slate-200 font-mono bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded-md inline-block group-hover:bg-gray-200 dark:group-hover:bg-slate-600 transition-colors">
                                                     {p.time}
                                                 </div>
                                                 <Edit2 size={8} className="absolute top-1 right-1 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -418,7 +393,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                         `}
                                                     >
                                                         <div className={`
-                                                            h-28 w-full rounded-2xl transition-all duration-300 flex flex-col relative overflow-hidden group/cell
+                                                            h-28 w-full rounded-[2rem] transition-all duration-300 flex flex-col relative overflow-hidden group/cell
                                                             ${slot 
                                                                 ? `${colorClasses.bg} border border-transparent hover:border-${colorClasses.border.split('-')[1]}-300 p-3 justify-between shadow-sm hover:shadow-md hover:-translate-y-0.5` 
                                                                 : 'bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-800 justify-center items-center hover:shadow-soft'
@@ -511,7 +486,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                         {busyFaculties.map((item, idx) => (
                                                             <div 
                                                                 key={`${item.id}-${idx}`}
-                                                                className="bg-white dark:bg-slate-800 border border-rose-100 dark:border-rose-900/30 p-1.5 rounded-lg shadow-sm flex justify-between items-start group/chip hover:border-rose-300 dark:hover:border-rose-700 transition-all"
+                                                                className="bg-white dark:bg-slate-800 border border-rose-100 dark:border-rose-900/30 p-1.5 rounded-full shadow-sm flex justify-between items-start group/chip hover:border-rose-300 dark:hover:border-rose-700 transition-all px-3"
                                                                 onClick={(e) => e.stopPropagation()} 
                                                             >
                                                                 <div className="min-w-0">

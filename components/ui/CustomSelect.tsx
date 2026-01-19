@@ -39,7 +39,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
   return (
     <div className="w-full group relative" ref={containerRef}>
-      {label && <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 ml-1">{label}</label>}
+      {label && <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 ml-3">{label}</label>}
       
       <button
         type="button"
@@ -48,7 +48,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         className={`
           relative w-full text-left bg-white dark:bg-slate-800 border-2 
           ${isOpen ? 'border-primary-500 ring-4 ring-primary-100 dark:ring-primary-900/30' : 'border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-slate-600'} 
-          rounded-2xl py-3 pl-4 pr-10 
+          rounded-full py-3 pl-6 pr-10 
           text-sm font-bold text-gray-900 dark:text-white
           transition-all outline-none 
           disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed dark:disabled:bg-slate-900 dark:disabled:text-slate-600
@@ -57,7 +57,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         <span className={`block truncate ${!selectedOption ? 'text-gray-300 dark:text-slate-600' : ''}`}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400 dark:text-slate-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors">
+        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 dark:text-slate-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors">
             {icon || <ChevronDown size={18} strokeWidth={3} />}
         </div>
       </button>
@@ -65,12 +65,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
       {isOpen && (
         <div className={`
           ${dropdownMode === 'absolute' ? 'absolute z-50 shadow-xl' : 'relative z-10 shadow-inner bg-gray-50 dark:bg-slate-900/50'}
-          mt-2 w-full bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 max-h-52 overflow-auto no-scrollbar animate-fade-in-up origin-top p-1.5
+          mt-2 w-full bg-white dark:bg-slate-800 rounded-[2rem] border border-gray-100 dark:border-slate-700 max-h-52 overflow-auto no-scrollbar animate-fade-in-up origin-top p-2
         `}>
           {options.length === 0 ? (
             <div className="p-3 text-center text-gray-400 dark:text-slate-500 text-xs font-bold">No options available</div>
           ) : (
-            <div className="space-y-0.5">
+            <div className="space-y-1">
                 {options.map((option) => (
                 <button
                     key={option.value}
@@ -83,7 +83,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                         }
                     }}
                     className={`
-                    w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between
+                    w-full text-left px-4 py-3 rounded-full flex items-center justify-between
                     transition-colors
                     ${option.disabled ? 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-slate-800' : 'hover:bg-primary-50 dark:hover:bg-slate-700 cursor-pointer'}
                     ${option.value === value ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-slate-300'}
