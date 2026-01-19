@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
-// Added Users to the imports from lucide-react
 import { ArrowLeft, Download, User, Users, Calendar, BookOpen, AlertTriangle } from 'lucide-react';
 import { Schedule, DAYS, Period, TimeSlot, Faculty } from '../types';
 import { Button } from '../components/ui/Button';
+import { CustomSelect } from '../components/ui/CustomSelect';
 import { exportToPDF } from '../utils/pdf';
 import { getColorClasses, getSubjectColorName } from '../utils';
 
@@ -58,6 +57,11 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
     setIsExporting(false);
   };
 
+  const facultyOptions = allFaculties.map(f => ({
+      value: f.id,
+      label: `${f.name} (${f.initials})`
+  }));
+
   return (
     <div className="h-screen bg-gray-50 flex flex-col font-sans relative overflow-hidden">
       {/* Header */}
@@ -87,19 +91,15 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
               <User size={32} />
             </div>
             <div className="flex-1 w-full">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Select Faculty Member</label>
-              <select 
-                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl px-4 py-3 font-bold text-gray-900 outline-none focus:border-primary-500 transition-all"
-                value={selectedFacultyId}
-                onChange={(e) => setSelectedFacultyId(e.target.value)}
-              >
-                {allFaculties.map(f => (
-                  <option key={f.id} value={f.id}>{f.name} ({f.initials})</option>
-                ))}
-              </select>
+              <CustomSelect
+                  label="Select Faculty Member"
+                  value={selectedFacultyId}
+                  onChange={setSelectedFacultyId}
+                  options={facultyOptions}
+              />
             </div>
             {selectedFaculty && (
-              <div className="bg-primary-50 px-6 py-3 rounded-2xl border border-primary-100 shrink-0 text-center sm:text-left">
+              <div className="bg-primary-50 px-6 py-3 rounded-2xl border border-primary-100 shrink-0 text-center sm:text-left mt-4 sm:mt-0">
                 <span className="text-[10px] font-black text-primary-400 uppercase tracking-widest block">Weekly Load</span>
                 <span className="text-2xl font-black text-primary-700">
                   {Object.values(facultySlots).reduce((acc, day) => 

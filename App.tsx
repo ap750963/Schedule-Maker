@@ -5,12 +5,18 @@ import { Wizard } from './views/Wizard.tsx';
 import { Editor } from './views/Editor.tsx';
 import { MultiSemesterEditor } from './views/MultiSemesterEditor.tsx';
 import { FacultyWiseView } from './views/FacultyWiseView.tsx';
+import { applyTheme } from './utils/index.ts';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [activeScheduleId, setActiveScheduleId] = useState<string | null>(null);
+  
+  // Theme State
+  const [theme, setTheme] = useState<string>(() => localStorage.getItem('scholarTime_theme') || 'teal');
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => localStorage.getItem('scholarTime_darkMode') === 'true');
 
+  // Load Schedules
   useEffect(() => {
     const saved = localStorage.getItem('scholarTime_schedules');
     if (saved) {
@@ -25,6 +31,22 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('scholarTime_schedules', JSON.stringify(schedules));
   }, [schedules]);
+
+  // Theme Effects
+  useEffect(() => {
+    applyTheme(theme);
+    localStorage.setItem('scholarTime_theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+        root.classList.add('dark');
+    } else {
+        root.classList.remove('dark');
+    }
+    localStorage.setItem('scholarTime_darkMode', String(isDarkMode));
+  }, [isDarkMode]);
 
   const handleCreateNew = () => setView('wizard');
 
@@ -43,7 +65,6 @@ const App: React.FC = () => {
   };
 
   const handleDeleteSchedule = useCallback((id: string) => {
-    // Delete happens immediately here because Home.tsx handles the confirmation UI
     setSchedules(prev => prev.filter(s => s.id !== id));
     if (activeScheduleId === id) {
       setActiveScheduleId(null);
@@ -76,6 +97,10 @@ const App: React.FC = () => {
           onOpenMaster={() => setView('master-editor')}
           onOpenFacultyWise={() => setView('faculty-wise')}
           onDeleteSchedule={handleDeleteSchedule}
+          currentTheme={theme}
+          isDarkMode={isDarkMode}
+          onSetTheme={setTheme}
+          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         />
       )}
       
@@ -96,7 +121,7 @@ const App: React.FC = () => {
       )}
 
       {view === 'editor' && !activeSchedule && (
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center justify-center h-screen dark:bg-slate-900 dark:text-white">
             <p>Error: Schedule not found.</p>
             <button onClick={() => setView('dashboard')} className="ml-4 text-blue-600 underline">Go Home</button>
         </div>

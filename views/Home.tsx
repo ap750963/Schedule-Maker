@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Plus, Clock, FolderOpen, Grid, Trash2, Users, Sparkles, BookOpen, AlertCircle, X } from 'lucide-react';
+import { Plus, Clock, FolderOpen, Grid, Trash2, Users, Sparkles, BookOpen, AlertCircle, Palette, Check, Moon, Sun, X } from 'lucide-react';
 import { Button } from '../components/ui/Button.tsx';
 import { Schedule } from '../types.ts';
+import { THEMES } from '../utils/index.ts';
 
 interface HomeProps {
   schedules: Schedule[];
@@ -10,10 +11,18 @@ interface HomeProps {
   onOpenMaster: () => void;
   onOpenFacultyWise: () => void;
   onDeleteSchedule: (id: string) => void;
+  currentTheme: string;
+  isDarkMode: boolean;
+  onSetTheme: (theme: string) => void;
+  onToggleDarkMode: () => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSchedule, onOpenMaster, onOpenFacultyWise, onDeleteSchedule }) => {
+export const Home: React.FC<HomeProps> = ({ 
+  schedules, onCreateNew, onSelectSchedule, onOpenMaster, onOpenFacultyWise, onDeleteSchedule,
+  currentTheme, isDarkMode, onSetTheme, onToggleDarkMode
+}) => {
   const [scheduleToDelete, setScheduleToDelete] = useState<Schedule | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   
   const groupedSchedules = useMemo<Record<string, Schedule[]>>(() => {
     const groups: Record<string, Schedule[]> = {};
@@ -36,34 +45,53 @@ export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSche
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 font-sans relative">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-20 font-sans relative transition-colors duration-300">
       <div className="relative px-6 pt-12 pb-2 z-10">
         <div className="flex justify-between items-start">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-              Schedule<span className="text-primary-600">.</span>
-            </h1>
-            <p className="text-slate-600 font-medium">Let's get organized ✨</p>
+          <div className="space-y-4">
+            {/* Logo Section */}
+            <div className="flex items-center gap-3">
+                <img 
+                    src="/logo.png" 
+                    alt="ScholarTime" 
+                    className="h-20 w-auto object-contain drop-shadow-sm dark:drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                    onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                />
+                <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight hidden">
+                    Schedule<span className="text-primary-600">.</span>
+                </h1>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400 font-medium pl-2">Let's get organized ✨</p>
           </div>
+          
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm hover:shadow-md transition-all text-slate-500 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400"
+          >
+            <Palette size={24} />
+          </button>
         </div>
       </div>
 
       <div className="p-6 max-w-lg mx-auto w-full space-y-4 relative z-10">
         {schedules.length === 0 && (
           <div className="text-center py-20 px-4">
-            <div className="bg-white h-40 w-40 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-soft border border-gray-100">
+            <div className="bg-white dark:bg-slate-800 h-40 w-40 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-soft border border-gray-100 dark:border-slate-700">
               <Sparkles className="h-16 w-16 text-primary-400" />
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">No schedules yet</h3>
-            <p className="text-slate-500 mb-10 max-w-xs mx-auto leading-relaxed font-medium">Create your first timetable to track classes and faculties with style.</p>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No schedules yet</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-10 max-w-xs mx-auto leading-relaxed font-medium">Create your first timetable to track classes and faculties with style.</p>
             <Button onClick={onCreateNew} size="lg" icon={<Plus size={20} />} className="rounded-full shadow-glow">Create New Schedule</Button>
           </div>
         )}
 
         {schedules.length > 0 && (
             <div className="grid grid-cols-1 gap-3 mb-6">
-                <Button onClick={onOpenMaster} fullWidth variant="secondary" icon={<Grid size={18} />} className="shadow-sm border-gray-200 text-slate-700">Master Department View</Button>
-                <Button onClick={onOpenFacultyWise} fullWidth variant="secondary" icon={<Users size={18} />} className="shadow-sm border-gray-200 text-slate-700">Faculty Timetables</Button>
+                <Button onClick={onOpenMaster} fullWidth variant="secondary" icon={<Grid size={18} />} className="shadow-sm border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">Master Department View</Button>
+                <Button onClick={onOpenFacultyWise} fullWidth variant="secondary" icon={<Users size={18} />} className="shadow-sm border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">Faculty Timetables</Button>
             </div>
         )}
 
@@ -71,8 +99,8 @@ export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSche
             <div key={session} className="pt-6">
                 <div className="flex items-center gap-2 mb-4 px-2">
                     <FolderOpen size={18} className="text-primary-500" />
-                    <h2 className="text-sm font-black text-slate-800 tracking-widest uppercase">{session}</h2>
-                    <div className="h-px bg-gray-200 flex-1 ml-2 rounded-full" />
+                    <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 tracking-widest uppercase">{session}</h2>
+                    <div className="h-px bg-gray-200 dark:bg-slate-700 flex-1 ml-2 rounded-full" />
                 </div>
                 
                 <div className="grid gap-5">
@@ -81,18 +109,18 @@ export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSche
                       {/* Interactive Card Surface */}
                       <div 
                         onClick={() => onSelectSchedule(schedule.id)} 
-                        className="bg-white p-6 rounded-[2rem] shadow-card hover:shadow-soft hover:-translate-y-1 transition-all duration-300 border border-gray-100 hover:border-primary-200 cursor-pointer"
+                        className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-card hover:shadow-soft hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-700 cursor-pointer"
                       >
                           <div className="flex justify-between items-start">
                             <div className="flex-1 pr-14">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-primary-50 text-primary-700 px-2 py-0.5 rounded-full border border-primary-100">{schedule.details.semester} Sem</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full border border-primary-100 dark:border-primary-800">{schedule.details.semester} Sem</span>
                                 </div>
-                                <h3 className="text-2xl font-bold text-slate-900 group-hover:text-primary-700 transition-colors line-clamp-1">{schedule.details.className}</h3>
-                                <div className="inline-flex items-center mt-2 px-3 py-1 bg-gray-50 rounded-full text-xs font-bold text-slate-500 uppercase tracking-wide">Section {schedule.details.section}</div>
+                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors line-clamp-1">{schedule.details.className}</h3>
+                                <div className="inline-flex items-center mt-2 px-3 py-1 bg-gray-50 dark:bg-slate-700/50 rounded-full text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Section {schedule.details.section}</div>
                             </div>
                           </div>
-                          <div className="mt-8 flex items-center justify-between text-xs font-bold text-slate-400">
+                          <div className="mt-8 flex items-center justify-between text-xs font-bold text-slate-400 dark:text-slate-500">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-1.5"><Clock size={14} /><span>{new Date(schedule.lastModified).toLocaleDateString()}</span></div>
                                 <div className="flex items-center gap-1.5"><BookOpen size={14} /><span>{schedule.subjects.length} Subjects</span></div>
@@ -108,7 +136,7 @@ export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSche
                               e.stopPropagation();
                               setScheduleToDelete(schedule);
                           }} 
-                          className="absolute top-6 right-6 h-12 w-12 bg-white rounded-full flex items-center justify-center text-red-500 border border-gray-100 shadow-sm hover:bg-red-50 hover:text-red-700 hover:scale-110 active:scale-90 transition-all z-20"
+                          className="absolute top-6 right-6 h-12 w-12 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center text-red-500 dark:text-red-400 border border-gray-100 dark:border-slate-600 shadow-sm hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 hover:scale-110 active:scale-90 transition-all z-20"
                           title="Delete Schedule"
                       >
                           <Trash2 size={20} strokeWidth={2.5} />
@@ -126,21 +154,81 @@ export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSche
         </div>
       )}
 
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300" onClick={() => setShowSettings(false)}>
+            <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 animate-modal border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between mb-6 px-2">
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Appearance</h3>
+                    <button onClick={() => setShowSettings(false)} className="h-8 w-8 bg-gray-50 dark:bg-slate-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300">
+                        <X size={18} />
+                    </button>
+                </div>
+
+                <div className="space-y-6">
+                    {/* Dark Mode Toggle */}
+                    <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-3xl flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 bg-white dark:bg-slate-600 rounded-full flex items-center justify-center text-slate-700 dark:text-white shadow-sm">
+                                {isDarkMode ? <Moon size={20} /> : <Sun size={20} />}
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-slate-900 dark:text-white text-sm">Dark Mode</h4>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Easier on the eyes</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={onToggleDarkMode}
+                            className={`w-14 h-8 rounded-full transition-colors relative ${isDarkMode ? 'bg-primary-500' : 'bg-gray-300 dark:bg-slate-600'}`}
+                        >
+                            <div className={`h-6 w-6 bg-white rounded-full absolute top-1 transition-all shadow-sm ${isDarkMode ? 'left-7' : 'left-1'}`} />
+                        </button>
+                    </div>
+
+                    {/* Theme Colors */}
+                    <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-4 px-2">Accent Color</h4>
+                        <div className="grid grid-cols-5 gap-3">
+                            {Object.keys(THEMES).map((theme) => {
+                                // Extract the 500 shade from the theme string 'R G B' and convert to css color
+                                const rgb = THEMES[theme][500];
+                                return (
+                                    <button 
+                                        key={theme}
+                                        onClick={() => onSetTheme(theme)}
+                                        className="aspect-square rounded-2xl flex items-center justify-center transition-transform active:scale-95 hover:scale-105 relative"
+                                        style={{ backgroundColor: `rgb(${rgb})` }}
+                                    >
+                                        {currentTheme === theme && (
+                                            <div className="bg-white/20 backdrop-blur-sm rounded-full p-1">
+                                                <Check size={16} className="text-white drop-shadow-md" strokeWidth={3} />
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* Custom Confirmation Modal */}
       {scheduleToDelete && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300">
             <div 
-              className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl p-8 animate-modal border border-slate-100"
+              className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[2.5rem] shadow-2xl p-8 animate-modal border border-slate-100 dark:border-slate-700"
               onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="h-20 w-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-2">
+                    <div className="h-20 w-20 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-500 dark:text-red-400 mb-2">
                         <AlertCircle size={40} strokeWidth={2.5} />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black text-slate-900">Delete Schedule?</h3>
-                        <p className="text-slate-500 font-medium mt-2 leading-relaxed">
-                            Are you sure you want to delete <span className="text-slate-900 font-bold">"{scheduleToDelete.details.className} - {scheduleToDelete.details.semester} Sem"</span>?
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white">Delete Schedule?</h3>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium mt-2 leading-relaxed">
+                            Are you sure you want to delete <span className="text-slate-900 dark:text-white font-bold">"{scheduleToDelete.details.className} - {scheduleToDelete.details.semester} Sem"</span>?
                             <br/>
                             <span className="text-xs uppercase tracking-widest text-red-400 font-black mt-4 block">This action is permanent</span>
                         </p>
@@ -150,7 +238,7 @@ export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSche
                             variant="danger" 
                             fullWidth 
                             onClick={confirmDelete}
-                            className="rounded-2xl py-4 text-red-700 bg-red-50 border-red-100 hover:bg-red-500 hover:text-white"
+                            className="rounded-2xl py-4 text-red-700 bg-red-50 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/30 dark:text-red-300 dark:border-red-900/50"
                         >
                             Delete Permanently
                         </Button>
@@ -158,7 +246,7 @@ export const Home: React.FC<HomeProps> = ({ schedules, onCreateNew, onSelectSche
                             variant="ghost" 
                             fullWidth 
                             onClick={() => setScheduleToDelete(null)}
-                            className="rounded-2xl py-4 text-slate-500 font-bold"
+                            className="rounded-2xl py-4 text-slate-500 font-bold dark:text-slate-400"
                         >
                             Cancel
                         </Button>

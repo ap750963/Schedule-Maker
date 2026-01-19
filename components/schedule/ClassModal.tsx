@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { X, Trash2, ChevronDown, Palette, AlertCircle, Clock, Plus, AlertTriangle, Edit2 } from 'lucide-react';
+
+import React, { useState } from 'react';
+import { X, Trash2, AlertCircle, Clock, Plus, AlertTriangle } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { TimeSlot, Subject, Faculty, SUBJECT_COLORS, Schedule } from '../../types';
-import { getColorClasses, getSubjectColorName } from '../../utils';
+import { CustomSelect, Option } from '../ui/CustomSelect';
+import { TimeSlot, Subject, Schedule } from '../../types';
 
 interface ClassModalProps {
   data: Partial<TimeSlot>;
-  schedule: Schedule; // Needed for subjects, faculties, and conflict checks within self
+  schedule: Schedule; 
   day: string;
   periodLabel?: string;
   onClose: () => void;
   onSave: (data: Partial<TimeSlot>) => void;
   onDelete: () => void;
-  // Optional: Used by Master Editor
-  conflicts?: Record<string, string>; // facultyId -> conflict string
+  conflicts?: Record<string, string>; 
   onCheckConflict?: (facultyId: string) => string | null;
 }
 
@@ -46,6 +46,43 @@ export const ClassModal: React.FC<ClassModalProps> = ({
   };
 
   const currentSubject = schedule.subjects.find(s => s.id === tempSlotData.subjectId);
+
+  // Prepare options for CustomSelect
+  const subjectOptions: Option[] = schedule.subjects.map(s => {
+    const stats = getSubjectUsage(s);
+    const isTheory = tempSlotData.type === 'Theory';
+    const isFull = isTheory ? stats.isTheoryFull : stats.isPracticalFull;
+    const remaining = isTheory ? stats.theoryRemaining : stats.practicalRemaining;
+    const isCurrent = tempSlotData.subjectId === s.id;
+    // Update: Only show parens if code exists
+    const label = s.code ? `${s.name} (${s.code})` : s.name;
+    
+    return {
+        value: s.id,
+        label: label,
+        dropdownLabel: (
+            <div className="flex items-center justify-between w-full">
+                <span className="truncate pr-2">{label}</span>
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 ${isFull && !isCurrent ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-500'}`}>
+                    {Math.max(0, remaining)} Left
+                </span>
+            </div>
+        ),
+        disabled: !isCurrent && isFull
+    };
+  });
+
+  const facultyOptions: Option[] = schedule.faculties.map(f => {
+    const isSelected = tempSlotData.facultyIds?.includes(f.id);
+    const conflict = conflicts ? conflicts[f.id] : null;
+    
+    if (isSelected) return null; // Don't show already selected
+
+    return {
+        value: f.id,
+        label: `${f.name} (${f.initials})${conflict ? ' (Busy)' : ''}`,
+    };
+  }).filter(Boolean) as Option[];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-gray-900/10 backdrop-blur-sm transition-all" onClick={onClose}>
@@ -120,44 +157,17 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                 </div>
 
                 {/* Subject Select */}
-                <div className="group relative">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block ml-1">Subject</label>
-                    <div className="relative">
-                        <select 
-                            className="w-full rounded-2xl border-2 border-gray-100 bg-white hover:border-primary-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 py-4 pl-5 pr-12 text-gray-900 font-bold text-lg appearance-none transition-all outline-none disabled:bg-gray-50"
-                            value={tempSlotData.subjectId || ''}
-                            onChange={(e) => setTempSlotData({ ...tempSlotData, subjectId: e.target.value })}
-                        >
-                            <option value="" disabled>Select Subject</option>
-                            {schedule.subjects.map(s => {
-                                const stats = getSubjectUsage(s);
-                                const isFull = tempSlotData.type === 'Theory' ? stats.isTheoryFull : stats.isPracticalFull;
-                                const isCurrent = tempSlotData.subjectId === s.id;
-                                
-                                return (
-                                    <option 
-                                        key={s.id} 
-                                        value={s.id} 
-                                        disabled={!isCurrent && isFull}
-                                        className={(!isCurrent && isFull) ? "text-gray-300" : ""}
-                                    >
-                                        {s.name} ({s.code})
-                                    </option>
-                                );
-                            })}
-                        </select>
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                            <ChevronDown size={20} strokeWidth={3} />
-                        </div>
-                    </div>
+                <div>
+                    <CustomSelect
+                        label="Subject"
+                        placeholder="Select Subject"
+                        value={tempSlotData.subjectId || ''}
+                        options={subjectOptions}
+                        onChange={(val) => setTempSlotData({ ...tempSlotData, subjectId: val })}
+                    />
                     
-                    {/* Subject Color Picker (Only show if onSave handles updates to subjects, which we might not do here to keep it simple, but we can display color) */}
-                    {/* For simplicity in this refactor, we are skipping color updating here to keep props simple, or we assume subject color is fixed in wizard. 
-                        If we want to update color, we need a callback. 
-                    */}
-
-                        {/* Quota Message */}
-                        {tempSlotData.subjectId && currentSubject && (() => {
+                    {/* Quota Message */}
+                    {tempSlotData.subjectId && currentSubject && (() => {
                         const stats = getSubjectUsage(currentSubject);
                         const isFull = tempSlotData.type === 'Theory' ? stats.isTheoryFull : stats.isPracticalFull;
                         const remaining = tempSlotData.type === 'Theory' ? stats.theoryRemaining : stats.practicalRemaining;
@@ -165,14 +175,14 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                         
                         if (isFull) {
                                 return (
-                                <div className="flex items-center gap-2 mt-2 text-red-500 text-xs font-bold animate-pulse">
+                                <div className="flex items-center gap-2 mt-2 text-red-500 text-xs font-bold animate-pulse ml-1">
                                     <AlertCircle size={12} />
                                     <span>{typeName} hours completed for {currentSubject.name}</span>
                                 </div>
                                 );
                         } else {
                                 return (
-                                <div className="flex items-center gap-2 mt-2 text-emerald-600 text-xs font-bold">
+                                <div className="flex items-center gap-2 mt-2 text-emerald-600 text-xs font-bold ml-1">
                                     <Clock size={12} />
                                     <span>{remaining} {typeName} hour{remaining !== 1 ? 's' : ''} remaining</span>
                                 </div>
@@ -182,7 +192,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                 </div>
 
                 {/* Faculty Select (Multi) */}
-                <div className="group relative">
+                <div>
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block ml-1">
                         Assign Faculties
                     </label>
@@ -212,36 +222,20 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                         )}
                     </div>
 
-                    <div className="relative">
-                        <select 
-                            className="w-full rounded-2xl border-2 border-gray-100 bg-white hover:border-primary-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 py-4 pl-5 pr-12 text-gray-900 font-bold text-lg appearance-none transition-all outline-none disabled:bg-gray-50"
-                            value=""
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (!val) return;
-                                setTempSlotData(prev => {
-                                    const current = prev.facultyIds || [];
-                                    if (current.includes(val)) return prev;
-                                    return { ...prev, facultyIds: [...current, val] };
-                                });
-                            }}
-                        >
-                            <option value="">+ Add Faculty</option>
-                            {schedule.faculties.map(f => {
-                                const isSelected = tempSlotData.facultyIds?.includes(f.id);
-                                const conflict = conflicts ? conflicts[f.id] : null;
-                                if (isSelected) return null;
-                                return (
-                                    <option key={f.id} value={f.id}>
-                                        {f.name} ({f.initials}) {conflict ? '(Busy)' : ''}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                            <Plus size={20} strokeWidth={3} />
-                        </div>
-                    </div>
+                    <CustomSelect
+                        value=""
+                        placeholder="+ Add Faculty"
+                        options={facultyOptions}
+                        icon={<Plus size={20} strokeWidth={3} />}
+                        onChange={(val) => {
+                            if (!val) return;
+                            setTempSlotData(prev => {
+                                const current = prev.facultyIds || [];
+                                if (current.includes(val)) return prev;
+                                return { ...prev, facultyIds: [...current, val] };
+                            });
+                        }}
+                    />
                         
                     {/* Conflict Messages */}
                     {conflicts && (
@@ -281,7 +275,8 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                     onClick={() => onSave(tempSlotData)}
                     fullWidth 
                     size="lg" 
-                    disabled={!tempSlotData.subjectId || !tempSlotData.facultyIds?.length} 
+                    // Update: Enabled even if no faculty selected
+                    disabled={!tempSlotData.subjectId} 
                     className="shadow-glow rounded-2xl text-lg"
                 >
                     {tempSlotData.id ? 'Save Changes' : 'Add to Schedule'}

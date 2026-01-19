@@ -94,29 +94,29 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
                       <button key={sem} onClick={() => setActiveSemTab(sem)} className={`px-5 py-2 rounded-full whitespace-nowrap font-bold text-sm transition-all ${activeSemTab === sem ? 'bg-gray-900 text-white shadow-lg' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'}`}>Semester {sem} <span className="ml-2 bg-white/20 px-1.5 py-0.5 rounded-md text-xs">{subjectsBySem[sem]?.length || 0}</span></button>
                   ))}
               </div>
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {activeSemTab && subjectsBySem[activeSemTab]?.map((sub, idx) => (
-                  <div key={sub.id} className="bg-white p-6 rounded-[2rem] shadow-card relative group">
-                    <div className="flex justify-between items-start mb-6 gap-2">
+                  <div key={sub.id} className="bg-white p-5 rounded-[1.5rem] shadow-card relative group border border-gray-100">
+                    <div className="flex justify-between items-start mb-3 gap-2">
                       <Input label="Subject Name" placeholder="Subject Name" value={sub.name} onChange={(e) => { const list = [...subjectsBySem[activeSemTab]]; list[idx].name = e.target.value; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} />
                       <button onClick={() => { const list = subjectsBySem[activeSemTab].filter(s => s.id !== sub.id); setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-14 w-14 shrink-0 bg-red-50 rounded-full flex items-center justify-center text-red-400 mt-6"><Trash2 size={20} /></button>
                     </div>
-                    <Input label="Subject Code" placeholder="Subject Code" value={sub.code} onChange={(e) => { const list = [...subjectsBySem[activeSemTab]]; list[idx].code = e.target.value; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="mb-6" />
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between bg-blue-50/50 rounded-2xl p-2 pr-3">
-                            <span className="text-sm font-bold text-blue-900/70 ml-2">Theory Hours</span>
-                            <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm">
-                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; if (list[idx].theoryCount > 0) list[idx].theoryCount--; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-8 w-8 text-gray-400"><Minus size={14} /></button>
-                                <span className="w-12 text-center text-sm font-bold">{sub.theoryCount}</span>
-                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; list[idx].theoryCount++; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-8 w-8 text-gray-400"><Plus size={14} /></button>
+                    <Input label="Subject Code" placeholder="Subject Code" value={sub.code} onChange={(e) => { const list = [...subjectsBySem[activeSemTab]]; list[idx].code = e.target.value; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="mb-4" />
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center justify-between bg-blue-50/50 rounded-2xl p-2 pr-2">
+                            <span className="text-xs font-bold text-blue-900/70 ml-2">Theory</span>
+                            <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-blue-100">
+                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; if (list[idx].theoryCount > 0) list[idx].theoryCount--; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"><Minus size={14} /></button>
+                                <span className="w-8 text-center text-sm font-black text-slate-900">{sub.theoryCount}</span>
+                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; list[idx].theoryCount++; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"><Plus size={14} /></button>
                             </div>
                         </div>
-                        <div className="flex items-center justify-between bg-purple-50/50 rounded-2xl p-2 pr-3">
-                            <span className="text-sm font-bold text-purple-900/70 ml-2">Lab Hours</span>
-                            <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm">
-                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; if (list[idx].practicalCount > 0) list[idx].practicalCount--; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-8 w-8 text-gray-400"><Minus size={14} /></button>
-                                <span className="w-12 text-center text-sm font-bold">{sub.practicalCount}</span>
-                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; list[idx].practicalCount++; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-8 w-8 text-gray-400"><Plus size={14} /></button>
+                        <div className="flex items-center justify-between bg-purple-50/50 rounded-2xl p-2 pr-2">
+                            <span className="text-xs font-bold text-purple-900/70 ml-2">Lab</span>
+                            <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-purple-100">
+                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; if (list[idx].practicalCount > 0) list[idx].practicalCount--; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"><Minus size={14} /></button>
+                                <span className="w-8 text-center text-sm font-black text-slate-900">{sub.practicalCount}</span>
+                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; list[idx].practicalCount++; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"><Plus size={14} /></button>
                             </div>
                         </div>
                     </div>
@@ -135,7 +135,18 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
                   <div key={fac.id} className="bg-white p-6 rounded-[2rem] shadow-card group">
                     <div className="flex justify-between items-center mb-4"><span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Faculty Details</span><button onClick={() => setFaculties(faculties.filter(f => f.id !== fac.id))} className="text-red-400"><Trash2 size={16}/></button></div>
                     <div className="space-y-4">
-                        <Input label="Faculty Name" placeholder="Faculty Name" value={fac.name} onChange={(e) => { const list = [...faculties]; list[idx].name = e.target.value; if (!list[idx].initials) list[idx].initials = generateInitials(e.target.value); setFaculties(list); }} icon={<User size={20} />} />
+                        <Input 
+                            label="Faculty Name" 
+                            placeholder="Faculty Name" 
+                            value={fac.name} 
+                            onChange={(e) => { 
+                                const list = [...faculties]; 
+                                list[idx].name = e.target.value; 
+                                list[idx].initials = generateInitials(e.target.value); 
+                                setFaculties(list); 
+                            }} 
+                            icon={<User size={20} />} 
+                        />
                         <div className="w-1/2"><Input label="Initials" placeholder="Initials" value={fac.initials || ''} maxLength={3} onChange={(e) => { const list = [...faculties]; list[idx].initials = e.target.value.toUpperCase(); setFaculties(list); }} /></div>
                     </div>
                   </div>
