@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Download } from 'lucide-react';
 import { Schedule, DEFAULT_PERIODS, Period, TimeSlot } from '../types';
@@ -51,20 +50,35 @@ export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col font-sans relative overflow-hidden">
-      <div className="px-6 py-6 z-20 flex items-center justify-between shrink-0 flex-wrap gap-4">
+    <div className="h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans relative overflow-hidden transition-colors duration-300">
+      {/* Ambient Background Blobs - Enhanced for Glass Effect */}
+      <div className="absolute -top-20 -right-20 w-[40rem] h-[40rem] bg-primary-200/40 dark:bg-primary-900/20 rounded-full blur-[100px] opacity-60 pointer-events-none animate-pulse" />
+      <div className="absolute top-40 -left-20 w-[30rem] h-[30rem] bg-blue-200/40 dark:bg-blue-900/20 rounded-full blur-[80px] opacity-60 pointer-events-none" />
+      <div className="absolute bottom-0 right-20 w-[25rem] h-[25rem] bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-[80px] opacity-50 pointer-events-none" />
+
+      {/* Header */}
+      <div className="px-6 py-6 z-20 flex items-center justify-between shrink-0 flex-wrap gap-4 bg-white/10 dark:bg-slate-900/10 backdrop-blur-sm border-b border-white/20 dark:border-slate-800/50">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="h-12 w-12 bg-white rounded-full shadow-soft flex items-center justify-center text-gray-500 hover:text-primary-600 border border-white/50"><ArrowLeft size={22} /></button>
-          <div><h2 className="text-2xl font-black text-gray-900 leading-none">{currentSchedule.details.className}</h2><div className="mt-1"><span className="bg-white/50 px-2 py-0.5 rounded-lg text-[10px] font-bold text-gray-500 uppercase">Sec {currentSchedule.details.section} • {currentSchedule.details.semester} Sem</span></div></div>
+          <button onClick={onBack} className="h-12 w-12 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-full shadow-soft flex items-center justify-center text-gray-500 dark:text-slate-300 hover:text-primary-600 hover:scale-110 transition-all border border-white/50 dark:border-slate-700/50">
+            <ArrowLeft size={22} />
+          </button>
+          <div>
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white leading-none tracking-tight">{currentSchedule.details.className}</h2>
+            <div className="mt-1 flex items-center gap-2">
+                <span className="bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full text-[10px] font-black text-gray-500 dark:text-slate-400 uppercase tracking-widest border border-white/20 dark:border-slate-700/50">Sec {currentSchedule.details.section}</span>
+                <span className="bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full text-[10px] font-black text-gray-500 dark:text-slate-400 uppercase tracking-widest border border-white/20 dark:border-slate-700/50">{currentSchedule.details.semester} Sem</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2 ml-auto">
-             <Button onClick={async () => { setIsExporting(true); await exportToPDF('schedule-grid', `${currentSchedule.details.className}.pdf`); setIsExporting(false); }} variant="secondary" icon={<Download size={18} />} disabled={isExporting} size="sm" className="rounded-2xl"><span>{isExporting ? '...' : 'Export PDF'}</span></Button>
-            <Button size="sm" onClick={() => onSave(currentSchedule)} className="shadow-glow rounded-2xl">Save</Button>
+        <div className="flex items-center gap-3 ml-auto">
+             <Button onClick={async () => { setIsExporting(true); await exportToPDF('schedule-grid', `${currentSchedule.details.className}.pdf`); setIsExporting(false); }} variant="secondary" icon={<Download size={18} />} disabled={isExporting} size="sm" className="rounded-2xl border-white/50 bg-white/50 backdrop-blur-sm hover:bg-white/80"><span>{isExporting ? '...' : 'PDF'}</span></Button>
+            <Button size="sm" onClick={() => onSave(currentSchedule)} className="shadow-glow rounded-2xl px-6">Save</Button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-8">
-        <div className="bg-white/60 backdrop-blur-md rounded-[2.5rem] shadow-card border border-white overflow-x-auto min-h-[500px]">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-8 relative z-10 scroll-smooth">
+        {/* Grid Container - Removed heavy background, allowing floating glass effect */}
+        <div className="overflow-x-auto pb-4 -mx-6 px-6 no-scrollbar">
           <ScheduleGrid 
             schedule={currentSchedule} 
             periods={periods} 
@@ -73,7 +87,11 @@ export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
             onAddPeriod={() => setEditingPeriod({ id: 0, label: 'New Hour', time: '09:00 - 10:00' })}
           />
         </div>
+        
         <FacultyTable stats={facultyStats} />
+        
+        {/* Spacer for scrolling */}
+        <div className="h-20" />
       </div>
 
       {editingSlot && (

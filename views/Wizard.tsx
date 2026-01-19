@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChevronLeft, GraduationCap, Users, Book, Beaker, Minus, Plus, Trash2, ArrowRight, User, CalendarRange } from 'lucide-react';
 import { Button } from '../components/ui/Button';
@@ -50,15 +49,19 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
   const isStep1Valid = deptName.trim() !== '' && session.trim() !== '' && selectedSemesters.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans relative">
-      <div className="px-6 py-6 sticky top-0 z-30 bg-gray-50/90 backdrop-blur-sm">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans relative transition-colors duration-300 overflow-x-hidden">
+       {/* Ambient Background Blobs */}
+       <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-100 dark:bg-primary-900/20 rounded-full blur-3xl opacity-40 pointer-events-none" />
+       <div className="absolute top-20 -left-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/10 rounded-full blur-3xl opacity-40 pointer-events-none" />
+
+      <div className="px-6 py-6 sticky top-0 z-30 bg-gray-50/90 dark:bg-slate-950/90 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-6">
-            <button onClick={() => step > 1 ? setStep(step - 1) : onCancel()} className="h-10 w-10 bg-white rounded-full shadow-sm flex items-center justify-center text-gray-600 hover:text-primary-600 hover:scale-110 transition-all">
+            <button onClick={() => step > 1 ? setStep(step - 1) : onCancel()} className="h-10 w-10 bg-white dark:bg-slate-800 rounded-full shadow-sm flex items-center justify-center text-gray-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-110 transition-all">
                 <ChevronLeft size={22} strokeWidth={2.5} />
             </button>
             <div className="flex space-x-2">
                 {[1, 2, 3].map((s) => (
-                    <div key={s} className={`h-2.5 rounded-full transition-all duration-500 ${s === step ? 'w-12 bg-primary-500' : s < step ? 'w-2.5 bg-primary-200' : 'w-2.5 bg-gray-200'}`} />
+                    <div key={s} className={`h-2.5 rounded-full transition-all duration-500 ${s === step ? 'w-12 bg-primary-500' : s < step ? 'w-2.5 bg-primary-200 dark:bg-primary-900' : 'w-2.5 bg-gray-200 dark:bg-slate-800'}`} />
                 ))}
             </div>
             <div className="w-10" />
@@ -69,16 +72,16 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
         <div className="max-w-xl mx-auto w-full animate-fade-in-up">
           {step === 1 && (
             <div className="pt-4">
-              <h2 className="text-4xl font-black text-gray-900 mb-2">Department Setup</h2>
-              <p className="text-gray-400 font-medium text-lg mb-10">Define your department and active semesters.</p>
+              <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Department Setup</h2>
+              <p className="text-gray-400 dark:text-slate-500 font-medium text-lg mb-10">Define your department and active semesters.</p>
               <div className="space-y-8">
                 <Input label="Department Name" placeholder="Department Name" value={deptName} onChange={(e) => setDeptName(e.target.value)} icon={<GraduationCap size={24} />} autoFocus />
                 <Input label="Academic Session" placeholder="Academic Session" value={session} onChange={(e) => setSession(e.target.value)} icon={<CalendarRange size={24} />} />
                 <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 ml-4">Select Active Semesters</label>
+                    <label className="block text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-4 ml-4">Select Active Semesters</label>
                     <div className="grid grid-cols-4 gap-3">
                         {[1, 2, 3, 4, 5, 6, 7, 8].map(sem => (
-                            <button key={sem} onClick={() => setSelectedSemesters(prev => prev.includes(sem) ? prev.filter(s => s !== sem).sort((a,b) => a-b) : [...prev, sem].sort((a,b) => a-b))} className={`h-16 rounded-2xl font-black text-xl flex items-center justify-center transition-all duration-200 ${selectedSemesters.includes(sem) ? 'bg-primary-600 text-white shadow-glow scale-105' : 'bg-white text-gray-400 border-2 border-gray-100 hover:border-primary-200 hover:text-primary-500'}`}>{sem}</button>
+                            <button key={sem} onClick={() => setSelectedSemesters(prev => prev.includes(sem) ? prev.filter(s => s !== sem).sort((a,b) => a-b) : [...prev, sem].sort((a,b) => a-b))} className={`h-16 rounded-2xl font-black text-xl flex items-center justify-center transition-all duration-200 ${selectedSemesters.includes(sem) ? 'bg-primary-600 text-white shadow-glow scale-105' : 'bg-white dark:bg-slate-800 text-gray-400 dark:text-slate-400 border-2 border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-800 hover:text-primary-500'}`}>{sem}</button>
                         ))}
                     </div>
                 </div>
@@ -88,52 +91,52 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
 
           {step === 2 && (
             <div>
-              <div className="mb-6"><h2 className="text-3xl font-black text-gray-900">Subjects</h2><p className="text-gray-400 font-medium">Add subjects for each semester.</p></div>
+              <div className="mb-6"><h2 className="text-3xl font-black text-gray-900 dark:text-white">Subjects</h2><p className="text-gray-400 dark:text-slate-500 font-medium">Add subjects for each semester.</p></div>
               <div className="flex overflow-x-auto gap-2 pb-4 mb-2 no-scrollbar">
                   {selectedSemesters.map(sem => (
-                      <button key={sem} onClick={() => setActiveSemTab(sem)} className={`px-5 py-2 rounded-full whitespace-nowrap font-bold text-sm transition-all ${activeSemTab === sem ? 'bg-gray-900 text-white shadow-lg' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'}`}>Semester {sem} <span className="ml-2 bg-white/20 px-1.5 py-0.5 rounded-md text-xs">{subjectsBySem[sem]?.length || 0}</span></button>
+                      <button key={sem} onClick={() => setActiveSemTab(sem)} className={`px-5 py-2 rounded-full whitespace-nowrap font-bold text-sm transition-all ${activeSemTab === sem ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg' : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700'}`}>Semester {sem} <span className="ml-2 bg-white/20 dark:bg-black/10 px-1.5 py-0.5 rounded-md text-xs">{subjectsBySem[sem]?.length || 0}</span></button>
                   ))}
               </div>
               <div className="space-y-4">
                 {activeSemTab && subjectsBySem[activeSemTab]?.map((sub, idx) => (
-                  <div key={sub.id} className="bg-white p-5 rounded-[1.5rem] shadow-card relative group border border-gray-100">
+                  <div key={sub.id} className="bg-white dark:bg-slate-800 p-5 rounded-[1.5rem] shadow-card relative group border border-gray-100 dark:border-slate-700">
                     <div className="flex justify-between items-start mb-3 gap-2">
                       <Input label="Subject Name" placeholder="Subject Name" value={sub.name} onChange={(e) => { const list = [...subjectsBySem[activeSemTab]]; list[idx].name = e.target.value; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} />
-                      <button onClick={() => { const list = subjectsBySem[activeSemTab].filter(s => s.id !== sub.id); setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-14 w-14 shrink-0 bg-red-50 rounded-full flex items-center justify-center text-red-400 mt-6"><Trash2 size={20} /></button>
+                      <button onClick={() => { const list = subjectsBySem[activeSemTab].filter(s => s.id !== sub.id); setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-14 w-14 shrink-0 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-400 mt-6 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"><Trash2 size={20} /></button>
                     </div>
                     <Input label="Subject Code" placeholder="Subject Code" value={sub.code} onChange={(e) => { const list = [...subjectsBySem[activeSemTab]]; list[idx].code = e.target.value; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="mb-4" />
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="flex items-center justify-between bg-blue-50/50 rounded-2xl p-2 pr-2">
-                            <span className="text-xs font-bold text-blue-900/70 ml-2">Theory</span>
-                            <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-blue-100">
-                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; if (list[idx].theoryCount > 0) list[idx].theoryCount--; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"><Minus size={14} /></button>
-                                <span className="w-8 text-center text-sm font-black text-slate-900">{sub.theoryCount}</span>
-                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; list[idx].theoryCount++; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"><Plus size={14} /></button>
+                        <div className="flex items-center justify-between bg-blue-50/50 dark:bg-blue-900/20 rounded-2xl p-2 pr-2">
+                            <span className="text-xs font-bold text-blue-900/70 dark:text-blue-300 ml-2">Theory</span>
+                            <div className="flex items-center gap-1 bg-white dark:bg-slate-700 rounded-xl p-1 shadow-sm border border-blue-100 dark:border-blue-900/30">
+                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; if (list[idx].theoryCount > 0) list[idx].theoryCount--; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600 rounded-lg transition-colors"><Minus size={14} /></button>
+                                <span className="w-8 text-center text-sm font-black text-slate-900 dark:text-white">{sub.theoryCount}</span>
+                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; list[idx].theoryCount++; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600 rounded-lg transition-colors"><Plus size={14} /></button>
                             </div>
                         </div>
-                        <div className="flex items-center justify-between bg-purple-50/50 rounded-2xl p-2 pr-2">
-                            <span className="text-xs font-bold text-purple-900/70 ml-2">Lab</span>
-                            <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-purple-100">
-                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; if (list[idx].practicalCount > 0) list[idx].practicalCount--; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"><Minus size={14} /></button>
-                                <span className="w-8 text-center text-sm font-black text-slate-900">{sub.practicalCount}</span>
-                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; list[idx].practicalCount++; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"><Plus size={14} /></button>
+                        <div className="flex items-center justify-between bg-purple-50/50 dark:bg-purple-900/20 rounded-2xl p-2 pr-2">
+                            <span className="text-xs font-bold text-purple-900/70 dark:text-purple-300 ml-2">Lab</span>
+                            <div className="flex items-center gap-1 bg-white dark:bg-slate-700 rounded-xl p-1 shadow-sm border border-purple-100 dark:border-purple-900/30">
+                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; if (list[idx].practicalCount > 0) list[idx].practicalCount--; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600 rounded-lg transition-colors"><Minus size={14} /></button>
+                                <span className="w-8 text-center text-sm font-black text-slate-900 dark:text-white">{sub.practicalCount}</span>
+                                <button onClick={() => { const list = [...subjectsBySem[activeSemTab]]; list[idx].practicalCount++; setSubjectsBySem({...subjectsBySem, [activeSemTab]: list}); }} className="h-7 w-7 flex items-center justify-center text-gray-500 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600 rounded-lg transition-colors"><Plus size={14} /></button>
                             </div>
                         </div>
                     </div>
                   </div>
                 ))}
-                <button onClick={() => activeSemTab && setSubjectsBySem({...subjectsBySem, [activeSemTab]: [...(subjectsBySem[activeSemTab]||[]), {id: generateId(), name:'', code:'', paperCode:'', theoryCount:1, practicalCount:0, color: getRandomColor()}]})} className="w-full py-5 border-2 border-dashed border-gray-300 rounded-[2rem] text-gray-400 font-bold hover:bg-primary-50 flex items-center justify-center gap-2"><Plus size={16} /> Add Subject</button>
+                <button onClick={() => activeSemTab && setSubjectsBySem({...subjectsBySem, [activeSemTab]: [...(subjectsBySem[activeSemTab]||[]), {id: generateId(), name:'', code:'', paperCode:'', theoryCount:1, practicalCount:0, color: getRandomColor()}]})} className="w-full py-5 border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-[2rem] text-gray-400 dark:text-slate-500 font-bold hover:bg-primary-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2 transition-colors"><Plus size={16} /> Add Subject</button>
               </div>
             </div>
           )}
 
           {step === 3 && (
             <div>
-              <div className="mb-8"><h2 className="text-3xl font-black text-gray-900">Faculties</h2><p className="text-gray-400 font-medium">Add all faculties for the department.</p></div>
+              <div className="mb-8"><h2 className="text-3xl font-black text-gray-900 dark:text-white">Faculties</h2><p className="text-gray-400 dark:text-slate-500 font-medium">Add all faculties for the department.</p></div>
               <div className="space-y-4">
                 {faculties.map((fac, idx) => (
-                  <div key={fac.id} className="bg-white p-6 rounded-[2rem] shadow-card group">
-                    <div className="flex justify-between items-center mb-4"><span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Faculty Details</span><button onClick={() => setFaculties(faculties.filter(f => f.id !== fac.id))} className="text-red-400"><Trash2 size={16}/></button></div>
+                  <div key={fac.id} className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-card group border border-gray-100 dark:border-slate-700">
+                    <div className="flex justify-between items-center mb-4"><span className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Faculty Details</span><button onClick={() => setFaculties(faculties.filter(f => f.id !== fac.id))} className="text-red-400 hover:text-red-500 transition-colors"><Trash2 size={16}/></button></div>
                     <div className="space-y-4">
                         <Input 
                             label="Faculty Name" 
@@ -151,14 +154,14 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
                     </div>
                   </div>
                 ))}
-                <button onClick={() => setFaculties([...faculties, { id: generateId(), name: '', initials: '' }])} className="w-full py-5 border-2 border-dashed border-gray-300 rounded-[2rem] text-gray-400 font-bold hover:bg-primary-50 flex items-center justify-center gap-2"><Plus size={16} /> Add Faculty</button>
+                <button onClick={() => setFaculties([...faculties, { id: generateId(), name: '', initials: '' }])} className="w-full py-5 border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-[2rem] text-gray-400 dark:text-slate-500 font-bold hover:bg-primary-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2 transition-colors"><Plus size={16} /> Add Faculty</button>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white to-transparent z-20 pointer-events-none">
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white dark:from-slate-950 to-transparent z-20 pointer-events-none">
         <div className="max-w-xl mx-auto w-full pointer-events-auto">
             <Button onClick={handleNext} fullWidth size="lg" disabled={step === 1 && !isStep1Valid} className="shadow-glow" icon={step === TOTAL_STEPS ? undefined : <ArrowRight className="ml-2" size={20} />}>
                 {step === TOTAL_STEPS ? 'Create Department Schedule' : 'Continue'}

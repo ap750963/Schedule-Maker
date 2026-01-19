@@ -45,26 +45,18 @@ export const Home: React.FC<HomeProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-20 font-sans relative transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-20 font-sans relative transition-colors duration-300 overflow-x-hidden">
+      {/* Ambient Background Blobs */}
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-100 dark:bg-primary-900/20 rounded-full blur-3xl opacity-40 pointer-events-none" />
+      <div className="absolute top-20 -left-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/10 rounded-full blur-3xl opacity-40 pointer-events-none" />
+
       <div className="relative px-6 pt-12 pb-2 z-10">
         <div className="flex justify-between items-start">
           <div className="space-y-4">
-            {/* Logo Section */}
-            <div className="flex items-center gap-3">
-                <img 
-                    src="/logo.png" 
-                    alt="ScholarTime" 
-                    className="h-20 w-auto object-contain drop-shadow-sm dark:drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                    onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                    }}
-                />
-                <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight hidden">
-                    Schedule<span className="text-primary-600">.</span>
-                </h1>
-            </div>
-            <p className="text-slate-600 dark:text-slate-400 font-medium pl-2">Let's get organized ✨</p>
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                Schedule<span className="text-primary-600">.</span>
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 font-medium pl-1">Let's get organized ✨</p>
           </div>
           
           <button 
@@ -79,8 +71,9 @@ export const Home: React.FC<HomeProps> = ({
       <div className="p-6 max-w-lg mx-auto w-full space-y-4 relative z-10">
         {schedules.length === 0 && (
           <div className="text-center py-20 px-4">
-            <div className="bg-white dark:bg-slate-800 h-40 w-40 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-soft border border-gray-100 dark:border-slate-700">
-              <Sparkles className="h-16 w-16 text-primary-400" />
+            <div className="bg-white dark:bg-slate-800 h-40 w-40 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-soft border border-gray-100 dark:border-slate-700 relative overflow-hidden group">
+               <div className="absolute inset-0 bg-gradient-to-tr from-primary-50 to-transparent dark:from-primary-900/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Sparkles className="h-16 w-16 text-primary-400 relative z-10" />
             </div>
             <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No schedules yet</h3>
             <p className="text-slate-500 dark:text-slate-400 mb-10 max-w-xs mx-auto leading-relaxed font-medium">Create your first timetable to track classes and faculties with style.</p>
@@ -109,9 +102,11 @@ export const Home: React.FC<HomeProps> = ({
                       {/* Interactive Card Surface */}
                       <div 
                         onClick={() => onSelectSchedule(schedule.id)} 
-                        className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-card hover:shadow-soft hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-700 cursor-pointer"
+                        className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-card hover:shadow-soft hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-700 cursor-pointer relative overflow-hidden"
                       >
-                          <div className="flex justify-between items-start">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 dark:bg-primary-900/10 rounded-bl-[4rem] -mr-8 -mt-8 pointer-events-none transition-transform group-hover:scale-110" />
+                          
+                          <div className="flex justify-between items-start relative z-10">
                             <div className="flex-1 pr-14">
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="text-[10px] font-bold uppercase tracking-wider bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full border border-primary-100 dark:border-primary-800">{schedule.details.semester} Sem</span>
@@ -120,7 +115,7 @@ export const Home: React.FC<HomeProps> = ({
                                 <div className="inline-flex items-center mt-2 px-3 py-1 bg-gray-50 dark:bg-slate-700/50 rounded-full text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Section {schedule.details.section}</div>
                             </div>
                           </div>
-                          <div className="mt-8 flex items-center justify-between text-xs font-bold text-slate-400 dark:text-slate-500">
+                          <div className="mt-8 flex items-center justify-between text-xs font-bold text-slate-400 dark:text-slate-500 relative z-10">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-1.5"><Clock size={14} /><span>{new Date(schedule.lastModified).toLocaleDateString()}</span></div>
                                 <div className="flex items-center gap-1.5"><BookOpen size={14} /><span>{schedule.subjects.length} Subjects</span></div>

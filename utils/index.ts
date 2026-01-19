@@ -21,25 +21,45 @@ export const to24Hour = (timeStr: string) => {
 // Map color names to Tailwind classes
 export const getColorClasses = (colorName?: string) => {
   const color = colorName || 'gray';
-  const styles: Record<string, { bg: string, border: string, text: string, lightText: string, pill: string }> = {
-    rose: { bg: 'bg-rose-100', border: 'border-rose-300', text: 'text-rose-900', lightText: 'text-rose-700', pill: 'bg-rose-200 text-rose-800' },
-    orange: { bg: 'bg-orange-100', border: 'border-orange-300', text: 'text-orange-900', lightText: 'text-orange-700', pill: 'bg-orange-200 text-orange-800' },
-    amber: { bg: 'bg-amber-100', border: 'border-amber-300', text: 'text-amber-900', lightText: 'text-amber-700', pill: 'bg-amber-200 text-amber-800' },
-    yellow: { bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-900', lightText: 'text-yellow-700', pill: 'bg-yellow-200 text-yellow-800' },
-    lime: { bg: 'bg-lime-100', border: 'border-lime-300', text: 'text-lime-900', lightText: 'text-lime-700', pill: 'bg-lime-200 text-lime-800' },
-    green: { bg: 'bg-green-100', border: 'border-green-300', text: 'text-green-900', lightText: 'text-green-700', pill: 'bg-green-200 text-green-800' },
-    emerald: { bg: 'bg-emerald-100', border: 'border-emerald-300', text: 'text-emerald-900', lightText: 'text-emerald-700', pill: 'bg-emerald-200 text-emerald-800' },
-    teal: { bg: 'bg-teal-100', border: 'border-teal-300', text: 'text-teal-900', lightText: 'text-teal-700', pill: 'bg-teal-200 text-teal-800' },
-    cyan: { bg: 'bg-cyan-100', border: 'border-cyan-300', text: 'text-cyan-900', lightText: 'text-cyan-700', pill: 'bg-cyan-200 text-cyan-800' },
-    sky: { bg: 'bg-sky-100', border: 'border-sky-300', text: 'text-sky-900', lightText: 'text-sky-700', pill: 'bg-sky-200 text-sky-800' },
-    blue: { bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-900', lightText: 'text-blue-700', pill: 'bg-blue-200 text-blue-800' },
-    indigo: { bg: 'bg-indigo-100', border: 'border-indigo-300', text: 'text-indigo-900', lightText: 'text-indigo-700', pill: 'bg-indigo-200 text-indigo-800' },
-    violet: { bg: 'bg-violet-100', border: 'border-violet-300', text: 'text-violet-900', lightText: 'text-violet-700', pill: 'bg-violet-200 text-violet-800' },
-    purple: { bg: 'bg-purple-100', border: 'border-purple-300', text: 'text-purple-900', lightText: 'text-purple-700', pill: 'bg-purple-200 text-purple-800' },
-    fuchsia: { bg: 'bg-fuchsia-100', border: 'border-fuchsia-300', text: 'text-fuchsia-900', lightText: 'text-fuchsia-700', pill: 'bg-fuchsia-200 text-fuchsia-800' },
-    pink: { bg: 'bg-pink-100', border: 'border-pink-300', text: 'text-pink-900', lightText: 'text-pink-700', pill: 'bg-pink-200 text-pink-800' },
-    slate: { bg: 'bg-slate-100', border: 'border-slate-300', text: 'text-slate-900', lightText: 'text-slate-700', pill: 'bg-slate-200 text-slate-800' },
-    gray: { bg: 'bg-gray-100', border: 'border-gray-300', text: 'text-gray-900', lightText: 'text-gray-700', pill: 'bg-gray-200 text-gray-800' },
+  
+  // Glassmorphic Playful Palette
+  const createPalette = (c: string) => ({
+      // Base glass background with tint
+      bg: `bg-${c}-500/10 dark:bg-${c}-400/10 backdrop-blur-md`,
+      // Gradient accent for active state or header
+      gradient: `bg-gradient-to-br from-${c}-50 to-${c}-100/50 dark:from-${c}-900/40 dark:to-${c}-800/20`,
+      // Subtle border
+      border: `border-${c}-200/60 dark:border-${c}-700/60`,
+      // Text colors
+      text: `text-${c}-900 dark:text-${c}-100`,
+      lightText: `text-${c}-700/70 dark:text-${c}-300/70`,
+      // Interactive elements
+      pill: `bg-${c}-500/15 text-${c}-700 dark:text-${c}-200`,
+      // Hover effects
+      hover: `hover:bg-${c}-500/20 dark:hover:bg-${c}-400/20 hover:scale-[1.02] hover:shadow-lg hover:shadow-${c}-500/10`,
+      // Icon colors
+      icon: `text-${c}-500 dark:text-${c}-400`
+  });
+
+  const styles: Record<string, ReturnType<typeof createPalette>> = {
+    rose: createPalette('rose'),
+    orange: createPalette('orange'),
+    amber: createPalette('amber'),
+    yellow: createPalette('yellow'),
+    lime: createPalette('lime'),
+    green: createPalette('green'),
+    emerald: createPalette('emerald'),
+    teal: createPalette('teal'),
+    cyan: createPalette('cyan'),
+    sky: createPalette('sky'),
+    blue: createPalette('blue'),
+    indigo: createPalette('indigo'),
+    violet: createPalette('violet'),
+    purple: createPalette('purple'),
+    fuchsia: createPalette('fuchsia'),
+    pink: createPalette('pink'),
+    slate: createPalette('slate'),
+    gray: createPalette('gray'),
   };
   return styles[color] || styles['gray'];
 };

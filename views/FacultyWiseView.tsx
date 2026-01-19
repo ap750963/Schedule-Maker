@@ -63,16 +63,20 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
   }));
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col font-sans relative overflow-hidden">
+    <div className="h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans relative overflow-hidden transition-colors duration-300">
+      {/* Ambient Background Blobs */}
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-100 dark:bg-primary-900/20 rounded-full blur-3xl opacity-40 pointer-events-none" />
+      <div className="absolute top-20 -left-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/10 rounded-full blur-3xl opacity-40 pointer-events-none" />
+
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 py-4 flex justify-between items-center shrink-0 z-50 shadow-sm relative flex-wrap gap-4">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-6 py-4 flex justify-between items-center shrink-0 z-50 shadow-sm relative flex-wrap gap-4">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <ArrowLeft size={20} className="text-gray-600"/>
+          <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+            <ArrowLeft size={20} className="text-gray-600 dark:text-slate-300"/>
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 leading-none">Faculty Timetables</h1>
-            <p className="text-xs font-medium text-gray-500 mt-1">Automatic workload distribution</p>
+            <h1 className="text-xl font-black text-gray-900 dark:text-white leading-none">Faculty Timetables</h1>
+            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mt-1">Automatic workload distribution</p>
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 ml-auto">
@@ -82,12 +86,12 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 sm:p-8">
+      <div className="flex-1 overflow-auto p-4 sm:p-8 relative z-10">
         <div className="max-w-6xl mx-auto space-y-6">
           
           {/* Faculty Selector Card */}
-          <div className="bg-white rounded-3xl shadow-soft p-6 border border-gray-100 flex flex-col sm:flex-row items-center gap-6">
-            <div className="h-16 w-16 bg-primary-100 rounded-2xl flex items-center justify-center text-primary-600 shrink-0">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-soft p-6 border border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row items-center gap-6">
+            <div className="h-16 w-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
               <User size={32} />
             </div>
             <div className="flex-1 w-full">
@@ -99,9 +103,9 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
               />
             </div>
             {selectedFaculty && (
-              <div className="bg-primary-50 px-6 py-3 rounded-2xl border border-primary-100 shrink-0 text-center sm:text-left mt-4 sm:mt-0">
-                <span className="text-[10px] font-black text-primary-400 uppercase tracking-widest block">Weekly Load</span>
-                <span className="text-2xl font-black text-primary-700">
+              <div className="bg-primary-50 dark:bg-primary-900/20 px-6 py-3 rounded-2xl border border-primary-100 dark:border-primary-900/40 shrink-0 text-center sm:text-left mt-4 sm:mt-0">
+                <span className="text-[10px] font-black text-primary-400 dark:text-primary-300 uppercase tracking-widest block">Weekly Load</span>
+                <span className="text-2xl font-black text-primary-700 dark:text-primary-100">
                   {Object.values(facultySlots).reduce((acc, day) => 
                     acc + Object.values(day).reduce((dAcc, slots) => 
                       dAcc + slots.reduce((sAcc, {slot}) => sAcc + (slot.duration || 1), 0)
@@ -114,22 +118,22 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
 
           {/* Timetable Grid */}
           {!selectedFacultyId ? (
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
-              <Users size={48} className="mx-auto text-gray-200 mb-4" />
-              <p className="text-gray-400 font-bold">Please add faculties and schedules first.</p>
+            <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-gray-300 dark:border-slate-700">
+              <Users size={48} className="mx-auto text-gray-200 dark:text-slate-600 mb-4" />
+              <p className="text-gray-400 dark:text-slate-500 font-bold">Please add faculties and schedules first.</p>
             </div>
           ) : (
-            <div className="bg-white rounded-[2.5rem] shadow-card border border-gray-200 overflow-x-auto">
-              <div id="faculty-timetable-grid" className="min-w-max p-6 bg-white">
+            <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-card border border-gray-200 dark:border-slate-700 overflow-x-auto">
+              <div id="faculty-timetable-grid" className="min-w-max p-6 bg-white dark:bg-slate-800">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
-                      <th className="p-4 border-b border-r border-gray-100 bg-gray-50/50 rounded-tl-2xl w-24">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Time / Day</span>
+                      <th className="p-4 border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 rounded-tl-2xl w-24">
+                        <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Time / Day</span>
                       </th>
                       {DAYS.map(day => (
-                        <th key={day} className="p-4 border-b border-r border-gray-100 bg-gray-50/50 min-w-[160px]">
-                          <span className="text-sm font-black text-gray-700 uppercase tracking-widest">{day}</span>
+                        <th key={day} className="p-4 border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 min-w-[160px]">
+                          <span className="text-sm font-black text-gray-700 dark:text-slate-200 uppercase tracking-widest">{day}</span>
                         </th>
                       ))}
                     </tr>
@@ -137,21 +141,21 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
                   <tbody>
                     {masterPeriods.map((period, pIdx) => (
                       <tr key={period.id}>
-                        <td className="p-4 border-b border-r border-gray-100 bg-gray-50/30 text-center">
+                        <td className="p-4 border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50/30 dark:bg-slate-900/30 text-center">
                           {period.isBreak ? (
-                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Recess</span>
+                            <span className="text-[10px] font-black text-gray-300 dark:text-slate-600 uppercase tracking-widest">Recess</span>
                           ) : (
-                            <span className="text-xs font-bold text-gray-500 font-mono">{period.time}</span>
+                            <span className="text-xs font-bold text-gray-500 dark:text-slate-400 font-mono">{period.time}</span>
                           )}
                         </td>
                         {DAYS.map(day => {
-                          if (period.isBreak) return <td key={day} className="border-b border-r border-gray-100 bg-gray-50/20"></td>;
+                          if (period.isBreak) return <td key={day} className="border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50/20 dark:bg-slate-900/20"></td>;
                           
                           const matches = facultySlots[day]?.[period.id] || [];
                           const hasConflict = matches.length > 1;
 
                           return (
-                            <td key={day} className="p-2 border-b border-r border-gray-100 align-top">
+                            <td key={day} className="p-2 border-b border-r border-gray-100 dark:border-slate-700 align-top">
                               {matches.map(({ slot, schedule }, mIdx) => {
                                 const subject = schedule.subjects.find(s => s.id === slot.subjectId);
                                 const colorName = getSubjectColorName(schedule.subjects, slot.subjectId);
@@ -175,7 +179,7 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
                                     <div className={`font-bold text-sm leading-tight line-clamp-2 ${styles.text}`}>
                                       {subject?.name}
                                     </div>
-                                    <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-black/5">
+                                    <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-black/5 dark:border-white/10">
                                       <Calendar size={10} className={styles.lightText} />
                                       <span className={`text-[10px] font-bold ${styles.lightText}`}>
                                         {schedule.details.className} - {schedule.details.section}
@@ -192,7 +196,7 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
                               })}
                               {matches.length === 0 && (
                                 <div className="h-20 flex items-center justify-center opacity-10">
-                                  <div className="h-1 w-4 bg-gray-300 rounded-full" />
+                                  <div className="h-1 w-4 bg-gray-300 dark:bg-slate-600 rounded-full" />
                                 </div>
                               )}
                             </td>
