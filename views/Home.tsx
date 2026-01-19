@@ -24,9 +24,12 @@ export const Home: React.FC<HomeProps> = ({
   const [scheduleToDelete, setScheduleToDelete] = useState<Schedule | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   
+  // Filter out the external-busy schedule for display
+  const displaySchedules = useMemo(() => schedules.filter(s => s.id !== 'external-busy'), [schedules]);
+
   const groupedSchedules = useMemo<Record<string, Schedule[]>>(() => {
     const groups: Record<string, Schedule[]> = {};
-    const sorted = [...schedules].sort((a, b) => b.lastModified - a.lastModified);
+    const sorted = [...displaySchedules].sort((a, b) => b.lastModified - a.lastModified);
 
     sorted.forEach(schedule => {
         const sessionName = schedule.details.session || 'General Schedules';
@@ -35,7 +38,7 @@ export const Home: React.FC<HomeProps> = ({
     });
 
     return groups;
-  }, [schedules]);
+  }, [displaySchedules]);
 
   const confirmDelete = () => {
     if (scheduleToDelete) {
@@ -69,7 +72,7 @@ export const Home: React.FC<HomeProps> = ({
       </div>
 
       <div className="p-6 max-w-lg mx-auto w-full space-y-4 relative z-10">
-        {schedules.length === 0 && (
+        {displaySchedules.length === 0 && (
           <div className="text-center py-20 px-4">
             <div className="bg-white dark:bg-slate-800 h-40 w-40 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-soft border border-gray-100 dark:border-slate-700 relative overflow-hidden group">
                <div className="absolute inset-0 bg-gradient-to-tr from-primary-50 to-transparent dark:from-primary-900/20 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -81,7 +84,7 @@ export const Home: React.FC<HomeProps> = ({
           </div>
         )}
 
-        {schedules.length > 0 && (
+        {displaySchedules.length > 0 && (
             <div className="grid grid-cols-1 gap-3 mb-6">
                 <Button onClick={onOpenMaster} fullWidth variant="secondary" icon={<Grid size={18} />} className="shadow-sm border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">Master Department View</Button>
                 <Button onClick={onOpenFacultyWise} fullWidth variant="secondary" icon={<Users size={18} />} className="shadow-sm border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">Faculty Timetables</Button>
@@ -143,7 +146,7 @@ export const Home: React.FC<HomeProps> = ({
         ))}
       </div>
 
-      {schedules.length > 0 && (
+      {displaySchedules.length > 0 && (
         <div className="fixed bottom-8 right-8 z-30">
           <button onClick={onCreateNew} className="h-16 w-16 bg-primary-600 rounded-3xl text-white shadow-glow flex items-center justify-center hover:bg-primary-700 hover:scale-110 active:scale-95 transition-all"><Plus size={32} strokeWidth={2.5} /></button>
         </div>

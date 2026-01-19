@@ -69,29 +69,29 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
       <div className="absolute top-20 -left-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/10 rounded-full blur-3xl opacity-40 pointer-events-none" />
 
       {/* Header */}
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-6 py-4 flex justify-between items-center shrink-0 z-50 shadow-sm relative flex-wrap gap-4">
+      <div className="px-6 py-6 flex items-center justify-between shrink-0 z-50 flex-wrap gap-4 bg-white/10 dark:bg-slate-900/10 backdrop-blur-sm border-b border-white/20 dark:border-slate-800/50">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-            <ArrowLeft size={20} className="text-gray-600 dark:text-slate-300"/>
+          <button onClick={onBack} className="h-12 w-12 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-full shadow-soft flex items-center justify-center text-gray-500 dark:text-slate-300 hover:text-primary-600 hover:scale-110 transition-all border border-white/50 dark:border-slate-700/50">
+            <ArrowLeft size={22} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white leading-none">Faculty Timetables</h1>
-            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mt-1">Automatic workload distribution</p>
+            <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-none tracking-tight">Faculty Timetables</h1>
+            <p className="text-sm font-bold text-gray-500 dark:text-slate-400 mt-1">Workload Distribution</p>
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 ml-auto">
-          <Button onClick={handleExport} variant="secondary" icon={<Download size={18} />} disabled={isExporting || !selectedFacultyId} size="sm">
+          <Button onClick={handleExport} variant="secondary" icon={<Download size={18} />} disabled={isExporting || !selectedFacultyId} size="sm" className="rounded-2xl border-white/50 bg-white/50 backdrop-blur-sm hover:bg-white/80">
             <span>{isExporting ? '...' : 'Export PDF'}</span>
           </Button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 sm:p-8 relative z-10">
+      <div className="flex-1 overflow-auto p-4 sm:p-8 relative z-10 scroll-smooth">
         <div className="max-w-6xl mx-auto space-y-6">
           
           {/* Faculty Selector Card */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-soft p-6 border border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row items-center gap-6">
-            <div className="h-16 w-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+          <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[2.5rem] shadow-card p-6 border border-white/20 dark:border-slate-700/30 flex flex-col sm:flex-row items-center gap-6">
+            <div className="h-16 w-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0 shadow-sm">
               <User size={32} />
             </div>
             <div className="flex-1 w-full">
@@ -100,17 +100,18 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
                   value={selectedFacultyId}
                   onChange={setSelectedFacultyId}
                   options={facultyOptions}
+                  dropdownMode="relative"
               />
             </div>
             {selectedFaculty && (
-              <div className="bg-primary-50 dark:bg-primary-900/20 px-6 py-3 rounded-2xl border border-primary-100 dark:border-primary-900/40 shrink-0 text-center sm:text-left mt-4 sm:mt-0">
-                <span className="text-[10px] font-black text-primary-400 dark:text-primary-300 uppercase tracking-widest block">Weekly Load</span>
-                <span className="text-2xl font-black text-primary-700 dark:text-primary-100">
+              <div className="bg-primary-50 dark:bg-primary-900/20 px-6 py-4 rounded-[1.5rem] border border-primary-100 dark:border-primary-900/40 shrink-0 text-center sm:text-left mt-4 sm:mt-0 shadow-sm">
+                <span className="text-[10px] font-black text-primary-400 dark:text-primary-300 uppercase tracking-widest block mb-1">Weekly Load</span>
+                <span className="text-3xl font-black text-primary-700 dark:text-primary-100">
                   {Object.values(facultySlots).reduce((acc, day) => 
                     acc + Object.values(day).reduce((dAcc, slots) => 
                       dAcc + slots.reduce((sAcc, {slot}) => sAcc + (slot.duration || 1), 0)
                     , 0)
-                  , 0)} Hours
+                  , 0)} <span className="text-lg">Hours</span>
                 </span>
               </div>
             )}
@@ -118,22 +119,26 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
 
           {/* Timetable Grid */}
           {!selectedFacultyId ? (
-            <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-gray-300 dark:border-slate-700">
+            <div className="text-center py-20 bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm rounded-[2.5rem] border border-dashed border-gray-300 dark:border-slate-700">
               <Users size={48} className="mx-auto text-gray-200 dark:text-slate-600 mb-4" />
-              <p className="text-gray-400 dark:text-slate-500 font-bold">Please add faculties and schedules first.</p>
+              <p className="text-gray-400 dark:text-slate-500 font-bold text-lg">Select a faculty member to view schedule</p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-card border border-gray-200 dark:border-slate-700 overflow-x-auto">
-              <div id="faculty-timetable-grid" className="min-w-max p-6 bg-white dark:bg-slate-800">
-                <table className="w-full border-collapse">
-                  <thead>
+            <div className="overflow-x-auto pb-6">
+              <div id="faculty-timetable-grid" className="min-w-max">
+                <table className="w-full border-separate border-spacing-2">
+                  <thead className="sticky top-0 z-40">
                     <tr>
-                      <th className="p-4 border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 rounded-tl-2xl w-24">
-                        <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Time / Day</span>
+                      <th className="sticky left-0 z-50 w-24 p-0 align-bottom">
+                         <div className="h-14 mb-2 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 flex items-center justify-center shadow-sm">
+                            <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Time</span>
+                         </div>
                       </th>
                       {DAYS.map(day => (
-                        <th key={day} className="p-4 border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 min-w-[160px]">
-                          <span className="text-sm font-black text-gray-700 dark:text-slate-200 uppercase tracking-widest">{day}</span>
+                        <th key={day} className="p-0 align-bottom min-w-[12rem]">
+                           <div className="h-14 mb-2 bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] border border-white/20 dark:border-slate-700/30 flex items-center justify-center shadow-sm">
+                              <span className="text-[10px] font-black text-gray-700 dark:text-slate-200 uppercase tracking-widest">{day}</span>
+                           </div>
                         </th>
                       ))}
                     </tr>
@@ -141,64 +146,75 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
                   <tbody>
                     {masterPeriods.map((period, pIdx) => (
                       <tr key={period.id}>
-                        <td className="p-4 border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50/30 dark:bg-slate-900/30 text-center">
-                          {period.isBreak ? (
-                            <span className="text-[10px] font-black text-gray-300 dark:text-slate-600 uppercase tracking-widest">Recess</span>
-                          ) : (
-                            <span className="text-xs font-bold text-gray-500 dark:text-slate-400 font-mono">{period.time}</span>
-                          )}
+                        <td className="sticky left-0 z-40 p-0 align-top">
+                           <div className="w-24 min-h-[6rem] bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-[1.5rem] flex flex-col items-center justify-center shadow-sm h-full">
+                              {period.isBreak ? (
+                                <span className="text-[10px] font-black text-gray-300 dark:text-slate-600 uppercase tracking-widest rotate-[-15deg]">Recess</span>
+                              ) : (
+                                <span className="text-xs font-bold text-gray-500 dark:text-slate-400 font-mono">{period.time}</span>
+                              )}
+                           </div>
                         </td>
                         {DAYS.map(day => {
-                          if (period.isBreak) return <td key={day} className="border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50/20 dark:bg-slate-900/20"></td>;
+                          if (period.isBreak) return (
+                              <td key={day} className="p-0">
+                                  <div className="h-full w-full min-h-[6rem] bg-gray-50/20 dark:bg-slate-800/20 rounded-[1.5rem] flex items-center justify-center">
+                                      <span className="text-2xl font-black text-gray-100 dark:text-slate-800 select-none">•</span>
+                                  </div>
+                              </td>
+                          );
                           
                           const matches = facultySlots[day]?.[period.id] || [];
                           const hasConflict = matches.length > 1;
 
                           return (
-                            <td key={day} className="p-2 border-b border-r border-gray-100 dark:border-slate-700 align-top">
-                              {matches.map(({ slot, schedule }, mIdx) => {
-                                const subject = schedule.subjects.find(s => s.id === slot.subjectId);
-                                const colorName = getSubjectColorName(schedule.subjects, slot.subjectId);
-                                const styles = getColorClasses(colorName);
-                                
-                                return (
-                                  <div 
-                                    key={slot.id} 
-                                    className={`
-                                      p-3 rounded-2xl mb-2 last:mb-0 transition-all border
-                                      ${styles.bg} ${styles.border}
-                                      ${hasConflict ? 'ring-2 ring-red-500 ring-offset-1' : ''}
-                                    `}
-                                  >
-                                    <div className="flex justify-between items-start mb-1">
-                                      <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${styles.pill}`}>
-                                        {schedule.details.semester} Sem
-                                      </span>
-                                      {hasConflict && <AlertTriangle size={12} className="text-red-500" />}
+                            <td key={day} className="p-0 align-top">
+                              <div className="flex flex-col gap-2 h-full min-h-[6rem]">
+                                {matches.length > 0 ? matches.map(({ slot, schedule }, mIdx) => {
+                                    const subject = schedule.subjects.find(s => s.id === slot.subjectId);
+                                    const colorName = getSubjectColorName(schedule.subjects, slot.subjectId);
+                                    const styles = getColorClasses(colorName);
+                                    
+                                    return (
+                                    <div 
+                                        key={slot.id} 
+                                        className={`
+                                        p-4 rounded-[1.5rem] transition-all border h-full relative overflow-hidden group hover:scale-[1.02] shadow-sm hover:shadow-md
+                                        ${styles.bg} ${styles.border}
+                                        ${hasConflict ? 'ring-2 ring-red-500 ring-offset-2 dark:ring-offset-slate-900' : ''}
+                                        `}
+                                    >
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm backdrop-blur-sm ${styles.pill}`}>
+                                                {schedule.details.semester} Sem
+                                            </span>
+                                            {hasConflict && <AlertTriangle size={14} className="text-red-500 animate-pulse" />}
+                                        </div>
+                                        
+                                        <div className={`font-black text-sm leading-tight line-clamp-2 drop-shadow-sm mb-2 ${styles.text}`}>
+                                            {subject?.name}
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-2 mt-auto pt-2 border-t border-black/5 dark:border-white/5">
+                                            <Calendar size={12} className={styles.lightText} />
+                                            <span className={`text-[10px] font-bold ${styles.lightText}`}>
+                                                {schedule.details.className} - {schedule.details.section}
+                                            </span>
+                                        </div>
+                                        
+                                        {slot.type === 'Practical' && (
+                                            <div className="absolute top-2 right-2 opacity-10">
+                                                <BookOpen size={24} />
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className={`font-bold text-sm leading-tight line-clamp-2 ${styles.text}`}>
-                                      {subject?.name}
+                                    );
+                                }) : (
+                                    <div className="h-full min-h-[6rem] rounded-[1.5rem] bg-white/20 dark:bg-slate-800/20 border border-white/10 dark:border-slate-700/10 border-dashed flex items-center justify-center opacity-30">
+                                       <div className="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-slate-500" />
                                     </div>
-                                    <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-black/5 dark:border-white/10">
-                                      <Calendar size={10} className={styles.lightText} />
-                                      <span className={`text-[10px] font-bold ${styles.lightText}`}>
-                                        {schedule.details.className} - {schedule.details.section}
-                                      </span>
-                                    </div>
-                                    {slot.type === 'Practical' && (
-                                      <div className="mt-1 flex items-center gap-1">
-                                        <BookOpen size={10} className={styles.lightText} />
-                                        <span className={`text-[9px] font-black uppercase ${styles.lightText}`}>Lab Session</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                              {matches.length === 0 && (
-                                <div className="h-20 flex items-center justify-center opacity-10">
-                                  <div className="h-1 w-4 bg-gray-300 dark:bg-slate-600 rounded-full" />
-                                </div>
-                              )}
+                                )}
+                              </div>
                             </td>
                           );
                         })}
@@ -211,6 +227,7 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
           )}
 
         </div>
+        <div className="h-20" />
       </div>
     </div>
   );

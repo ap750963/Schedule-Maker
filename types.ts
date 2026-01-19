@@ -35,8 +35,13 @@ export interface TimeSlot {
   startTime: string;
   subjectId: string;
   facultyIds: string[]; 
-  type: 'Theory' | 'Practical';
+  type: 'Theory' | 'Practical' | 'Busy';
   duration?: number;
+  externalDetails?: {
+    dept: string;
+    semester: string;
+    subject: string;
+  };
 }
 
 export interface Schedule {
