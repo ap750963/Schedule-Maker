@@ -76,6 +76,29 @@ const App: React.FC = () => {
       setView('dashboard');
   };
 
+  const handleGlobalFacultyUpdate = (updatedFaculties: Faculty[]) => {
+    setGlobalFaculties(updatedFaculties);
+
+    // Propagate changes (name/initials updates) to all schedules that reference these faculties
+    setSchedules(prevSchedules => prevSchedules.map(schedule => {
+      // Create a new list of faculties for the schedule by merging with global updates
+      const updatedScheduleFaculties = schedule.faculties.map(schFac => {
+        // Find if the local faculty exists in the updated global list
+        const globalMatch = updatedFaculties.find(gf => gf.id === schFac.id);
+        
+        // If found, update local copy with global details (preserves local existence)
+        // If not found (globally deleted), keep the local copy as is to preserve historical data
+        return globalMatch ? { ...schFac, ...globalMatch } : schFac;
+      });
+
+      return {
+        ...schedule,
+        faculties: updatedScheduleFaculties,
+        lastModified: Date.now()
+      };
+    }));
+  };
+
   const activeSchedule = schedules.find(s => s.id === activeScheduleId);
   const filteredSchedulesForMaster = schedules.filter(s => masterFilter ? s.details.level === masterFilter : true);
 
@@ -139,7 +162,7 @@ const App: React.FC = () => {
       {view === 'faculty-management' && (
         <FacultyManagement 
           faculties={globalFaculties} 
-          onSave={setGlobalFaculties} 
+          onSave={handleGlobalFacultyUpdate} 
           onBack={() => setView('dashboard')} 
         />
       )}
