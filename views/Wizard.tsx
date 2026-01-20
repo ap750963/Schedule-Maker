@@ -48,23 +48,25 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
     const finalFaculties = globalFaculties.filter(f => selectedFaculties.includes(f.id));
     
     if (academicLevel === '1st-year') {
-        const newSchedule: Schedule = {
+        const finalBranches = branches.filter(b => b.trim() !== '');
+        // Create separate schedules for each branch
+        const newSchedules: Schedule[] = finalBranches.map(branch => ({
             id: generateId(),
             details: { 
-                className: "1st Year Combined", 
-                section: "Combined", 
+                className: branch, 
+                section: "A", 
                 session, 
                 semester: semester.toString(),
                 level: '1st-year',
-                branches: branches.filter(b => b.trim() !== '')
+                branches: [branch]
             },
             subjects: subjectsByGroup['1'] || [],
             faculties: finalFaculties,
             periods: periods,
             timeSlots: [],
             lastModified: Date.now()
-        };
-        onFinish([newSchedule]);
+        }));
+        onFinish(newSchedules);
     } else {
         const newSchedules: Schedule[] = activeSemesters.map(sem => ({
             id: generateId(),
@@ -120,7 +122,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                     <button onClick={() => handleLevelSelect('1st-year')} className="p-8 bg-gray-50/50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-500 hover:bg-white dark:hover:bg-slate-800 transition-all text-left group shadow-soft">
                         <Users className="h-12 w-12 text-primary-500 mb-6" />
                         <h4 className="text-2xl font-black dark:text-white tracking-tight">1st Year</h4>
-                        <p className="text-sm text-gray-400 mt-2 font-medium leading-relaxed">Single common timetable for all branches.</p>
+                        <p className="text-sm text-gray-400 mt-2 font-medium leading-relaxed">Common subjects, split by branch.</p>
                     </button>
                     <button onClick={() => handleLevelSelect('higher-year')} className="p-8 bg-gray-50/50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-500 hover:bg-white dark:hover:bg-slate-800 transition-all text-left group shadow-soft">
                         <Beaker className="h-12 w-12 text-primary-500 mb-6" />
