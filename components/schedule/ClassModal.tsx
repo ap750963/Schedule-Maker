@@ -8,7 +8,7 @@ import { TimeSlot, Subject, Schedule } from '../../types';
 interface ClassModalProps {
   data: Partial<TimeSlot>;
   schedule: Schedule; 
-  allSchedules?: Schedule[]; // Added to allow broader checks
+  allSchedules?: Schedule[]; 
   day: string;
   periodLabel?: string;
   onClose: () => void;
@@ -89,6 +89,9 @@ export const ClassModal: React.FC<ClassModalProps> = ({
         )
     };
   }).filter(Boolean) as Option[];
+
+  // UPDATED: Only Subject is mandatory. Faculty is now optional.
+  const isSaveDisabled = !tempSlotData.subjectId;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/10 dark:bg-black/50 backdrop-blur-sm" onClick={onClose}>
@@ -194,11 +197,12 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                     </div>
 
                     <div>
-                        <label className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-2 block ml-1">
+                        <label className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-2 block ml-1 flex justify-between">
                             Assign Faculties
+                            <span className="text-gray-400 dark:text-slate-600 text-[9px] uppercase">Optional</span>
                         </label>
 
-                        <div className="flex flex-wrap gap-2 mb-3">
+                        <div className="flex flex-wrap gap-2 mb-3 p-1 rounded-2xl transition-all">
                             {(tempSlotData.facultyIds || []).map(fid => {
                                     const fac = schedule.faculties.find(f => f.id === fid);
                                     if (!fac) return null;
@@ -221,7 +225,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                                     );
                             })}
                             {(tempSlotData.facultyIds || []).length === 0 && (
-                                <div className="text-gray-400 dark:text-slate-600 text-xs font-bold py-2 px-1">No faculty assigned</div>
+                                <div className="text-gray-400 dark:text-slate-600 text-[10px] font-black uppercase tracking-widest py-2 px-2">No faculty assigned</div>
                             )}
                         </div>
 
@@ -271,8 +275,8 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                         onClick={() => onSave(tempSlotData)}
                         fullWidth 
                         size="lg" 
-                        disabled={!tempSlotData.subjectId} 
-                        className="shadow-glow rounded-2xl text-lg"
+                        disabled={isSaveDisabled} 
+                        className="shadow-glow rounded-2xl text-lg disabled:shadow-none disabled:bg-gray-100 dark:disabled:bg-slate-700/50"
                     >
                         {tempSlotData.id ? 'Save Changes' : 'Add to Schedule'}
                     </Button>

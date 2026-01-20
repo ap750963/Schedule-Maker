@@ -41,7 +41,8 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
   }, [currentSchedule.timeSlots, currentSchedule.faculties]);
 
   const handleSaveSlot = (data: Partial<TimeSlot>) => {
-    if (!data.subjectId || !data.facultyIds?.length) return;
+    // Only check for subjectId now. Faculty is optional.
+    if (!data.subjectId) return;
     let newSlots = currentSchedule.timeSlots.filter(s => !(s.day === editingSlot?.day && s.period === editingSlot?.period));
     newSlots.push({ ...data as TimeSlot, id: data.id || generateId() });
     const updated = { ...currentSchedule, timeSlots: newSlots, lastModified: Date.now() };

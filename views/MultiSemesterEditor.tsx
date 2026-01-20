@@ -78,7 +78,8 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     setLocalSchedules(prev => prev.map(sch => {
         if (sch.id !== editingCell.scheduleId) return sch;
         let newSlots = sch.timeSlots.filter(s => !(s.day === editingCell.day && s.period === editingCell.periodId && (editingCell.branch ? s.branch === editingCell.branch : true)));
-        if (data.subjectId && data.facultyIds?.length) {
+        // UPDATED: Faculty is optional. Only subjectId is required to save a slot.
+        if (data.subjectId) {
             newSlots.push({ ...data as TimeSlot, id: data.id || generateId(), branch: editingCell.branch });
         }
         return { ...sch, timeSlots: newSlots, lastModified: Date.now() };
@@ -127,29 +128,29 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                     <table className="w-full border-collapse">
                         <thead className="bg-gray-100/90 dark:bg-slate-800/90 sticky top-0 z-40">
                             <tr>
-                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-3 w-10 sticky left-0 bg-gray-100 dark:bg-slate-800 text-[10px] font-black uppercase text-gray-400 tracking-widest">Day</th>
-                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-3 w-20 sticky left-10 bg-gray-100 dark:bg-slate-800 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Context</th>
+                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-2 w-10 sticky left-0 bg-gray-100 dark:bg-slate-800 text-[10px] font-black uppercase text-gray-400 tracking-widest">Day</th>
+                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-2 w-20 sticky left-10 bg-gray-100 dark:bg-slate-800 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Context</th>
                                 {masterPeriods.map(p => (
                                     <th 
                                       key={p.id} 
                                       onClick={() => setEditingPeriod(p)}
-                                      className={`border-r border-b border-gray-200 dark:border-slate-700 p-3 text-center min-w-[140px] cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-colors group ${p.isBreak ? 'bg-gray-100/30 dark:bg-slate-800/40' : ''}`}
+                                      className={`border-r border-b border-gray-200 dark:border-slate-700 p-2 text-center min-w-[130px] cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-colors group ${p.isBreak ? 'bg-gray-100/30 dark:bg-slate-800/40' : ''}`}
                                     >
                                         {p.isBreak ? (
                                            <div className="flex flex-col items-center opacity-40">
-                                              <Coffee size={12} className="mb-1 text-gray-400 dark:text-slate-400" />
-                                              <span className="text-[10px] font-black uppercase tracking-widest dark:text-slate-300">Recess</span>
+                                              <Coffee size={12} className="mb-0.5 text-gray-400 dark:text-slate-400" />
+                                              <span className="text-[9px] font-black uppercase tracking-widest dark:text-slate-300">Recess</span>
                                            </div>
                                         ) : (
                                           <div className="flex flex-col items-center group-hover:scale-105 transition-transform">
-                                            <div className="text-[10px] font-black uppercase tracking-[0.05em] text-gray-900 dark:text-white">{p.time.split('-')[0].trim()}</div>
-                                            <div className="text-[9px] font-bold uppercase tracking-[0.05em] text-gray-400 dark:text-slate-500 mt-0.5">{p.time.split('-')[1].trim()}</div>
+                                            <div className="text-[10px] font-black uppercase tracking-[0.05em] text-gray-900 dark:text-white leading-tight">{p.time.split('-')[0].trim()}</div>
+                                            <div className="text-[9px] font-bold uppercase tracking-[0.05em] text-gray-400 dark:text-slate-500">{p.time.split('-')[1].trim()}</div>
                                           </div>
                                         )}
                                     </th>
                                 ))}
-                                <th className="border-b border-gray-200 dark:border-slate-700 p-2 bg-gray-100 dark:bg-slate-800">
-                                  <button onClick={() => setEditingPeriod({ id: 0, label: 'New', time: '09:00 AM - 10:00 AM', isBreak: false })} className="p-2 text-gray-300 hover:text-primary-500 transition-colors"><Plus size={20} strokeWidth={3} /></button>
+                                <th className="border-b border-gray-200 dark:border-slate-700 p-1 bg-gray-100 dark:bg-slate-800">
+                                  <button onClick={() => setEditingPeriod({ id: 0, label: 'New', time: '09:00 AM - 10:00 AM', isBreak: false })} className="p-1 text-gray-300 hover:text-primary-500 transition-colors"><Plus size={16} strokeWidth={3} /></button>
                                 </th>
                             </tr>
                         </thead>
@@ -182,20 +183,20 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                             <tr key={rowKey} className={`group hover:bg-primary-500/5 transition-colors ${dayBlockBg} ${dayBlockBorder}`}>
                                                 {sIdx === 0 && rIdx === 0 && (
                                                     <td rowSpan={dayTotalSubrows} className={`border-r ${dayBlockBorder} bg-white dark:bg-slate-900 sticky left-0 z-30 text-center font-black text-gray-400 text-[10px] uppercase p-0 ${!isEvenDay ? '!bg-gray-100/20 dark:!bg-slate-800/20' : ''}`}>
-                                                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }} className="mx-auto py-4 tracking-[0.5em]">{day}</div>
+                                                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }} className="mx-auto py-3 tracking-[0.5em]">{day}</div>
                                                     </td>
                                                 )}
-                                                <td className={`border-r ${dayBlockBorder} bg-white dark:bg-slate-900 sticky left-10 z-30 p-2 text-center shadow-sm ${!isEvenDay ? '!bg-gray-100/20 dark:!bg-slate-800/20' : ''}`}>
-                                                    <div className="text-[9px] font-black text-primary-600 dark:text-primary-300 uppercase truncate max-w-[70px] tracking-tight bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded-xl border border-primary-100 dark:border-primary-900/50">{sch.details.level === '1st-year' ? sub : `SEM ${sub}`}</div>
+                                                <td className={`border-r ${dayBlockBorder} bg-white dark:bg-slate-900 sticky left-10 z-30 p-1.5 text-center shadow-sm ${!isEvenDay ? '!bg-gray-100/20 dark:!bg-slate-800/20' : ''}`}>
+                                                    <div className="text-[8px] font-black text-primary-600 dark:text-primary-300 uppercase truncate max-w-[70px] tracking-tight bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 rounded-lg border border-primary-100 dark:border-primary-900/50">{sch.details.level === '1st-year' ? sub : `SEM ${sub}`}</div>
                                                 </td>
                                                 {sch.periods.map((period, pIdx) => {
                                                     if (period.isBreak) {
                                                       if (dIdx === 0 && sIdx === 0 && rIdx === 0) {
                                                         return (
                                                           <td key={period.id} rowSpan={totalTableRows} className="border-r border-b border-gray-200 dark:border-slate-700 bg-gray-100/50 dark:bg-slate-800/20 text-center align-middle p-0">
-                                                            <div className="flex flex-col items-center justify-center leading-none py-6 opacity-40 hover:opacity-100 transition-opacity">
+                                                            <div className="flex flex-col items-center justify-center leading-none py-4 opacity-40 hover:opacity-100 transition-opacity">
                                                                 {"RECESS".split("").map((letter, i) => (
-                                                                    <span key={i} className="text-xl sm:text-2xl font-black text-gray-400 dark:text-slate-400/80 my-1.5 drop-shadow-sm">{letter}</span>
+                                                                    <span key={i} className="text-xs font-black text-gray-400 dark:text-slate-400/80 my-0.5 drop-shadow-sm">{letter}</span>
                                                                 ))}
                                                             </div>
                                                           </td>
@@ -242,34 +243,27 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                     const colorClasses = slot ? getColorClasses(getSubjectColorName(sch.subjects, slot.subjectId, slot.facultyIds)) : null;
 
                                                     return (
-                                                        <td key={period.id} colSpan={colSpan} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className={`border-r ${dayBlockBorder} p-1.5 cursor-pointer group/cell overflow-hidden`}>
+                                                        <td key={period.id} colSpan={colSpan} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className={`border-r ${dayBlockBorder} p-1 cursor-pointer group/cell overflow-hidden`}>
                                                             {slot ? (
-                                                                <div className={`h-28 w-full rounded-[1.75rem] p-4 flex flex-col justify-between transition-all duration-300 border-2 ${colorClasses?.bg} ${colorClasses?.border} shadow-card ${colorClasses?.hover} ${conflictLabel ? 'ring-4 ring-rose-500 ring-offset-2 z-10 scale-[0.98] animate-pulse' : ''}`}>
-                                                                    <div className="space-y-0.5">
-                                                                        <div className={`font-black text-[13px] leading-tight line-clamp-2 tracking-tight ${colorClasses?.text}`}>
+                                                                <div className={`h-14 w-full rounded-xl p-2 flex flex-col justify-between transition-all duration-300 border ${colorClasses?.bg} ${colorClasses?.border} shadow-sm ${colorClasses?.hover} ${conflictLabel ? 'ring-2 ring-rose-500 ring-offset-1 z-10 scale-[0.98]' : ''}`}>
+                                                                    <div className="space-y-0">
+                                                                        <div className={`font-black text-[10px] leading-tight line-clamp-1 tracking-tight ${colorClasses?.text}`}>
                                                                             {sch.subjects.find(s => s.id === slot.subjectId)?.name}
-                                                                        </div>
-                                                                        <div className={`text-[10px] font-bold opacity-70 ${colorClasses?.text}`}>
-                                                                            {slot.type === 'Practical' ? 'Lab Session' : 'Theory Class'}
                                                                         </div>
                                                                     </div>
                                                                     
                                                                     <div className="flex items-center justify-between mt-auto">
-                                                                        <span className={`${colorClasses?.accentText} text-[9px] truncate max-w-[100px]`}>
+                                                                        <span className={`${colorClasses?.accentText} text-[7px] truncate max-w-[80px]`}>
                                                                             {slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}
                                                                         </span>
                                                                         {conflictLabel && (
-                                                                          <div className="bg-rose-500 p-1 rounded-full shadow-lg animate-bounce">
-                                                                            <AlertTriangle size={12} className="text-white" title={`Conflict: ${conflictLabel}`} />
-                                                                          </div>
+                                                                          <AlertTriangle size={8} className="text-rose-500 animate-pulse" title={`Conflict: ${conflictLabel}`} />
                                                                         )}
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                <div className="h-28 w-full rounded-[1.75rem] border-2 border-dashed border-gray-200 dark:border-slate-800 flex items-center justify-center opacity-40 hover:opacity-100 hover:bg-gray-50 dark:hover:bg-slate-900 transition-all">
-                                                                  <div className="h-8 w-8 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-gray-300 group-hover:text-primary-500 transition-all">
-                                                                    <Plus size={18} strokeWidth={3} />
-                                                                  </div>
+                                                                <div className="h-14 w-full rounded-xl border border-dashed border-gray-200 dark:border-slate-800 flex items-center justify-center opacity-30 hover:opacity-100 hover:bg-gray-50 dark:hover:bg-slate-900 transition-all">
+                                                                  <Plus size={10} strokeWidth={3} className="text-gray-300" />
                                                                 </div>
                                                             )}
                                                         </td>
@@ -286,7 +280,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                         </tbody>
                     </table>
                 </div>
-                <div className="max-w-4xl mx-auto w-full">
+                <div className="max-w-4xl mx-auto w-full px-4">
                   <FacultyTable stats={facultyStats} />
                 </div>
             </div>
