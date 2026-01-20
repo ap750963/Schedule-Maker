@@ -77,7 +77,7 @@ export const getColorClasses = (colorName?: string) => {
   const color = colorName || 'gray';
   const createPalette = (c: string) => ({
       // Vibrant Glassmorphism: Increased opacity and saturation
-      bg: `bg-${c}-100 dark:bg-${c}-500/20 backdrop-blur-md`,
+      bg: `bg-${c}-100/80 dark:bg-${c}-500/20 backdrop-blur-md`,
       border: `border-${c}-300 dark:border-${c}-500/50 shadow-[0_4px_20px_-4px_rgba(var(--color-${c}-500),0.2)]`,
       text: `text-${c}-950 dark:text-${c}-100`,
       accentText: `text-${c}-800 dark:text-${c}-200 font-black uppercase tracking-widest text-[10px]`,
@@ -99,44 +99,41 @@ export const getColorClasses = (colorName?: string) => {
 export const getSolidColorClasses = (colorName?: string) => {
   const c = colorName || 'gray';
   return {
-    // Solid/Grid View: More saturated backgrounds for vibrancy
-    bg: `bg-${c}-100 dark:bg-${c}-900/60 backdrop-blur-xl`,
+    // Solid/Grid View: More saturated backgrounds for vibrancy (200 shade)
+    bg: `bg-${c}-200 dark:bg-${c}-900/60 backdrop-blur-xl`,
     text: `text-${c}-950 dark:text-${c}-50`,
     accentText: `text-${c}-900 dark:text-${c}-200 font-black uppercase tracking-[0.2em] text-[10px]`,
     subtext: `text-${c}-900/70 dark:text-${c}-300/70 text-[11px] font-bold`,
-    border: `border-${c}-300 dark:border-${c}-500/60`,
-    hover: `hover:bg-${c}-200 dark:hover:bg-${c}-800/80 hover:scale-[1.03] hover:shadow-lg hover:shadow-${c}-500/20`
+    border: `border-${c}-400/50 dark:border-${c}-500/60`,
+    hover: `hover:bg-${c}-300 dark:hover:bg-${c}-800/80 hover:scale-[1.03] hover:shadow-lg hover:shadow-${c}-500/20`
   };
 };
 
 export const getSubjectColorName = (subjects: Subject[], subjectId: string, facultyIds?: string[]): string => {
   const subj = subjects.find(s => s.id === subjectId);
-  if (!subj) return 'gray';
+  const baseColor = subj?.color || 'gray';
 
   // If no faculty is assigned, return the subject's base color
-  if (!facultyIds || facultyIds.length === 0) return subj.color || 'gray';
+  if (!facultyIds || facultyIds.length === 0) return baseColor;
 
-  // If faculties are assigned, shift the color based on the faculty combination.
+  // Generate a unique, deterministic hash based on Subject + Faculty Combination
   // This ensures that:
-  // 1. Same subject + Same faculty = Same color
-  // 2. Same subject + Different faculty = Different color
-  // 3. Keeps a deterministic relationship with the base color (shifts it) rather than pure random
+  // 1. Same Subject + Same Faculty -> Always same color
+  // 2. Same Subject + Different Faculty -> Very likely different color (better distribution)
   
-  const baseColorIndex = SUBJECT_COLORS.indexOf(subj.color || 'gray');
-  const baseIndex = baseColorIndex === -1 ? 0 : baseColorIndex;
-
-  const facultyKey = [...facultyIds].sort().join('');
+  const sortedFacultyKey = [...facultyIds].sort().join('-');
+  const compositeKey = `${subjectId}:${sortedFacultyKey}`;
+  
   let hash = 0;
-  for (let i = 0; i < facultyKey.length; i++) {
-      hash = facultyKey.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < compositeKey.length; i++) {
+      hash = ((hash << 5) - hash) + compositeKey.charCodeAt(i);
+      hash |= 0; // Convert to 32bit integer
   }
 
-  // Use the hash to determine a step/offset from the base color
-  // Adding 1 ensures we don't just stay on the same color if hash is small (though hash is usually large)
-  // We mod by Length-1 and add 1 to get a step between 1 and Length-1.
-  const step = (Math.abs(hash) % (SUBJECT_COLORS.length - 1)) + 1;
+  // Use the full range of colors for the combination to maximize distinctness
+  // We do NOT use baseColor as an offset anymore, to avoid clustering.
+  const index = Math.abs(hash) % SUBJECT_COLORS.length;
   
-  const index = (baseIndex + step) % SUBJECT_COLORS.length;
   return SUBJECT_COLORS[index];
 };
 
