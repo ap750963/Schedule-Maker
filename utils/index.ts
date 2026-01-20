@@ -76,64 +76,60 @@ export const to12Hour = (time24: string): string => {
 export const getColorClasses = (colorName?: string) => {
   const color = colorName || 'gray';
   const createPalette = (c: string) => ({
-      // Vibrant Glassmorphism: Increased opacity and saturation
-      bg: `bg-${c}-100/80 dark:bg-${c}-500/20 backdrop-blur-md`,
-      border: `border-${c}-300 dark:border-${c}-500/50 shadow-[0_4px_20px_-4px_rgba(var(--color-${c}-500),0.2)]`,
-      text: `text-${c}-950 dark:text-${c}-100`,
-      accentText: `text-${c}-800 dark:text-${c}-200 font-black uppercase tracking-widest text-[10px]`,
-      subText: `text-${c}-800/70 dark:text-${c}-200/60 font-medium text-[11px]`,
-      hover: `hover:scale-[1.02] hover:shadow-2xl hover:shadow-${c}-500/30 hover:bg-${c}-200 dark:hover:bg-${c}-500/30 transition-all duration-300`,
+      // High-vibrancy Glassmorphism: Clear contrast for readability
+      bg: `bg-${c}-200/90 dark:bg-${c}-500/20 backdrop-blur-md`,
+      border: `border-${c}-400/50 dark:border-${c}-500/50 shadow-[0_4px_12px_rgba(var(--color-${c}-500),0.15)]`,
+      text: `text-${c}-950 dark:text-${c}-50`,
+      accentText: `text-${c}-900 dark:text-${c}-200 font-black uppercase tracking-widest text-[10px]`,
+      subText: `text-${c}-900/60 dark:text-${c}-100/40 font-bold text-[11px]`,
+      hover: `hover:scale-[1.03] hover:shadow-xl hover:bg-${c}-300/80 dark:hover:bg-${c}-500/30 transition-all duration-300`,
   });
   
-  const styles: Record<string, any> = {
-    rose: createPalette('rose'), orange: createPalette('orange'), amber: createPalette('amber'),
-    yellow: createPalette('yellow'), lime: createPalette('lime'), green: createPalette('green'),
-    emerald: createPalette('emerald'), teal: createPalette('teal'), cyan: createPalette('cyan'),
-    sky: createPalette('sky'), blue: createPalette('blue'), indigo: createPalette('indigo'),
-    violet: createPalette('violet'), purple: createPalette('purple'), fuchsia: createPalette('fuchsia'),
-    pink: createPalette('pink'), slate: createPalette('slate'), gray: createPalette('gray'),
-  };
+  const styles: Record<string, any> = {};
+  SUBJECT_COLORS.forEach(c => {
+    styles[c] = createPalette(c);
+  });
+  
+  // Explicitly mapping some standard Tailwind colors not in our palette for safety
+  styles['gray'] = createPalette('slate');
+  styles['red'] = createPalette('red');
+  styles['green'] = createPalette('green');
+  styles['purple'] = createPalette('purple');
+
   return styles[color] || styles['gray'];
 };
 
 export const getSolidColorClasses = (colorName?: string) => {
   const c = colorName || 'gray';
   return {
-    // Solid/Grid View: More saturated backgrounds for vibrancy (200 shade)
+    // Solid/Grid View: Saturated backgrounds (200 shade) for maximum pop
     bg: `bg-${c}-200 dark:bg-${c}-900/60 backdrop-blur-xl`,
     text: `text-${c}-950 dark:text-${c}-50`,
     accentText: `text-${c}-900 dark:text-${c}-200 font-black uppercase tracking-[0.2em] text-[10px]`,
     subtext: `text-${c}-900/70 dark:text-${c}-300/70 text-[11px] font-bold`,
     border: `border-${c}-400/50 dark:border-${c}-500/60`,
-    hover: `hover:bg-${c}-300 dark:hover:bg-${c}-800/80 hover:scale-[1.03] hover:shadow-lg hover:shadow-${c}-500/20`
+    hover: `hover:bg-${c}-300 dark:hover:bg-${c}-800/80 hover:scale-[1.03] hover:shadow-lg shadow-${c}-500/10`
   };
 };
 
+/**
+ * Generates a deterministic color based on Subject + Faculty combination.
+ */
 export const getSubjectColorName = (subjects: Subject[], subjectId: string, facultyIds?: string[]): string => {
   const subj = subjects.find(s => s.id === subjectId);
-  const baseColor = subj?.color || 'gray';
+  if (!subj) return 'slate';
 
-  // If no faculty is assigned, return the subject's base color
-  if (!facultyIds || facultyIds.length === 0) return baseColor;
+  // If no faculty is assigned, return a color based only on the subject ID
+  const facKey = facultyIds ? [...facultyIds].sort().join('-') : 'no-faculty';
+  const compositeKey = `${subjectId}_${facKey}`;
 
-  // Generate a unique, deterministic hash based on Subject + Faculty Combination
-  // This ensures that:
-  // 1. Same Subject + Same Faculty -> Always same color
-  // 2. Same Subject + Different Faculty -> Very likely different color (better distribution)
-  
-  const sortedFacultyKey = [...facultyIds].sort().join('-');
-  const compositeKey = `${subjectId}:${sortedFacultyKey}`;
-  
+  // Simple, deterministic string hashing
   let hash = 0;
   for (let i = 0; i < compositeKey.length; i++) {
-      hash = ((hash << 5) - hash) + compositeKey.charCodeAt(i);
-      hash |= 0; // Convert to 32bit integer
+    hash = compositeKey.charCodeAt(i) + ((hash << 5) - hash);
   }
-
-  // Use the full range of colors for the combination to maximize distinctness
-  // We do NOT use baseColor as an offset anymore, to avoid clustering.
-  const index = Math.abs(hash) % SUBJECT_COLORS.length;
   
+  const index = Math.abs(hash) % SUBJECT_COLORS.length;
   return SUBJECT_COLORS[index];
 };
 

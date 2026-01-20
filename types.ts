@@ -71,8 +71,9 @@ export type ViewState = 'dashboard' | 'wizard' | 'editor' | 'master-editor' | 'm
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export const SUBJECT_COLORS = [
-  'rose', 'orange', 'amber', 'yellow', 'lime', 'emerald', 
-  'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'fuchsia', 'pink', 'slate'
+  'rose', 'pink', 'fuchsia', 'purple', 'violet', 'indigo', 
+  'blue', 'sky', 'cyan', 'teal', 'emerald', 'green', 
+  'lime', 'yellow', 'amber', 'orange', 'red', 'slate'
 ];
 
 export const FIRST_YEAR_PERIODS: Period[] = [
