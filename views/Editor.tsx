@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Download, FileSpreadsheet } from 'lucide-react';
-import { Schedule, DEFAULT_PERIODS, Period, TimeSlot, FIRST_YEAR_PERIODS, HIGHER_YEAR_PERIODS } from '../types';
+import { Schedule, Period, TimeSlot, FIRST_YEAR_PERIODS, HIGHER_YEAR_PERIODS } from '../types';
 import { Button } from '../components/ui/Button';
-import { generateId, isTimeOverlap, getSlotInterval, to12Hour } from '../utils';
+import { generateId, checkGlobalFacultyConflict, to12Hour } from '../utils';
 import { exportToPDF } from '../utils/pdf';
 import { exportScheduleToExcel } from '../utils/excel';
 import { FacultyTable } from '../components/schedule/FacultyTable';
@@ -23,7 +24,6 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
   const [editingPeriod, setEditingPeriod] = useState<Period | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Use the specific default periods based on the level if custom periods aren't set
   const periods = useMemo(() => {
     if (currentSchedule.periods && currentSchedule.periods.length > 0) {
       return currentSchedule.periods;
@@ -39,74 +39,6 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
         return { ...fac, totalDuration: total };
     });
   }, [currentSchedule.timeSlots, currentSchedule.faculties]);
-
-  const checkGlobalConflict = (day: string, periodId: number, facultyId: string) => {
-    const targetFac = currentSchedule.faculties.find(f => f.id === facultyId);
-    if (!targetFac) return null;
-
-    // Determine the interval of the slot being checked
-    const currentSlot = currentSchedule.timeSlots.find(ts => ts.day === day && ts.period === periodId);
-    const interval = currentSlot 
-        ? getSlotInterval(currentSlot, periods) 
-        : getSlotInterval({ day, period: periodId, duration: 1 } as TimeSlot, periods);
-
-    if (!interval) return null;
-
-    // 1. Check Internal Conflicts (within the current schedule's state)
-    // We compare against other slots in the current editing state
-    for (const slot of currentSchedule.timeSlots) {
-        if (slot.day !== day) continue;
-        if (slot.id === currentSlot?.id) continue; // Skip self
-
-        if (slot.facultyIds.includes(facultyId)) {
-            const slotInterval = getSlotInterval(slot, periods);
-            if (slotInterval && isTimeOverlap(interval.start, interval.end, slotInterval.start, slotInterval.end)) {
-                return `Self (Internal Overlap)`;
-            }
-        }
-    }
-
-    // 2. Check External Conflicts (against other schedules in the system)
-    for (const s of allSchedules) {
-      // Skip the current schedule entirely to avoid stale state comparisons
-      if (s.id === currentSchedule.id) continue;
-      
-      // Only check conflicts in the SAME session
-      if (s.details.session !== currentSchedule.details.session) continue;
-      
-      for (const slot of s.timeSlots) {
-        if (slot.day !== day) continue;
-        
-        const hasMatch = slot.facultyIds.some(fid => {
-          // Resolve faculty ID to initials/name to match across schedules if IDs differ but person is same
-          // Assuming Global Faculty IDs are consistent. If not, match by initials.
-          const facInSlot = s.faculties.find(f => f.id === fid);
-          return facInSlot && facInSlot.initials === targetFac.initials;
-        });
-
-        if (hasMatch) {
-          const slotInterval = getSlotInterval(slot, s.periods);
-          if (slotInterval) {
-             const overlap = isTimeOverlap(interval.start, interval.end, slotInterval.start, slotInterval.end);
-             if (overlap) {
-               return `${s.details.className} (Sem ${s.details.semester})`;
-             }
-          }
-        }
-      }
-    }
-    return null;
-  };
-
-  const getConflictsForEditing = (facultyIds?: string[]) => {
-    if (!editingSlot || !facultyIds) return {};
-    const confs: Record<string, string> = {};
-    facultyIds.forEach(fid => {
-      const c = checkGlobalConflict(editingSlot.day, editingSlot.period, fid);
-      if (c) confs[fid] = c;
-    });
-    return confs;
-  };
 
   const handleSaveSlot = (data: Partial<TimeSlot>) => {
     if (!data.subjectId || !data.facultyIds?.length) return;
@@ -155,10 +87,11 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
                 onAddPeriod={() => setEditingPeriod({ id: 0, label: 'New Hour', time: '09:00 AM - 10:00 AM' })}
                 getConflictStatus={(day, periodId) => {
                   const slot = currentSchedule.timeSlots.find(ts => ts.day === day && ts.period === periodId);
-                  const facs = slot ? slot.facultyIds : [];
-                  for (const fid of facs) {
-                    const c = checkGlobalConflict(day, periodId, fid);
-                    if (c) return c;
+                  if (!slot) return null;
+                  
+                  for (const fid of slot.facultyIds) {
+                    const conflict = checkGlobalFacultyConflict(fid, day, slot, periods, currentSchedule.id, allSchedules);
+                    if (conflict) return `${conflict.scheduleName} (Sem ${conflict.semester})`;
                   }
                   return null;
                 }}
@@ -172,13 +105,16 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
         <ClassModal 
           data={editingData}
           schedule={currentSchedule}
+          allSchedules={allSchedules}
           day={editingSlot.day}
           periodLabel={periods.find(p => p.id === editingSlot.period)?.label}
           onClose={() => setEditingSlot(null)}
           onSave={handleSaveSlot}
           onDelete={() => { setCurrentSchedule({...currentSchedule, timeSlots: currentSchedule.timeSlots.filter(s => !(s.day === editingSlot.day && s.period === editingSlot.period))}); setEditingSlot(null); }}
-          conflicts={getConflictsForEditing(editingData.facultyIds)}
-          onCheckConflict={(fid) => checkGlobalConflict(editingSlot.day, editingSlot.period, fid)}
+          onCheckConflict={(fid, currentSlotData) => {
+             const conflict = checkGlobalFacultyConflict(fid, editingSlot.day, currentSlotData, periods, currentSchedule.id, allSchedules);
+             return conflict ? `${conflict.scheduleName} | ${conflict.semester} Sem` : null;
+          }}
         />
       )}
 

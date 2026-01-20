@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Plus, Coffee, FileSpreadsheet, AlertTriangle } from 'lucide-react';
 import { Schedule, DAYS, Period, TimeSlot, Faculty } from '../types';
 import { Button } from '../components/ui/Button';
-import { generateId, getColorClasses, getSubjectColorName, isTimeOverlap, getSlotInterval, to12Hour } from '../utils';
+import { generateId, getColorClasses, getSubjectColorName, checkGlobalFacultyConflict, to12Hour } from '../utils';
 import { exportMasterToExcel } from '../utils/excel';
 import { FacultyTable } from '../components/schedule/FacultyTable';
 import { PeriodModal } from '../components/schedule/PeriodModal';
@@ -42,42 +43,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
 
   const findSlot = (schedule: Schedule, day: string, periodId: number, branch?: string) => {
     return schedule.timeSlots.find(s => s.day === day && s.period === periodId && (branch ? s.branch === branch : true));
-  };
-
-  const checkConflict = (scheduleId: string, day: string, periodId: number, facultyId: string, branch?: string) => {
-    const targetFaculty = allFaculties.find(f => f.id === facultyId);
-    if (!targetFaculty) return null;
-
-    const currentSchedule = localSchedules.find(s => s.id === scheduleId);
-    if (!currentSchedule) return null;
-    const currentSlot = findSlot(currentSchedule, day, periodId, branch);
-    
-    const interval = currentSlot 
-        ? getSlotInterval(currentSlot, currentSchedule.periods)
-        : getSlotInterval({ day, period: periodId, duration: 1 } as TimeSlot, currentSchedule.periods);
-    
-    if (!interval) return null;
-
-    for (const s of localSchedules) {
-        if (s.details.session !== currentSchedule.details.session) continue;
-
-        for (const slot of s.timeSlots) {
-            if (slot.day !== day) continue;
-            const hasTeacherMatch = slot.facultyIds.some(fid => {
-                const facInSlot = s.faculties.find(f => f.id === fid);
-                return facInSlot && facInSlot.initials === targetFaculty.initials;
-            });
-            if (hasTeacherMatch) {
-                const slotInterval = getSlotInterval(slot, s.periods);
-                if (slotInterval) {
-                    const overlap = isTimeOverlap(interval.start, interval.end, slotInterval.start, slotInterval.end);
-                    const isSelf = s.id === scheduleId && slot.period === periodId && (!slot.branch || slot.branch === branch);
-                    if (overlap && !isSelf) return `${s.details.className} (Sem ${s.details.semester})`;
-                }
-            }
-        }
-    }
-    return null;
   };
 
   const facultyStats = useMemo(() => {
@@ -255,19 +220,30 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                          }
                                                     }
 
-                                                    const conflict = slot && slot.facultyIds.map(fid => checkConflict(sch.id, day, period.id, fid, slotBranch)).find(c => c);
+                                                    // Use robust checker
+                                                    let conflictLabel = null;
+                                                    if (slot) {
+                                                        for (const fid of slot.facultyIds) {
+                                                            const conflict = checkGlobalFacultyConflict(fid, day, slot, sch.periods, sch.id, localSchedules);
+                                                            if (conflict) {
+                                                                conflictLabel = `${conflict.scheduleName} | Sem ${conflict.semester}`;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+
                                                     const colorClasses = slot ? getColorClasses(getSubjectColorName(sch.subjects, slot.subjectId, slot.facultyIds)) : null;
 
                                                     return (
                                                         <td key={period.id} colSpan={colSpan} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className={`border-r ${dayBlockBorder} p-1.5 cursor-pointer group/cell overflow-hidden`}>
                                                             {slot ? (
-                                                                <div className={`h-28 w-full rounded-[1.75rem] p-4 flex flex-col justify-between transition-all duration-300 border-2 ${colorClasses?.bg} ${colorClasses?.border} shadow-card ${colorClasses?.hover}`}>
+                                                                <div className={`h-28 w-full rounded-[1.75rem] p-4 flex flex-col justify-between transition-all duration-300 border-2 ${colorClasses?.bg} ${colorClasses?.border} shadow-card ${colorClasses?.hover} ${conflictLabel ? 'ring-2 ring-red-500 ring-offset-1' : ''}`}>
                                                                     <div className="space-y-0.5">
                                                                         <div className={`font-black text-[13px] leading-tight line-clamp-2 tracking-tight ${colorClasses?.text}`}>
                                                                             {sch.subjects.find(s => s.id === slot.subjectId)?.name}
                                                                         </div>
-                                                                        <div className={`text-[10px] font-medium opacity-60 ${colorClasses?.text}`}>
-                                                                            {sch.details.section ? `Room ${sch.details.section}` : 'General Hall'}
+                                                                        <div className={`text-[10px] font-bold opacity-70 ${colorClasses?.text}`}>
+                                                                            {slot.type === 'Practical' ? 'Lab Session' : 'Theory Class'}
                                                                         </div>
                                                                     </div>
                                                                     
@@ -275,11 +251,11 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                                         <span className={`${colorClasses?.accentText} text-[9px] truncate max-w-[100px]`}>
                                                                             {slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}
                                                                         </span>
-                                                                        {conflict && <AlertTriangle size={12} className="text-red-600 animate-pulse shrink-0" />}
+                                                                        {conflictLabel && <AlertTriangle size={12} className="text-red-600 animate-pulse shrink-0" title={conflictLabel} />}
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                <div className="h-28 w-full rounded-[1.75rem] border-2 border-dashed border-gray-200 dark:border-slate-800 flex items-center justify-center opacity-40 hover:opacity-100 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                                                                <div className="h-28 w-full rounded-[1.75rem] border-2 border-dashed border-gray-200 dark:border-slate-800 flex items-center justify-center opacity-40 hover:opacity-100 hover:bg-gray-50 dark:hover:bg-slate-900 transition-all">
                                                                   <div className="h-8 w-8 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-gray-300 group-hover:text-primary-500 transition-all">
                                                                     <Plus size={18} strokeWidth={3} />
                                                                   </div>
@@ -308,11 +284,15 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
             <ClassModal 
                 data={tempSlot} 
                 schedule={localSchedules.find(s => s.id === editingCell.scheduleId)!} 
+                allSchedules={localSchedules}
                 day={editingCell.day} 
                 onClose={() => setEditingCell(null)} 
                 onSave={handleSaveSlot} 
                 onDelete={() => handleSaveSlot({ subjectId: '' })}
-                onCheckConflict={fid => checkConflict(editingCell.scheduleId, editingCell.day, editingCell.periodId, fid, editingCell.branch)}
+                onCheckConflict={(fid, currentSlotData) => {
+                  const conflict = checkGlobalFacultyConflict(fid, editingCell.day, currentSlotData, localSchedules.find(s => s.id === editingCell.scheduleId)!.periods, editingCell.scheduleId, localSchedules);
+                  return conflict ? `${conflict.scheduleName} | Sem ${conflict.semester}` : null;
+                }}
             />
         )}
         {editingPeriod && (

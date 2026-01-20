@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { X, Trash2, AlertCircle, Clock, Plus, AlertTriangle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { CustomSelect, Option } from '../ui/CustomSelect';
@@ -7,17 +8,17 @@ import { TimeSlot, Subject, Schedule } from '../../types';
 interface ClassModalProps {
   data: Partial<TimeSlot>;
   schedule: Schedule; 
+  allSchedules?: Schedule[]; // Added to allow broader checks
   day: string;
   periodLabel?: string;
   onClose: () => void;
   onSave: (data: Partial<TimeSlot>) => void;
   onDelete: () => void;
-  conflicts?: Record<string, string>; 
-  onCheckConflict?: (facultyId: string) => string | null;
+  onCheckConflict?: (facultyId: string, currentSlotData: Partial<TimeSlot>) => string | null;
 }
 
 export const ClassModal: React.FC<ClassModalProps> = ({ 
-  data, schedule, day, periodLabel, onClose, onSave, onDelete, conflicts, onCheckConflict
+  data, schedule, day, periodLabel, onClose, onSave, onDelete, onCheckConflict
 }) => {
   const [tempSlotData, setTempSlotData] = useState<Partial<TimeSlot>>(data);
 
@@ -69,7 +70,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
 
   const facultyOptions: Option[] = schedule.faculties.map(f => {
     const isSelected = tempSlotData.facultyIds?.includes(f.id);
-    const conflict = onCheckConflict ? onCheckConflict(f.id) : (conflicts ? conflicts[f.id] : null);
+    const conflict = onCheckConflict ? onCheckConflict(f.id, tempSlotData) : null;
     
     if (isSelected) return null;
 
@@ -81,7 +82,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
             <span className="truncate pr-2">{f.name} ({f.initials})</span>
             {conflict && (
               <span className="text-[9px] font-black bg-rose-50 dark:bg-rose-900/40 text-rose-500 dark:text-rose-300 px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
-                Busy: {conflict.split('-')[0].trim()}
+                Busy: {conflict}
               </span>
             )}
           </div>
@@ -125,7 +126,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                         <div className="bg-gray-100 dark:bg-slate-700 p-1.5 rounded-[1.5rem] flex relative">
                             <button 
                                 className={`flex-1 py-4 text-sm font-black rounded-2xl transition-all flex items-center justify-center gap-2 ${tempSlotData.type === 'Theory' ? 'bg-white dark:bg-slate-800 text-orange-500 dark:text-orange-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5' : 'text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200'}`}
-                                onClick={() => setTempSlotData({ ...tempSlotData, type: 'Theory', facultyIds: [], duration: 1 })}
+                                onClick={() => setTempSlotData({ ...tempSlotData, type: 'Theory', duration: 1 })}
                             >
                                 <div className={`h-2 w-2 rounded-full ${tempSlotData.type === 'Theory' ? 'bg-orange-500 dark:bg-orange-400' : 'bg-gray-300 dark:bg-slate-600'}`} />
                                 Theory
@@ -133,7 +134,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                             <button 
                                 className={`flex-1 py-4 text-sm font-black rounded-2xl transition-all flex items-center justify-center gap-2 ${tempSlotData.type === 'Practical' ? 'bg-white dark:bg-slate-800 text-green-600 dark:text-green-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5' : 'text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200'}`}
                                 onClick={() => {
-                                    setTempSlotData({ ...tempSlotData, type: 'Practical', facultyIds: [] });
+                                    setTempSlotData({ ...tempSlotData, type: 'Practical', duration: 2 });
                                 }}
                             >
                                 <div className={`h-2 w-2 rounded-full ${tempSlotData.type === 'Practical' ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-300 dark:bg-slate-600'}`} />
@@ -201,12 +202,12 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                             {(tempSlotData.facultyIds || []).map(fid => {
                                     const fac = schedule.faculties.find(f => f.id === fid);
                                     if (!fac) return null;
-                                    const hasConflict = onCheckConflict ? onCheckConflict(fid) : (conflicts ? conflicts[fid] : null);
+                                    const conflictDetail = onCheckConflict ? onCheckConflict(fid, tempSlotData) : null;
 
                                     return (
-                                        <div key={fid} className={`${hasConflict ? 'bg-rose-50 dark:bg-rose-900/40 border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300' : 'bg-primary-50 dark:bg-primary-900/20 border-primary-100 dark:border-primary-900/40 text-primary-700 dark:text-primary-300'} border pl-3 pr-2 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in-up relative overflow-hidden group/tag`}>
+                                        <div key={fid} className={`${conflictDetail ? 'bg-rose-50 dark:bg-rose-900/40 border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300' : 'bg-primary-50 dark:bg-primary-900/20 border-primary-100 dark:border-primary-900/40 text-primary-700 dark:text-primary-300'} border pl-3 pr-2 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in-up relative overflow-hidden group/tag`}>
                                             {fac.name} ({fac.initials})
-                                            {hasConflict && <AlertTriangle size={10} className="text-rose-500" />}
+                                            {conflictDetail && <AlertTriangle size={10} className="text-rose-500" />}
                                             <button 
                                               onClick={() => setTempSlotData(prev => ({ 
                                                   ...prev, 
@@ -242,13 +243,13 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                             
                         <div className="space-y-2 mt-3">
                         {(tempSlotData.facultyIds || []).map(fid => {
-                            const conflict = onCheckConflict ? onCheckConflict(fid) : (conflicts ? conflicts[fid] : null);
+                            const conflict = onCheckConflict ? onCheckConflict(fid, tempSlotData) : null;
                             if (!conflict) return null;
                             const fac = schedule.faculties.find(f => f.id === fid);
                             return (
                                 <div key={fid} className="text-[10px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2 bg-rose-50 dark:bg-rose-900/20 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/30">
                                     <AlertTriangle size={14} className="shrink-0 text-rose-500"/> 
-                                    <span><strong>{fac?.initials} Overlap:</strong> Busy in {conflict}</span>
+                                    <span><strong>{fac?.initials} Overlap:</strong> Already scheduled in {conflict}</span>
                                 </div>
                             )
                         })}

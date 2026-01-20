@@ -1,3 +1,4 @@
+
 import { SUBJECT_COLORS, Schedule, Subject, Faculty, TimeSlot, Period } from '../types';
 
 export const generateId = () => Math.random().toString(36).substring(2, 9);
@@ -12,7 +13,12 @@ export const timeStrToMinutes = (timeStr: string): number => {
     const [rawH, rawM] = cleanStr.replace(/[ap]m/, '').split(':').map(n => parseInt(n));
     let h = rawH;
     let m = rawM || 0;
-    if (!isPM && h >= 1 && h <= 6) isPM = true;
+    
+    // Auto-detect PM for typical college hours if not specified
+    if (!cleanStr.includes('am') && !cleanStr.includes('pm')) {
+      if (h >= 1 && h <= 6) isPM = true;
+    }
+    
     if (isPM && h < 12) h += 12;
     if (!isPM && h === 12) h = 0;
     return h * 60 + m;
@@ -26,31 +32,93 @@ export const isTimeOverlap = (s1: number, e1: number, s2: number, e2: number): b
 };
 
 /**
- * Gets the start and end minutes for a slot, accounting for duration.
+ * Gets the start and end minutes for a slot, accounting for duration and the specific schedule's period config.
  */
-export const getSlotInterval = (slot: TimeSlot, periods: Period[]) => {
+export const getSlotInterval = (slot: Partial<TimeSlot>, periods: Period[]) => {
+    if (!slot.period) return null;
     const startPeriod = periods.find(p => p.id === slot.period);
-    if (!startPeriod || startPeriod.startMinutes === undefined) return null;
+    if (!startPeriod) return null;
 
-    const duration = slot.duration || 1;
     const startIndex = periods.findIndex(p => p.id === slot.period);
+    const duration = slot.duration || 1;
     
-    let endMinutes = startPeriod.endMinutes!;
+    // Start time is fixed by the period
+    const startMinutes = startPeriod.startMinutes !== undefined 
+        ? startPeriod.startMinutes 
+        : timeStrToMinutes(startPeriod.time.split('-')[0]);
+
+    // Calculate end time by jumping 'duration' academic (non-break) periods
     let actualEndIdx = startIndex;
-    let count = 0;
+    let academicCount = 0;
     for (let i = startIndex; i < periods.length; i++) {
         if (!periods[i].isBreak) {
-            count++;
+            academicCount++;
         }
-        if (count > duration) break; 
-        if (!periods[i].isBreak) actualEndIdx = i;
+        actualEndIdx = i;
+        if (academicCount >= duration) break;
     }
     
-    if (periods[actualEndIdx]) {
-        endMinutes = periods[actualEndIdx].endMinutes!;
-    }
+    const endPeriod = periods[actualEndIdx];
+    const endMinutes = endPeriod.endMinutes !== undefined 
+        ? endPeriod.endMinutes 
+        : timeStrToMinutes(endPeriod.time.split('-')[1]);
 
-    return { start: startPeriod.startMinutes, end: endMinutes };
+    return { start: startMinutes, end: endMinutes };
+};
+
+/**
+ * GLOBAL FACULTY CONFLICT CHECKER
+ * Checks if a faculty member is scheduled in ANY other class at the same time across ALL schedules.
+ */
+export interface ConflictInfo {
+  scheduleName: string;
+  semester: string;
+  subjectName: string;
+  type: string;
+}
+
+export const checkGlobalFacultyConflict = (
+  facultyId: string,
+  day: string,
+  targetSlot: Partial<TimeSlot>,
+  targetPeriods: Period[],
+  currentScheduleId: string,
+  allSchedules: Schedule[]
+): ConflictInfo | null => {
+  const targetInterval = getSlotInterval(targetSlot, targetPeriods);
+  if (!targetInterval) return null;
+
+  for (const schedule of allSchedules) {
+    // We check all schedules in the same session
+    // Note: We don't skip currentScheduleId because we need to check internal overlaps with OTHER slots
+    
+    const schedulePeriods = schedule.periods && schedule.periods.length > 0 ? schedule.periods : [];
+    if (schedulePeriods.length === 0) continue;
+
+    for (const slot of schedule.timeSlots) {
+      // Basic match conditions
+      if (slot.day !== day) continue;
+      if (!slot.facultyIds.includes(facultyId)) continue;
+      
+      // Prevent self-conflict with the exact same slot being edited
+      if (schedule.id === currentScheduleId && slot.id === targetSlot.id) continue;
+
+      const slotInterval = getSlotInterval(slot, schedulePeriods);
+      if (!slotInterval) continue;
+
+      if (isTimeOverlap(targetInterval.start, targetInterval.end, slotInterval.start, slotInterval.end)) {
+        const subject = schedule.subjects.find(s => s.id === slot.subjectId);
+        return {
+          scheduleName: schedule.details.className,
+          semester: schedule.details.semester,
+          subjectName: subject?.name || 'Unknown',
+          type: slot.type
+        };
+      }
+    }
+  }
+
+  return null;
 };
 
 export const to24Hour = (timeStr: string) => {
@@ -68,21 +136,22 @@ export const to12Hour = (time24: string): string => {
   const m = parseInt(mStr, 10);
   const ampm = h >= 12 ? 'PM' : 'AM';
   h = h % 12;
-  h = h ? h : 12; // the hour '0' should be '12'
+  h = h ? h : 12;
   const minutes = m < 10 ? '0' + m : m;
   return `${h}:${minutes} ${ampm}`;
 };
 
 export const getColorClasses = (colorName?: string) => {
-  const color = colorName || 'gray';
+  const color = colorName || 'slate';
   const createPalette = (c: string) => ({
-      // High-vibrancy Glassmorphism: Clear contrast for readability
-      bg: `bg-${c}-200/90 dark:bg-${c}-500/20 backdrop-blur-md`,
-      border: `border-${c}-400/50 dark:border-${c}-500/50 shadow-[0_4px_12px_rgba(var(--color-${c}-500),0.15)]`,
+      bg: `bg-${c}-300/80 dark:bg-${c}-500/20 backdrop-blur-md`,
+      border: `border-${c}-500/40 dark:border-${c}-400/30 shadow-[0_8px_24px_-4px_rgba(var(--color-${c}-500),0.25)]`,
       text: `text-${c}-950 dark:text-${c}-50`,
-      accentText: `text-${c}-900 dark:text-${c}-200 font-black uppercase tracking-widest text-[10px]`,
-      subText: `text-${c}-900/60 dark:text-${c}-100/40 font-bold text-[11px]`,
-      hover: `hover:scale-[1.03] hover:shadow-xl hover:bg-${c}-300/80 dark:hover:bg-${c}-500/30 transition-all duration-300`,
+      accentText: `text-${c}-950 dark:text-${c}-200 font-black uppercase tracking-widest text-[10px]`,
+      subText: `text-${c}-900/70 dark:text-${c}-100/50 font-bold text-[11px]`,
+      hover: `hover:scale-[1.04] hover:shadow-2xl hover:bg-${c}-400/90 dark:hover:bg-${c}-500/40 transition-all duration-300`,
+      pill: `bg-${c}-500/20 dark:bg-${c}-500/40 text-${c}-700 dark:text-${c}-300`,
+      lightText: `text-${c}-700 dark:text-${c}-400`
   });
   
   const styles: Record<string, any> = {};
@@ -90,40 +159,29 @@ export const getColorClasses = (colorName?: string) => {
     styles[c] = createPalette(c);
   });
   
-  // Explicitly mapping some standard Tailwind colors not in our palette for safety
   styles['gray'] = createPalette('slate');
-  styles['red'] = createPalette('red');
-  styles['green'] = createPalette('green');
-  styles['purple'] = createPalette('purple');
-
   return styles[color] || styles['gray'];
 };
 
 export const getSolidColorClasses = (colorName?: string) => {
-  const c = colorName || 'gray';
+  const c = colorName || 'slate';
   return {
-    // Solid/Grid View: Saturated backgrounds (200 shade) for maximum pop
-    bg: `bg-${c}-200 dark:bg-${c}-900/60 backdrop-blur-xl`,
+    bg: `bg-${c}-300 dark:bg-${c}-900/80 backdrop-blur-xl`,
     text: `text-${c}-950 dark:text-${c}-50`,
-    accentText: `text-${c}-900 dark:text-${c}-200 font-black uppercase tracking-[0.2em] text-[10px]`,
-    subtext: `text-${c}-900/70 dark:text-${c}-300/70 text-[11px] font-bold`,
-    border: `border-${c}-400/50 dark:border-${c}-500/60`,
-    hover: `hover:bg-${c}-300 dark:hover:bg-${c}-800/80 hover:scale-[1.03] hover:shadow-lg shadow-${c}-500/10`
+    accentText: `text-${c}-950 dark:text-${c}-200 font-black uppercase tracking-[0.2em] text-[10px]`,
+    subtext: `text-${c}-900/70 dark:text-${c}-200/60 text-[11px] font-bold`,
+    border: `border-${c}-500/50 dark:border-${c}-400/40`,
+    hover: `hover:bg-${c}-400 dark:hover:bg-${c}-700 hover:scale-[1.04] hover:shadow-2xl transition-all duration-300`
   };
 };
 
-/**
- * Generates a deterministic color based on Subject + Faculty combination.
- */
 export const getSubjectColorName = (subjects: Subject[], subjectId: string, facultyIds?: string[]): string => {
   const subj = subjects.find(s => s.id === subjectId);
   if (!subj) return 'slate';
 
-  // If no faculty is assigned, return a color based only on the subject ID
   const facKey = facultyIds ? [...facultyIds].sort().join('-') : 'no-faculty';
   const compositeKey = `${subjectId}_${facKey}`;
 
-  // Simple, deterministic string hashing
   let hash = 0;
   for (let i = 0; i < compositeKey.length; i++) {
     hash = compositeKey.charCodeAt(i) + ((hash << 5) - hash);

@@ -134,7 +134,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                             key={period.id}
                             onClick={() => onCellClick(day, period.id)}
                             className={`
-                                h-32 sm:h-36 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-6 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl relative overflow-hidden group border-2 ${styles.border}
+                                h-32 sm:h-36 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-6 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl relative overflow-hidden group border-2 ${styles.border}
                                 ${styles.bg} ${styles.text}
                                 ${conflict ? 'ring-4 ring-rose-500 ring-offset-4 z-10 scale-[0.98]' : ''}
                             `}
@@ -150,8 +150,8 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                                 <div className="font-black text-[14px] sm:text-[16px] leading-tight line-clamp-2 tracking-tight">
                                     {sub?.name || 'Unknown'}
                                 </div>
-                                <div className={`text-[10px] font-bold opacity-60 ${styles.text}`}>
-                                    {schedule.details.section ? `Room ${schedule.details.section}` : 'General Hall'}
+                                <div className={`text-[10px] font-bold opacity-80 ${styles.text}`}>
+                                    {slot.type === 'Practical' ? 'Lab Session' : 'Theory Class'}
                                 </div>
                             </div>
 
