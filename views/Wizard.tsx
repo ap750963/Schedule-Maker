@@ -141,7 +141,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                   {academicLevel === '1st-year' ? (
                       <>
                           <div>
-                              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-3">Select Semester</label>
+                              <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-3">Select Semester</label>
                               <div className="grid grid-cols-2 gap-3">
                                   {[1, 2].map(s => (
                                       <button 
@@ -156,8 +156,8 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                           </div>
                           <div>
                               <div className="flex justify-between items-center mb-3 px-3">
-                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400">Branches</label>
-                                  <button onClick={() => setBranches([...branches, ''])} className="text-primary-500 text-[10px] font-black uppercase hover:underline">+ Add</button>
+                                  <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400">Branches</label>
+                                  <button onClick={() => setBranches([...branches, ''])} className="text-primary-500 text-[11px] font-black uppercase hover:underline">+ Add</button>
                               </div>
                               <div className="space-y-3">
                                   {branches.map((b, i) => (
@@ -173,7 +173,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                       <>
                           <Input label="Department Name" placeholder="e.g. Mechanical Engineering" value={deptName} onChange={e => setDeptName(e.target.value)} icon={<GraduationCap size={24} />} />
                           <div>
-                              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-3">Active Semesters</label>
+                              <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-3">Active Semesters</label>
                               <div className="grid grid-cols-4 gap-3">
                                   {[3, 4, 5, 6].map(s => (
                                       <button 
@@ -224,7 +224,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="flex items-center justify-between bg-gray-50 dark:bg-slate-800/50 p-3 px-5 rounded-2xl">
-                                    <span className="text-[10px] font-black uppercase text-gray-400">Theory</span>
+                                    <span className="text-[11px] font-black uppercase text-gray-400">Theory</span>
                                     <div className="flex items-center gap-4">
                                         <button onClick={() => updateSubject(activeSubTab, sub.id, { theoryCount: Math.max(0, sub.theoryCount - 1) })} className="p-1 hover:text-primary-500 transition-colors"><Minus size={18} /></button>
                                         <span className="font-black text-sm w-4 text-center dark:text-white">{sub.theoryCount}</span>
@@ -232,7 +232,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between bg-gray-50 dark:bg-slate-800/50 p-3 px-5 rounded-2xl">
-                                    <span className="text-[10px] font-black uppercase text-gray-400">Lab</span>
+                                    <span className="text-[11px] font-black uppercase text-gray-400">Lab</span>
                                     <div className="flex items-center gap-4">
                                         <button onClick={() => updateSubject(activeSubTab, sub.id, { practicalCount: Math.max(0, sub.practicalCount - 1) })} className="p-1 hover:text-primary-500 transition-colors"><Minus size={18} /></button>
                                         <span className="font-black text-sm w-4 text-center dark:text-white">{sub.practicalCount}</span>
@@ -260,7 +260,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                         <div className="text-center py-20 bg-gray-50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-dashed border-gray-100 dark:border-slate-800 px-6">
                             <User size={48} className="mx-auto text-gray-200 dark:text-slate-700 mb-4" />
                             <p className="text-gray-400 font-black">No global faculties found.</p>
-                            <p className="text-[10px] uppercase font-bold text-gray-300 mt-2">Add them on the Home screen first.</p>
+                            <p className="text-[11px] uppercase font-bold text-gray-300 mt-2">Add them on the Home screen first.</p>
                         </div>
                     ) : (
                         globalFaculties.map(f => {
@@ -271,7 +271,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                                         <div className="h-14 w-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm border border-gray-100 dark:border-slate-700 text-slate-800 dark:text-slate-200">{f.initials}</div>
                                         <div className="text-left">
                                             <span className="font-black text-gray-900 dark:text-white block">{f.name}</span>
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Faculty Member</span>
+                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Faculty Member</span>
                                         </div>
                                     </div>
                                     {selected && <div className="h-8 w-8 bg-primary-500 text-white rounded-full flex items-center justify-center shadow-lg"><Check size={18} strokeWidth={4} /></div>}

@@ -127,8 +127,8 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
           <div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white leading-none tracking-tight">{currentSchedule.details.className}</h2>
             <div className="mt-1 flex items-center gap-2">
-                <span className="bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full text-[10px] font-black text-gray-500 dark:text-slate-400 uppercase tracking-widest border border-white/20 dark:border-slate-700/50">Sec {currentSchedule.details.section}</span>
-                <span className="bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full text-[10px] font-black text-gray-500 dark:text-slate-400 uppercase tracking-widest border border-white/20 dark:border-slate-700/50">{currentSchedule.details.semester} Sem</span>
+                <span className="bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full text-[11px] font-black text-gray-500 dark:text-slate-400 uppercase tracking-widest border border-white/20 dark:border-slate-700/50">Sec {currentSchedule.details.section}</span>
+                <span className="bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full text-[11px] font-black text-gray-500 dark:text-slate-400 uppercase tracking-widest border border-white/20 dark:border-slate-700/50">{currentSchedule.details.semester} Sem</span>
             </div>
           </div>
         </div>

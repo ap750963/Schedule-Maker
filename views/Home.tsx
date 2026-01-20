@@ -121,7 +121,7 @@ export const Home: React.FC<HomeProps> = ({
             <div key={session} className="space-y-4">
                 <div className="flex items-center gap-2 px-2">
                     <FolderOpen size={14} className="text-primary-400" />
-                    <h2 className="text-[10px] font-black text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">{session}</h2>
+                    <h2 className="text-[11px] font-black text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">{session}</h2>
                     <div className="h-px bg-gray-100 dark:bg-slate-800 flex-1 ml-2 rounded-full" />
                 </div>
                 
@@ -134,7 +134,7 @@ export const Home: React.FC<HomeProps> = ({
                       >
                           <div className="flex justify-between items-start mb-4">
                             <div className="flex-1">
-                                <span className="text-[9px] font-black uppercase tracking-wider bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 px-3 py-1 rounded-full mb-3 inline-block">
+                                <span className="text-[10px] font-black uppercase tracking-wider bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 px-3 py-1 rounded-full mb-3 inline-block">
                                     {schedule.details.semester} Sem • {schedule.details.level === '1st-year' ? 'Combined' : 'Dept'}
                                 </span>
                                 <h3 className="text-xl font-black text-slate-900 dark:text-white line-clamp-2 tracking-tight leading-snug">{schedule.details.className}</h3>
@@ -146,7 +146,7 @@ export const Home: React.FC<HomeProps> = ({
                                 <Trash2 size={18} />
                             </button>
                           </div>
-                          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mt-auto pt-4 border-t border-gray-50 dark:border-slate-700/50">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mt-auto pt-4 border-t border-gray-50 dark:border-slate-700/50">
                              <div className="flex gap-4">
                                 <span className="flex items-center gap-1.5"><Clock size={12} /> {new Date(schedule.lastModified).toLocaleDateString()}</span>
                                 <span className="flex items-center gap-1.5"><BookOpen size={12} /> {schedule.subjects.length} Subj</span>
@@ -179,7 +179,7 @@ export const Home: React.FC<HomeProps> = ({
                         </button>
                     </div>
                     <div>
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">Theme Palette</h4>
+                        <h4 className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">Theme Palette</h4>
                         <div className="grid grid-cols-5 gap-3">
                             {Object.keys(THEMES).map(t => (
                                 <button key={t} onClick={() => onSetTheme(t)} className={`aspect-square rounded-2xl border-4 flex items-center justify-center transition-all ${currentTheme === t ? 'border-primary-500 scale-110 shadow-lg shadow-primary-500/30' : 'border-transparent hover:scale-105 bg-gray-50 dark:bg-slate-700'}`} style={{ backgroundColor: currentTheme === t ? `rgb(${THEMES[t][500]})` : undefined }}>

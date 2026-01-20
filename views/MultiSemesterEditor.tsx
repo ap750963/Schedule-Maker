@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Plus, Coffee, FileSpreadsheet, AlertTriangle } from 'lucide-react';
 import { Schedule, DAYS, Period, TimeSlot, Faculty } from '../types';
@@ -8,9 +9,10 @@ import { FacultyTable } from '../components/schedule/FacultyTable';
 import { PeriodModal } from '../components/schedule/PeriodModal';
 import { ClassModal } from '../components/schedule/ClassModal';
 
+// Define the missing MultiSemesterEditorProps interface
 interface MultiSemesterEditorProps {
   schedules: Schedule[];
-  onSaveAll: (schedules: Schedule[]) => void;
+  onSaveAll: (updatedSchedules: Schedule[]) => void;
   onBack: () => void;
 }
 
@@ -59,7 +61,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     if (!interval) return null;
 
     for (const s of localSchedules) {
-        // Only check same session
         if (s.details.session !== currentSchedule.details.session) continue;
 
         for (const slot of s.timeSlots) {
@@ -141,7 +142,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                 <button onClick={onBack} className="h-10 w-10 bg-gray-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-500 hover:text-primary-600 transition-all shadow-sm"><ArrowLeft size={22} /></button>
                 <div>
                     <h1 className="text-xl font-black dark:text-white leading-none tracking-tight">College Master Schedule</h1>
-                    <p className="text-[10px] text-gray-400 font-black uppercase mt-1.5 tracking-[0.2em]">{activeSchedules[0]?.details.session || '2024-25'}</p>
+                    <p className="text-[11px] text-gray-400 font-black uppercase mt-1.5 tracking-[0.2em]">{activeSchedules[0]?.details.session || '2024-25'}</p>
                 </div>
             </div>
             <div className="flex items-center gap-3">
@@ -156,8 +157,8 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                     <table className="w-full border-collapse">
                         <thead className="bg-gray-100/90 dark:bg-slate-800/90 sticky top-0 z-40">
                             <tr>
-                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-4 w-12 sticky left-0 bg-gray-100 dark:bg-slate-800 text-[10px] font-black uppercase text-gray-400 tracking-widest">Day</th>
-                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-4 w-20 sticky left-12 bg-gray-100 dark:bg-slate-800 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Context</th>
+                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-4 w-12 sticky left-0 bg-gray-100 dark:bg-slate-800 text-[11px] font-black uppercase text-gray-400 tracking-widest">Day</th>
+                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-4 w-20 sticky left-12 bg-gray-100 dark:bg-slate-800 text-[11px] font-black uppercase text-gray-400 tracking-widest text-center">Context</th>
                                 {masterPeriods.map(p => (
                                     <th 
                                       key={p.id} 
@@ -167,7 +168,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                         {p.isBreak ? (
                                            <div className="flex flex-col items-center opacity-40">
                                               <Coffee size={14} className="mb-1 text-gray-400 dark:text-slate-400" />
-                                              <span className="text-[10px] font-black uppercase tracking-widest dark:text-slate-300">Recess</span>
+                                              <span className="text-[11px] font-black uppercase tracking-widest dark:text-slate-300">Recess</span>
                                            </div>
                                         ) : (
                                           <div className="flex flex-col items-center">
@@ -183,7 +184,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                         </thead>
                         <tbody>
                             {DAYS.map((day, dIdx) => {
-                                // Track spanning cells row by row
                                 const rowCoveredMap: Record<string, Set<number>> = {};
                                 
                                 return (
@@ -197,12 +197,12 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                             return (
                                             <tr key={rowKey} className="group hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                                                 {sIdx === 0 && rIdx === 0 && (
-                                                    <td rowSpan={activeSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0)} className="border-r border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-0 z-30 text-center font-black text-gray-400 text-[11px] uppercase p-0">
+                                                    <td rowSpan={activeSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0)} className="border-r border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-0 z-30 text-center font-black text-gray-400 text-[12px] uppercase p-0">
                                                         <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }} className="mx-auto py-6 tracking-[0.5em]">{day}</div>
                                                     </td>
                                                 )}
                                                 <td className="border-r border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-12 z-30 p-3 text-center shadow-sm">
-                                                    <div className="text-[10px] font-black text-gray-900 dark:text-white uppercase truncate max-w-[60px] tracking-tight">{sch.details.level === '1st-year' ? sub : `SEM ${sub}`}</div>
+                                                    <div className="text-[11px] font-black text-gray-900 dark:text-white uppercase truncate max-w-[60px] tracking-tight">{sch.details.level === '1st-year' ? sub : `SEM ${sub}`}</div>
                                                 </td>
                                                 {sch.periods.map((period, pIdx) => {
                                                     if (period.isBreak) {
@@ -251,9 +251,9 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                             <div className={`h-28 w-full rounded-[2rem] p-4 flex flex-col justify-between transition-all duration-300 border-2 ${slot ? `${colorClasses?.bg} ${colorClasses?.border} shadow-sm hover:scale-[1.02]` : 'bg-white dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
                                                                 {slot ? (
                                                                     <>
-                                                                        <div className="font-black text-[11px] leading-tight dark:text-white line-clamp-2 tracking-tight">{sch.subjects.find(s => s.id === slot.subjectId)?.name}</div>
+                                                                        <div className="font-black text-[12px] leading-tight dark:text-white line-clamp-2 tracking-tight">{sch.subjects.find(s => s.id === slot.subjectId)?.name}</div>
                                                                         <div className="flex items-center justify-between mt-auto">
-                                                                            <span className="text-[9px] font-black uppercase tracking-wider text-gray-500 dark:text-slate-400 truncate max-w-[80px]">{slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}</span>
+                                                                            <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-slate-400 truncate max-w-[80px]">{slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}</span>
                                                                             {conflict && <AlertTriangle size={12} className="text-red-500 animate-pulse shrink-0" />}
                                                                         </div>
                                                                     </>
@@ -268,7 +268,9 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                 })}
                                                 <td className="border-b border-gray-200 dark:border-slate-700 bg-gray-50/10 dark:bg-slate-900/10"></td>
                                             </tr>
-                                        )})}
+                                        );
+                                      });
+                                    })}
                                 </React.Fragment>
                                 );
                             })}

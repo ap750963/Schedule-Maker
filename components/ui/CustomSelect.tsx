@@ -39,7 +39,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
   return (
     <div className="w-full group relative" ref={containerRef}>
-      {label && <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 ml-1">{label}</label>}
+      {label && <label className="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 ml-1">{label}</label>}
       
       <button
         type="button"

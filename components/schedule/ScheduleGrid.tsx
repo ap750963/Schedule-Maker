@@ -39,14 +39,14 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
               {p.isBreak ? (
                   <div className="flex flex-col items-center opacity-30 group-hover:opacity-100 transition-opacity">
                      <Coffee size={14} className="mb-1 text-gray-400 dark:text-slate-400" />
-                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">Break</span>
+                     <span className="text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">Break</span>
                   </div>
               ) : (
                   <>
                     <span className="text-sm font-black text-gray-900 dark:text-white font-mono opacity-80 group-hover:scale-110 transition-transform">
                         {p.time.split('-')[0].trim()}
                     </span>
-                    <span className="text-[10px] text-gray-400 dark:text-slate-500">
+                    <span className="text-[11px] text-gray-400 dark:text-slate-500">
                          - {p.time.split('-')[1].trim()}
                     </span>
                   </>
@@ -67,7 +67,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
               <React.Fragment key={day}>
                 {/* Day Label */}
                 <div className="sticky left-0 z-[35] bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] shadow-sm border border-gray-200 dark:border-slate-700/80 flex items-center justify-center h-32 sm:h-36 w-14 sm:w-16">
-                    <span className="text-[10px] sm:text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em] -rotate-90">{day}</span>
+                    <span className="text-[11px] sm:text-[12px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em] -rotate-90">{day}</span>
                 </div>
 
                 {periods.map((period, pIdx) => {
@@ -149,16 +149,16 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                                </div>
                             )}
 
-                            <div className="font-black text-[13px] sm:text-[15px] leading-tight line-clamp-2 tracking-tight">
+                            <div className="font-black text-[14px] sm:text-[16.5px] leading-tight line-clamp-2 tracking-tight">
                                 {sub?.name || 'Unknown'}
                             </div>
 
                             <div className="mt-auto space-y-1">
-                                <div className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest opacity-60 ${styles.subtext}`}>
+                                <div className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest opacity-60 ${styles.subtext}`}>
                                     {slot.type === 'Practical' ? 'Lab Practice' : sub?.code || 'Gen Subject'}
                                 </div>
                                 <div className={`flex items-center justify-between`}>
-                                    <span className="text-[10px] sm:text-[11px] font-black opacity-80">{schedule.details.section ? `ROOM ${schedule.details.section}` : 'TBA'}</span>
+                                    <span className="text-[11px] sm:text-[12px] font-black opacity-80">{schedule.details.section ? `ROOM ${schedule.details.section}` : 'TBA'}</span>
                                     <div className={`h-1 w-4 sm:h-1.5 sm:w-6 rounded-full bg-current opacity-20`}></div>
                                 </div>
                             </div>

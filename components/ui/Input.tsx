@@ -30,7 +30,7 @@ export const Input: React.FC<InputProps> = ({ label, icon, error, className = ''
           </div>
         )}
       </div>
-      {error && <p className="mt-1.5 text-[10px] font-bold text-red-600 dark:text-red-400 ml-4">{error}</p>}
+      {error && <p className="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400 ml-4">{error}</p>}
     </div>
   );
 };
