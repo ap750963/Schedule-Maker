@@ -41,8 +41,13 @@ export const FacultyManagement: React.FC<FacultyManagementProps> = ({ faculties,
     setIsAddModalOpen(false);
   };
 
-  const handleUpdate = (id: string, name: string) => {
-    const updated = localFaculties.map(f => f.id === id ? { ...f, name, initials: generateInitials(name) } : f);
+  const handleUpdate = (id: string, field: 'name' | 'initials', value: string) => {
+    const updated = localFaculties.map(f => {
+        if (f.id !== id) return f;
+        if (field === 'name') return { ...f, name: value };
+        if (field === 'initials') return { ...f, initials: value.toUpperCase().substring(0, 3) };
+        return f;
+    });
     setLocalFaculties(updated);
     onSave(updated);
   };
@@ -97,11 +102,18 @@ export const FacultyManagement: React.FC<FacultyManagementProps> = ({ faculties,
                         <input 
                             className="w-full bg-transparent border-none font-bold text-gray-900 dark:text-white focus:ring-0 p-0 text-sm"
                             value={f.name}
-                            onChange={e => handleUpdate(f.id, e.target.value)}
+                            onChange={e => handleUpdate(f.id, 'name', e.target.value)}
                             placeholder="Faculty Name"
                         />
-                        <div className="flex items-center gap-2 mt-0.5">
-                           <span className="text-[10px] font-black text-gray-300 dark:text-slate-600 uppercase tracking-widest">Initials: {f.initials}</span>
+                        <div className="flex items-center gap-2 mt-1">
+                           <span className="text-[10px] font-black text-gray-300 dark:text-slate-600 uppercase tracking-widest">Initials:</span>
+                           <input 
+                                className="bg-transparent border-b border-gray-200 dark:border-slate-700 font-bold text-gray-500 dark:text-slate-400 focus:border-primary-500 focus:text-primary-600 focus:ring-0 p-0 text-xs w-16 uppercase tracking-widest"
+                                value={f.initials}
+                                onChange={e => handleUpdate(f.id, 'initials', e.target.value)}
+                                maxLength={3}
+                                placeholder="INI"
+                            />
                         </div>
                     </div>
                     <button 

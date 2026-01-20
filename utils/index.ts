@@ -110,13 +110,32 @@ export const getSolidColorClasses = (colorName?: string) => {
 
 export const getSubjectColorName = (subjects: Subject[], subjectId: string, facultyIds?: string[]): string => {
   const subj = subjects.find(s => s.id === subjectId);
-  if (subj?.color && (!facultyIds || facultyIds.length === 0)) return subj.color;
-  const colorKey = subjectId + (facultyIds ? [...facultyIds].sort().join('') : '');
+  if (!subj) return 'gray';
+
+  // If no faculty is assigned, return the subject's base color
+  if (!facultyIds || facultyIds.length === 0) return subj.color || 'gray';
+
+  // If faculties are assigned, shift the color based on the faculty combination.
+  // This ensures that:
+  // 1. Same subject + Same faculty = Same color
+  // 2. Same subject + Different faculty = Different color
+  // 3. Keeps a deterministic relationship with the base color (shifts it) rather than pure random
+  
+  const baseColorIndex = SUBJECT_COLORS.indexOf(subj.color || 'gray');
+  const baseIndex = baseColorIndex === -1 ? 0 : baseColorIndex;
+
+  const facultyKey = [...facultyIds].sort().join('');
   let hash = 0;
-  for (let i = 0; i < colorKey.length; i++) {
-      hash = colorKey.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < facultyKey.length; i++) {
+      hash = facultyKey.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % SUBJECT_COLORS.length;
+
+  // Use the hash to determine a step/offset from the base color
+  // Adding 1 ensures we don't just stay on the same color if hash is small (though hash is usually large)
+  // We mod by Length-1 and add 1 to get a step between 1 and Length-1.
+  const step = (Math.abs(hash) % (SUBJECT_COLORS.length - 1)) + 1;
+  
+  const index = (baseIndex + step) % SUBJECT_COLORS.length;
   return SUBJECT_COLORS[index];
 };
 
