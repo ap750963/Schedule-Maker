@@ -160,7 +160,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                            </div>
                                         ) : (
                                           <div className="flex flex-col items-center">
-                                            {/* Removed Hour Label as requested */}
                                             <div className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.05em] mb-1 group-hover:scale-105 transition-transform">{p.time}</div>
                                           </div>
                                         )}
@@ -195,7 +194,11 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                     if (period.isBreak) {
                                                       return (
                                                         <td key={period.id} className="border-r border-b border-gray-100 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-800/20 text-center align-middle p-0">
-                                                          <span className="text-3xl font-black uppercase tracking-[0.2em] text-gray-300 dark:text-slate-700/60 vertical-text" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>RECESS</span>
+                                                          <div className="flex flex-col items-center justify-center leading-none">
+                                                              {"RECESS".split("").map((letter, i) => (
+                                                                  <span key={i} className="text-xl font-black text-gray-300 dark:text-slate-700/60">{letter}</span>
+                                                              ))}
+                                                          </div>
                                                         </td>
                                                       );
                                                     }
@@ -207,7 +210,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
 
                                                     return (
                                                         <td key={period.id} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className="border-r border-b border-gray-100 dark:border-slate-800 p-2 cursor-pointer group/cell">
-                                                            <div className={`h-28 w-full rounded-[2rem] p-4 flex flex-col justify-between transition-all duration-300 ${slot ? `${colorClasses?.bg} shadow-sm border border-transparent hover:border-primary-300 hover:scale-[1.02]` : 'bg-white dark:bg-slate-900/50 border border-gray-50 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
+                                                            <div className={`h-28 w-full rounded-[2rem] p-4 flex flex-col justify-between transition-all duration-300 ${slot ? `${colorClasses?.bg} shadow-sm border border-transparent hover:border-primary-300 hover:scale-[1.02]` : 'bg-white dark:bg-slate-900/50 border border-gray-100 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
                                                                 {slot ? (
                                                                     <>
                                                                         <div className="font-black text-[11px] leading-tight dark:text-white line-clamp-2 tracking-tight">{sch.subjects.find(s => s.id === slot.subjectId)?.name}</div>

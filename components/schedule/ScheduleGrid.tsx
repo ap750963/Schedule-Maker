@@ -69,7 +69,11 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                    if (period.isBreak) {
                        return (
                            <div key={period.id} className="h-36 rounded-[2.5rem] bg-gray-100/30 dark:bg-slate-900/20 border-2 border-dashed border-gray-100 dark:border-slate-800/50 flex flex-col items-center justify-center opacity-40 group hover:opacity-100 transition-opacity cursor-pointer" onClick={() => onPeriodClick(period)}>
-                               <span className="text-3xl font-black uppercase tracking-[0.2em] text-gray-300 dark:text-slate-700/60 vertical-text" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>RECESS</span>
+                               <div className="flex flex-col items-center justify-center leading-none">
+                                   {"RECESS".split("").map((letter, i) => (
+                                       <span key={i} className="text-xl font-black text-gray-300 dark:text-slate-700/60">{letter}</span>
+                                   ))}
+                               </div>
                            </div>
                        );
                    }
