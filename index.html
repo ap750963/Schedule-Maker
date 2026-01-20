@@ -13,10 +13,8 @@
     <meta name="apple-mobile-web-app-title" content="ScholarTime" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2693/2693507.png" />
 
-    <!-- Modern Font Loading -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Sans Font -->
+    <link href="https://fonts.cdnfonts.com/css/google-sans" rel="stylesheet">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -41,16 +39,16 @@
               },
             },
             fontFamily: {
-              sans: ['Inter', 'system-ui', 'sans-serif'],
+              sans: ['Google Sans', 'Product Sans', 'sans-serif'],
             },
             boxShadow: {
               'soft': '0 10px 40px -10px rgba(0, 0, 0, 0.05)',
               'glow': '0 8px 30px -4px rgb(var(--primary-500) / 0.3)',
-              'card': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+              'card': '0 4px 12px -1px rgba(0, 0, 0, 0.03), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
             },
             animation: {
-              'fade-in-up': 'fadeInUp 0.2s ease-out forwards',
-              'modal': 'modal-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
+              'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
+              'modal': 'modal-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
             }
           }
         }
@@ -60,7 +58,6 @@
     <style type="text/tailwindcss">
       @layer base {
         :root {
-          /* Default Teal Theme (RGB values for Tailwind) */
           --primary-50: 240 253 250;
           --primary-100: 204 251 241;
           --primary-200: 153 246 228;
@@ -74,11 +71,10 @@
         }
 
         body {
-          @apply bg-gray-50 text-slate-900 antialiased font-sans transition-colors duration-300;
+          @apply bg-white text-slate-900 antialiased font-sans transition-colors duration-300;
           -webkit-tap-highlight-color: transparent;
         }
 
-        /* Dark mode overrides */
         .dark body {
           @apply bg-slate-950 text-white;
           background-color: #020617 !important;
@@ -95,30 +91,26 @@
       }
       
       @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(15px); }
         to { opacity: 1; transform: translateY(0); }
       }
     </style>
-
-    <script type="importmap">
+  <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@19.0.0",
-    "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.462.0",
-    "html2canvas": "https://esm.sh/html2canvas@1.4.1",
-    "jspdf": "https://esm.sh/jspdf@2.5.1",
-    "uuid": "https://esm.sh/uuid@11.0.0",
-    "xlsx": "https://esm.sh/xlsx@0.18.5",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
     "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "jspdf": "https://esm.sh/jspdf@^4.0.0",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
     "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "xlsx": "https://esm.sh/xlsx@^0.18.5"
   }
 }
 </script>
-  </head>
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>

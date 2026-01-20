@@ -21,55 +21,55 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   const getSub = (id: string) => schedule.subjects.find(s => s.id === id);
 
   return (
-    <div className="w-full overflow-auto bg-gray-50/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-[2.5rem] scrollbar-hide">
+    <div className="w-full overflow-auto bg-gray-50/30 dark:bg-slate-950/30 p-4 sm:p-6 rounded-[3rem] no-scrollbar">
       <div 
-        className="grid gap-3 min-w-max"
+        className="grid gap-4 min-w-max"
         style={{
-           gridTemplateColumns: `60px repeat(${periods.length}, minmax(130px, 1fr)) 50px`
+           gridTemplateColumns: `70px repeat(${periods.length}, minmax(140px, 1fr)) 60px`
         }}
       >
-        <div className="sticky left-0 top-0 z-30 bg-gray-50/0 backdrop-blur-sm rounded-xl"></div>
+        <div className="sticky left-0 top-0 z-30 bg-transparent rounded-xl"></div>
         
         {periods.map(p => (
            <div 
              key={p.id} 
              onClick={() => onPeriodClick(p)}
-             className="sticky top-0 z-20 flex flex-col items-center justify-end pb-3 bg-gray-50/90 dark:bg-slate-900/90 backdrop-blur-sm group cursor-pointer"
+             className="sticky top-0 z-20 flex flex-col items-center justify-center pt-2 pb-5 bg-gray-50/90 dark:bg-slate-950/90 backdrop-blur-md group cursor-pointer"
            >
               {p.isBreak ? (
-                  <div className="flex flex-col items-center opacity-50">
-                     <Coffee size={12} className="mb-0.5" />
-                     <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">Break</span>
+                  <div className="flex flex-col items-center opacity-30 group-hover:opacity-100 transition-opacity">
+                     <Coffee size={14} className="mb-1" />
+                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">Break</span>
                   </div>
               ) : (
                   <>
-                    <span className="text-[9px] font-black text-blue-400 dark:text-blue-300 uppercase tracking-widest mb-0.5 group-hover:text-blue-600 transition-colors">
-                        {p.id}{p.id === 1 ? 'ST' : p.id === 2 ? 'ND' : p.id === 3 ? 'RD' : 'TH'}
-                    </span>
-                    <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">
+                    <span className="text-sm font-black text-gray-900 dark:text-white font-mono opacity-80 group-hover:scale-110 transition-transform">
                         {p.time.split('-')[0].trim()}
+                    </span>
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500">
+                         - {p.time.split('-')[1].trim()}
                     </span>
                   </>
               )}
            </div>
         ))}
         
-        <div className="sticky top-0 z-20 flex items-end justify-center pb-3 bg-gray-50/90 dark:bg-slate-900/90 backdrop-blur-sm">
-             <button onClick={onAddPeriod} className="p-1.5 text-gray-300 hover:text-primary-500 transition-colors"><Plus size={18} /></button>
+        <div className="sticky top-0 z-20 flex items-center justify-center pb-3 bg-gray-50/90 dark:bg-slate-950/90 backdrop-blur-md">
+             <button onClick={onAddPeriod} className="p-2 text-gray-300 hover:text-primary-500 hover:scale-125 transition-all"><Plus size={24} strokeWidth={3} /></button>
         </div>
 
 
         {DAYS.map((day, dIdx) => (
             <React.Fragment key={day}>
-               <div className="sticky left-0 z-10 bg-white dark:bg-slate-800 rounded-[1.5rem] shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center h-32 w-14">
-                   <span className="text-[10px] font-black text-gray-800 dark:text-white uppercase tracking-[0.2em] -rotate-90">{day}</span>
+               <div className="sticky left-0 z-10 bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-800 flex items-center justify-center h-36 w-16">
+                   <span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em] -rotate-90">{day}</span>
                </div>
 
                {periods.map((period, pIdx) => {
                    if (period.isBreak) {
                        return (
-                           <div key={period.id} className="h-32 rounded-[1.5rem] border-2 border-dashed border-gray-100 dark:border-slate-700/50 flex flex-col items-center justify-center opacity-50">
-                               <div className="w-1 h-full bg-gray-100 dark:bg-slate-700 rounded-full" />
+                           <div key={period.id} className="h-36 rounded-[2.5rem] bg-gray-100/30 dark:bg-slate-900/20 border-2 border-dashed border-gray-100 dark:border-slate-800/50 flex flex-col items-center justify-center opacity-40 group hover:opacity-100 transition-opacity cursor-pointer" onClick={() => onPeriodClick(period)}>
+                               <span className="text-3xl font-black uppercase tracking-[0.2em] text-gray-300 dark:text-slate-700/60 vertical-text" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>RECESS</span>
                            </div>
                        );
                    }
@@ -93,9 +93,11 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                            <div 
                                key={period.id} 
                                onClick={() => onCellClick(day, period.id)}
-                               className="h-32 rounded-[1.5rem] border-2 border-dashed border-gray-100 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:border-blue-200 dark:hover:border-blue-800 transition-all cursor-pointer flex items-center justify-center group"
+                               className="h-36 rounded-[2.5rem] border-2 border-dashed border-gray-50 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30 hover:bg-white dark:hover:bg-slate-800 hover:border-primary-200 dark:hover:border-primary-800 transition-all cursor-pointer flex items-center justify-center group"
                            >
-                               <Plus size={20} className="text-gray-200 dark:text-slate-700 group-hover:text-blue-300 transition-colors" />
+                               <div className="h-10 w-10 bg-gray-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-200 dark:text-slate-700 group-hover:text-primary-400 group-hover:scale-110 transition-all duration-300">
+                                  <Plus size={24} strokeWidth={3} />
+                               </div>
                            </div>
                        );
                    }
@@ -109,35 +111,36 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                            key={period.id}
                            onClick={() => onCellClick(day, period.id)}
                            className={`
-                               h-32 rounded-[1.5rem] p-3.5 flex flex-col justify-between cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg relative overflow-hidden
+                               h-36 rounded-[2.5rem] p-5 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden group
                                ${styles.bg} ${styles.text}
-                               ${conflict ? 'ring-4 ring-rose-500 ring-offset-2' : ''}
+                               ${conflict ? 'ring-4 ring-rose-500 ring-offset-4 z-10 scale-[0.98]' : ''}
                            `}
                            style={{ gridColumn: `span ${colSpan}` }}
                        >
                            {conflict && (
-                              <div className="absolute top-2 right-2 h-6 w-6 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse z-10" title={`Conflict: ${conflict}`}>
-                                <AlertTriangle size={14} />
+                              <div className="absolute top-3 right-3 h-8 w-8 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse z-10" title={`Conflict: ${conflict}`}>
+                                <AlertTriangle size={16} strokeWidth={2.5} />
                               </div>
                            )}
 
-                           <div className="font-bold text-sm leading-tight line-clamp-2">
+                           <div className="font-black text-[15px] leading-tight line-clamp-2 tracking-tight">
                                {sub?.name || 'Unknown'}
                            </div>
 
-                           <div className="mt-auto space-y-0.5">
-                               <div className={`text-[10px] font-bold uppercase tracking-wide opacity-80 ${styles.subtext}`}>
-                                   {slot.type === 'Practical' ? 'Lab Session' : sub?.code || 'No Code'}
+                           <div className="mt-auto space-y-1">
+                               <div className={`text-[10px] font-black uppercase tracking-widest opacity-60 ${styles.subtext}`}>
+                                   {slot.type === 'Practical' ? 'Lab Practice' : sub?.code || 'Gen Subject'}
                                </div>
-                               <div className={`text-xs font-black ${styles.text} flex items-center justify-between`}>
-                                   <span>{schedule.details.section ? `RM ${schedule.details.section}` : 'RM --'}</span>
+                               <div className={`flex items-center justify-between`}>
+                                   <span className="text-[11px] font-black opacity-80">{schedule.details.section ? `ROOM ${schedule.details.section}` : 'TBA'}</span>
+                                   <div className={`h-1.5 w-6 rounded-full bg-current opacity-20`}></div>
                                </div>
                            </div>
                        </div>
                    );
                })}
 
-               <div className="h-32 bg-transparent" />
+               <div className="h-36 bg-transparent" />
             </React.Fragment>
         ))}
       </div>

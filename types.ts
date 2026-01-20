@@ -27,11 +27,12 @@ export interface Faculty {
 }
 
 export interface ClassDetails {
-  className: string;
+  className: string; // Department name
   section: string;
   session: string;
   semester: string;
-  level?: '1st-year' | 'higher-year'; // Added to distinguish structure
+  level: '1st-year' | 'higher-year';
+  branches?: string[]; // Used for 1st-year combined schedules
 }
 
 export interface Period {
@@ -52,6 +53,7 @@ export interface TimeSlot {
   facultyIds: string[]; 
   type: 'Theory' | 'Practical';
   duration?: number;
+  branch?: string; // Specific branch for 1st-year combined batch slots if needed
 }
 
 export interface Schedule {
@@ -64,7 +66,7 @@ export interface Schedule {
   lastModified: number;
 }
 
-export type ViewState = 'dashboard' | 'wizard' | 'editor' | 'master-editor' | 'faculty-wise';
+export type ViewState = 'dashboard' | 'wizard' | 'editor' | 'master-editor' | 'faculty-wise' | 'faculty-management';
 
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

@@ -1,36 +1,42 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Schedule, ViewState } from './types.ts';
+import { Schedule, ViewState, Faculty } from './types.ts';
 import { Home } from './views/Home.tsx';
 import { Wizard } from './views/Wizard.tsx';
 import { Editor } from './views/Editor.tsx';
 import { MultiSemesterEditor } from './views/MultiSemesterEditor.tsx';
 import { FacultyWiseView } from './views/FacultyWiseView.tsx';
+import { FacultyManagement } from './views/FacultyManagement.tsx';
 import { applyTheme } from './utils/index.ts';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('dashboard');
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [globalFaculties, setGlobalFaculties] = useState<Faculty[]>([]);
   const [activeScheduleId, setActiveScheduleId] = useState<string | null>(null);
   
   // Theme State
   const [theme, setTheme] = useState<string>(() => localStorage.getItem('scholarTime_theme') || 'teal');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => localStorage.getItem('scholarTime_darkMode') === 'true');
 
-  // Load Schedules
+  // Load Schedules and Global Faculties
   useEffect(() => {
-    const saved = localStorage.getItem('scholarTime_schedules');
-    if (saved) {
-      try {
-        setSchedules(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse schedules", e);
-      }
+    const savedSchedules = localStorage.getItem('scholarTime_schedules');
+    if (savedSchedules) {
+      try { setSchedules(JSON.parse(savedSchedules)); } catch (e) { console.error(e); }
+    }
+    const savedFaculties = localStorage.getItem('scholarTime_faculties');
+    if (savedFaculties) {
+      try { setGlobalFaculties(JSON.parse(savedFaculties)); } catch (e) { console.error(e); }
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('scholarTime_schedules', JSON.stringify(schedules));
   }, [schedules]);
+
+  useEffect(() => {
+    localStorage.setItem('scholarTime_faculties', JSON.stringify(globalFaculties));
+  }, [globalFaculties]);
 
   // Theme Effects
   useEffect(() => {
@@ -40,15 +46,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const root = document.documentElement;
-    if (isDarkMode) {
-        root.classList.add('dark');
-    } else {
-        root.classList.remove('dark');
-    }
+    if (isDarkMode) root.classList.add('dark');
+    else root.classList.remove('dark');
     localStorage.setItem('scholarTime_darkMode', String(isDarkMode));
   }, [isDarkMode]);
-
-  const handleCreateNew = () => setView('wizard');
 
   const handleFinishWizard = (newSchedules: Schedule[]) => {
     setSchedules(prev => [...newSchedules, ...prev]);
@@ -58,19 +59,6 @@ const App: React.FC = () => {
         setView('dashboard');
     }
   };
-
-  const handleSelectSchedule = (id: string) => {
-    setActiveScheduleId(id);
-    setView('editor');
-  };
-
-  const handleDeleteSchedule = useCallback((id: string) => {
-    setSchedules(prev => prev.filter(s => s.id !== id));
-    if (activeScheduleId === id) {
-      setActiveScheduleId(null);
-      setView('dashboard');
-    }
-  }, [activeScheduleId]);
 
   const handleUpdateSchedule = (updated: Schedule) => {
     setSchedules(prev => prev.map(s => s.id === updated.id ? updated : s));
@@ -92,11 +80,12 @@ const App: React.FC = () => {
       {view === 'dashboard' && (
         <Home 
           schedules={schedules} 
-          onCreateNew={handleCreateNew} 
-          onSelectSchedule={handleSelectSchedule}
+          onCreateNew={() => setView('wizard')} 
+          onSelectSchedule={(id) => { setActiveScheduleId(id); setView('editor'); }}
           onOpenMaster={() => setView('master-editor')}
           onOpenFacultyWise={() => setView('faculty-wise')}
-          onDeleteSchedule={handleDeleteSchedule}
+          onOpenFacultyManagement={() => setView('faculty-management')}
+          onDeleteSchedule={(id) => setSchedules(prev => prev.filter(s => s.id !== id))}
           currentTheme={theme}
           isDarkMode={isDarkMode}
           onSetTheme={setTheme}
@@ -105,7 +94,11 @@ const App: React.FC = () => {
       )}
       
       {view === 'wizard' && (
-        <Wizard onCancel={() => setView('dashboard')} onFinish={handleFinishWizard} />
+        <Wizard 
+          onCancel={() => setView('dashboard')} 
+          onFinish={handleFinishWizard} 
+          globalFaculties={globalFaculties}
+        />
       )}
       
       {view === 'editor' && activeSchedule && (
@@ -118,18 +111,23 @@ const App: React.FC = () => {
       )}
 
       {view === 'master-editor' && (
-        <MultiSemesterEditor schedules={schedules} onSaveAll={handleUpdateAllSchedules} onBack={() => setView('dashboard')} />
+        <MultiSemesterEditor 
+          schedules={schedules} 
+          onSaveAll={handleUpdateAllSchedules} 
+          onBack={() => setView('dashboard')} 
+        />
       )}
 
       {view === 'faculty-wise' && (
         <FacultyWiseView schedules={schedules} onBack={() => setView('dashboard')} />
       )}
 
-      {view === 'editor' && !activeSchedule && (
-        <div className="flex items-center justify-center h-screen dark:bg-slate-900 dark:text-white">
-            <p>Error: Schedule not found.</p>
-            <button onClick={() => setView('dashboard')} className="ml-4 text-blue-600 underline">Go Home</button>
-        </div>
+      {view === 'faculty-management' && (
+        <FacultyManagement 
+          faculties={globalFaculties} 
+          onSave={setGlobalFaculties} 
+          onBack={() => setView('dashboard')} 
+        />
       )}
     </div>
   );
