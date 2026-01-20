@@ -111,21 +111,21 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
           <div className="w-12" />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 max-w-xl mx-auto w-full pb-32">
+      <div className="flex-1 overflow-y-auto p-6 max-w-2xl mx-auto w-full pb-32">
         {step === 1 && (
             <div className="animate-fade-in-up space-y-2">
                 <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">New Schedule</h2>
                 <p className="text-gray-400 font-medium text-lg mb-10">Select the year level to configure.</p>
-                <div className="grid gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <button onClick={() => handleLevelSelect('1st-year')} className="p-8 bg-gray-50/50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-500 hover:bg-white dark:hover:bg-slate-800 transition-all text-left group shadow-soft">
                         <Users className="h-12 w-12 text-primary-500 mb-6" />
-                        <h4 className="text-2xl font-black dark:text-white tracking-tight">1st Year (Combined)</h4>
-                        <p className="text-sm text-gray-400 mt-2 font-medium leading-relaxed">Single common timetable for all branches together.</p>
+                        <h4 className="text-2xl font-black dark:text-white tracking-tight">1st Year</h4>
+                        <p className="text-sm text-gray-400 mt-2 font-medium leading-relaxed">Single common timetable for all branches.</p>
                     </button>
                     <button onClick={() => handleLevelSelect('higher-year')} className="p-8 bg-gray-50/50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-500 hover:bg-white dark:hover:bg-slate-800 transition-all text-left group shadow-soft">
                         <Beaker className="h-12 w-12 text-primary-500 mb-6" />
-                        <h4 className="text-2xl font-black dark:text-white tracking-tight">Higher Years (Branch-wise)</h4>
-                        <p className="text-sm text-gray-400 mt-2 font-medium leading-relaxed">Separate departmental schedules for 2nd and 3rd years.</p>
+                        <h4 className="text-2xl font-black dark:text-white tracking-tight">Higher Years</h4>
+                        <p className="text-sm text-gray-400 mt-2 font-medium leading-relaxed">Separate branch-wise departmental schedules.</p>
                     </button>
                 </div>
             </div>
@@ -156,8 +156,8 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                           </div>
                           <div>
                               <div className="flex justify-between items-center mb-3 px-3">
-                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400">Branches for Combined Batch</label>
-                                  <button onClick={() => setBranches([...branches, ''])} className="text-primary-500 text-[10px] font-black uppercase hover:underline">+ Add Branch</button>
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400">Branches</label>
+                                  <button onClick={() => setBranches([...branches, ''])} className="text-primary-500 text-[10px] font-black uppercase hover:underline">+ Add</button>
                               </div>
                               <div className="space-y-3">
                                   {branches.map((b, i) => (
@@ -218,11 +218,11 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                 <div className="space-y-5">
                     {(subjectsByGroup[activeSubTab || (academicLevel === '1st-year' ? '1' : '')] || []).map((sub, idx) => (
                         <div key={sub.id} className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 shadow-card animate-fade-in-up">
-                            <div className="flex justify-between items-start mb-6">
+                            <div className="flex justify-between items-start mb-6 gap-4">
                                 <Input label="Subject Name" value={sub.name} onChange={e => updateSubject(activeSubTab || '1', sub.id, { name: e.target.value })} />
-                                <button onClick={() => setSubjectsByGroup(prev => ({ ...prev, [activeSubTab]: prev[activeSubTab].filter(s => s.id !== sub.id) }))} className="text-red-200 hover:text-red-500 mt-8 ml-4 transition-colors"><Trash2 size={24} /></button>
+                                <button onClick={() => setSubjectsByGroup(prev => ({ ...prev, [activeSubTab]: prev[activeSubTab].filter(s => s.id !== sub.id) }))} className="text-red-200 hover:text-red-500 mt-8 transition-colors"><Trash2 size={24} /></button>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="flex items-center justify-between bg-gray-50 dark:bg-slate-800/50 p-3 px-5 rounded-2xl">
                                     <span className="text-[10px] font-black uppercase text-gray-400">Theory</span>
                                     <div className="flex items-center gap-4">
@@ -255,12 +255,12 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                 <h2 className="text-4xl font-black dark:text-white tracking-tight mb-2">Assign Faculty</h2>
                 <p className="text-gray-400 text-lg font-medium mb-10">Choose from the global college faculty list.</p>
                 
-                <div className="grid gap-3">
+                <div className="grid grid-cols-1 gap-3">
                     {globalFaculties.length === 0 ? (
                         <div className="text-center py-20 bg-gray-50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-dashed border-gray-100 dark:border-slate-800 px-6">
                             <User size={48} className="mx-auto text-gray-200 dark:text-slate-700 mb-4" />
                             <p className="text-gray-400 font-black">No global faculties found.</p>
-                            <p className="text-[10px] uppercase font-bold text-gray-300 mt-2">Add them on the Home screen registry first.</p>
+                            <p className="text-[10px] uppercase font-bold text-gray-300 mt-2">Add them on the Home screen first.</p>
                         </div>
                     ) : (
                         globalFaculties.map(f => {
@@ -271,7 +271,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                                         <div className="h-14 w-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm border border-gray-100 dark:border-slate-700 text-slate-800 dark:text-slate-200">{f.initials}</div>
                                         <div className="text-left">
                                             <span className="font-black text-gray-900 dark:text-white block">{f.name}</span>
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{f.initials} Registry</span>
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Faculty Member</span>
                                         </div>
                                     </div>
                                     {selected && <div className="h-8 w-8 bg-primary-500 text-white rounded-full flex items-center justify-center shadow-lg"><Check size={18} strokeWidth={4} /></div>}
@@ -282,7 +282,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                 </div>
 
                 <div className="mt-12">
-                    <Button fullWidth onClick={handleFinish} size="lg" className="rounded-3xl py-5 shadow-glow" disabled={selectedFaculties.length === 0}>Create Department Schedule</Button>
+                    <Button fullWidth onClick={handleFinish} size="lg" className="rounded-3xl py-5 shadow-glow" disabled={selectedFaculties.length === 0}>Create Schedules</Button>
                 </div>
             </div>
         )}
