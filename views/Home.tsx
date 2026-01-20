@@ -99,7 +99,6 @@ export const Home: React.FC<HomeProps> = ({
                 <div className="grid gap-4">
                     {sessionSchedules.map((schedule) => (
                     <div key={schedule.id} className="relative group">
-                      {/* Interactive Card Surface */}
                       <div 
                         onClick={() => onSelectSchedule(schedule.id)} 
                         className="bg-white dark:bg-slate-800 p-5 rounded-[2.5rem] shadow-card hover:shadow-soft hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-700 cursor-pointer relative overflow-hidden"
@@ -109,10 +108,10 @@ export const Home: React.FC<HomeProps> = ({
                           <div className="flex justify-between items-start relative z-10">
                             <div className="flex-1 pr-12">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[9px] font-bold uppercase tracking-wider bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full border border-primary-100 dark:border-primary-800">{schedule.details.semester} Sem</span>
+                                    <span className="text-[9px] font-bold uppercase tracking-wider bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2.5 py-1 rounded-full border border-primary-100 dark:border-primary-800">{schedule.details.semester} Sem</span>
                                 </div>
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors line-clamp-1">{schedule.details.className}</h3>
-                                <div className="inline-flex items-center mt-2 px-2.5 py-1 bg-gray-50 dark:bg-slate-700/50 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Section {schedule.details.section}</div>
+                                <div className="inline-flex items-center mt-2 px-3 py-1 bg-gray-50 dark:bg-slate-700/50 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Section {schedule.details.section}</div>
                             </div>
                           </div>
                           <div className="mt-6 flex items-center justify-between text-[10px] font-bold text-slate-400 dark:text-slate-500 relative z-10">
@@ -123,7 +122,6 @@ export const Home: React.FC<HomeProps> = ({
                           </div>
                       </div>
 
-                      {/* Absolute Delete Button Overlay */}
                       <button 
                           type="button"
                           onClick={(e) => { 
@@ -132,7 +130,6 @@ export const Home: React.FC<HomeProps> = ({
                               setScheduleToDelete(schedule);
                           }} 
                           className="absolute top-4 right-4 h-9 w-9 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center text-red-500 dark:text-red-400 border border-gray-100 dark:border-slate-600 shadow-sm hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 hover:scale-110 active:scale-90 transition-all z-20"
-                          title="Delete Schedule"
                       >
                           <Trash2 size={16} strokeWidth={2.5} />
                       </button>
@@ -161,8 +158,7 @@ export const Home: React.FC<HomeProps> = ({
                 </div>
 
                 <div className="space-y-5">
-                    {/* Dark Mode Toggle */}
-                    <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-full flex items-center justify-between">
+                    <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-full flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="h-8 w-8 bg-white dark:bg-slate-600 rounded-full flex items-center justify-center text-slate-700 dark:text-white shadow-sm">
                                 {isDarkMode ? <Moon size={16} /> : <Sun size={16} />}
@@ -180,10 +176,9 @@ export const Home: React.FC<HomeProps> = ({
                         </button>
                     </div>
 
-                    {/* Theme Colors */}
                     <div>
-                        <h4 className="font-bold text-slate-900 dark:text-white text-xs mb-3 px-1">Accent Color</h4>
-                        <div className="grid grid-cols-5 gap-2">
+                        <h4 className="font-bold text-slate-900 dark:text-white text-xs mb-3 px-1 uppercase tracking-widest">Theme Colors</h4>
+                        <div className="grid grid-cols-5 gap-3">
                             {Object.keys(THEMES).map((theme) => {
                                 const rgb = THEMES[theme][500];
                                 return (
@@ -208,7 +203,6 @@ export const Home: React.FC<HomeProps> = ({
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
       {scheduleToDelete && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300">
             <div 
@@ -232,7 +226,7 @@ export const Home: React.FC<HomeProps> = ({
                             variant="danger" 
                             fullWidth 
                             onClick={confirmDelete}
-                            className="rounded-full py-3 text-sm text-red-700 bg-red-50 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/30 dark:text-red-300 dark:border-red-900/50"
+                            className="rounded-full py-3 text-sm"
                         >
                             Delete Permanently
                         </Button>

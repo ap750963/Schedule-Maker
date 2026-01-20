@@ -39,7 +39,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
   return (
     <div className="w-full group relative" ref={containerRef}>
-      {label && <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 ml-3">{label}</label>}
+      {label && <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 ml-4">{label}</label>}
       
       <button
         type="button"
@@ -48,7 +48,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         className={`
           relative w-full text-left bg-white dark:bg-slate-800 border-2 
           ${isOpen ? 'border-primary-500 ring-4 ring-primary-100 dark:ring-primary-900/30' : 'border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-slate-600'} 
-          rounded-full py-3 pl-6 pr-10 
+          rounded-full py-2.5 pl-6 pr-10 
           text-sm font-bold text-gray-900 dark:text-white
           transition-all outline-none 
           disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed dark:disabled:bg-slate-900 dark:disabled:text-slate-600
@@ -83,13 +83,13 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                         }
                     }}
                     className={`
-                    w-full text-left px-4 py-3 rounded-full flex items-center justify-between
+                    w-full text-left px-4 py-2.5 rounded-full flex items-center justify-between
                     transition-colors
                     ${option.disabled ? 'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-slate-800' : 'hover:bg-primary-50 dark:hover:bg-slate-700 cursor-pointer'}
                     ${option.value === value ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-slate-300'}
                     `}
                 >
-                    <span className={`font-bold text-xs flex-1 mr-2 ${option.value === value ? 'text-primary-900 dark:text-primary-100' : ''}`}>
+                    <span className={`font-bold text-[13px] flex-1 mr-2 ${option.value === value ? 'text-primary-900 dark:text-primary-100' : ''}`}>
                         {option.dropdownLabel || option.label}
                     </span>
                     {option.value === value && <Check size={14} className="text-primary-600 dark:text-primary-400 shrink-0" />}
