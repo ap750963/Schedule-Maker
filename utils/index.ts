@@ -35,24 +35,17 @@ export const getSlotInterval = (slot: TimeSlot, periods: Period[]) => {
     const duration = slot.duration || 1;
     const startIndex = periods.findIndex(p => p.id === slot.period);
     
-    // Find the end time by looking at the period where the slot ends
-    // If it spans 2 periods, the end time is the endMinutes of (startIndex + 1)
     let endMinutes = startPeriod.endMinutes!;
-    
-    // Handle duration by finding the actual end time across consecutive periods
     let actualEndIdx = startIndex;
     let count = 0;
-    // Iterate to find the end period index based on academic duration (skipping breaks if needed logic required, but simplified here)
     for (let i = startIndex; i < periods.length; i++) {
         if (!periods[i].isBreak) {
             count++;
         }
         if (count > duration) break; 
-        // We track the index of the last valid period included
         if (!periods[i].isBreak) actualEndIdx = i;
     }
     
-    // If we have periods, grab end minutes of the calculated end index
     if (periods[actualEndIdx]) {
         endMinutes = periods[actualEndIdx].endMinutes!;
     }
@@ -71,14 +64,15 @@ export const to24Hour = (timeStr: string) => {
 export const getColorClasses = (colorName?: string) => {
   const color = colorName || 'gray';
   const createPalette = (c: string) => ({
-      bg: `bg-${c}-500/10 dark:bg-${c}-400/20 backdrop-blur-md`,
-      gradient: `bg-gradient-to-br from-${c}-50 to-${c}-100/50 dark:from-${c}-900/60 dark:to-${c}-800/40`,
-      border: `border-${c}-200/60 dark:border-${c}-500/40`,
+      // Enhanced glassmorphism: slightly higher opacity and richer gradients
+      bg: `bg-${c}-500/15 dark:bg-${c}-400/20 backdrop-blur-xl`,
+      gradient: `bg-gradient-to-br from-${c}-400/10 to-${c}-600/10`,
+      border: `border-${c}-300 dark:border-${c}-500/50`,
       text: `text-${c}-900 dark:text-${c}-50`,
-      lightText: `text-${c}-700/70 dark:text-${c}-300/80`,
-      pill: `bg-${c}-500/15 text-${c}-700 dark:text-${c}-200`,
-      hover: `hover:bg-${c}-500/20 dark:hover:bg-${c}-400/30 hover:scale-[1.02] hover:shadow-lg hover:shadow-${c}-500/10`,
-      icon: `text-${c}-500 dark:text-${c}-400`
+      lightText: `text-${c}-700/80 dark:text-${c}-300/80`,
+      pill: `bg-${c}-500/20 text-${c}-800 dark:text-${c}-200`,
+      hover: `hover:bg-${c}-500/25 dark:hover:bg-${c}-400/30 hover:scale-[1.03] hover:shadow-xl hover:shadow-${c}-500/20`,
+      icon: `text-${c}-600 dark:text-${c}-400`
   });
   const styles: Record<string, any> = {
     rose: createPalette('rose'), orange: createPalette('orange'), amber: createPalette('amber'),
@@ -94,11 +88,11 @@ export const getColorClasses = (colorName?: string) => {
 export const getSolidColorClasses = (colorName?: string) => {
   const c = colorName || 'gray';
   return {
-    bg: `bg-${c}-200 dark:bg-${c}-900/40`,
+    bg: `bg-${c}-100 dark:bg-${c}-900/40 backdrop-blur-md`,
     text: `text-${c}-900 dark:text-${c}-50`,
     subtext: `text-${c}-700 dark:text-${c}-300`,
-    border: `border-${c}-300 dark:border-${c}-500/40`,
-    hover: `hover:bg-${c}-300 dark:hover:bg-${c}-800/80`
+    border: `border-${c}-300/60 dark:border-${c}-500/40`,
+    hover: `hover:bg-${c}-200 dark:hover:bg-${c}-800/80`
   };
 };
 
@@ -133,19 +127,7 @@ export const applyTheme = (themeName: string) => {
 };
 
 export const THEMES = {
-    teal: { 
-      // Slightly fresher/lighter teal palette
-      50: '236 253 250', 
-      100: '204 251 241', 
-      200: '153 246 228', 
-      300: '94 234 212', 
-      400: '45 212 191', 
-      500: '20 184 166', // Standard Teal 500
-      600: '13 148 136', 
-      700: '15 118 110', 
-      800: '17 94 89', 
-      900: '19 78 74' 
-    },
+    teal: { 50: '236 253 250', 100: '204 251 241', 200: '153 246 228', 300: '94 234 212', 400: '45 212 191', 500: '20 184 166', 600: '13 148 136', 700: '15 118 110', 800: '17 94 89', 900: '19 78 74' },
     blue: { 50: '239 246 255', 100: '219 234 254', 200: '191 219 254', 300: '147 197 253', 400: '96 165 250', 500: '59 130 246', 600: '37 99 235', 700: '29 78 216', 800: '30 64 175', 900: '30 58 138' },
     violet: { 50: '245 243 255', 100: '237 233 254', 200: '221 214 254', 300: '196 181 253', 400: '167 139 250', 500: '139 92 246', 600: '124 58 237', 700: '109 40 217', 800: '91 33 182', 900: '76 29 149' },
     rose: { 50: '255 241 242', 100: '255 228 230', 200: '254 205 211', 300: '253 164 175', 400: '251 113 133', 500: '244 63 94', 600: '225 29 72', 700: '190 18 60', 800: '159 18 57', 900: '136 19 55' },

@@ -137,7 +137,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                             key={period.id}
                             onClick={() => onCellClick(day, period.id)}
                             className={`
-                                h-32 sm:h-36 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-5 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden group border-2 ${styles.border}
+                                h-32 sm:h-36 rounded-[1.5rem] sm:rounded-[2.5rem] p-5 sm:p-6 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden group border-2 ${styles.border}
                                 ${styles.bg} ${styles.text}
                                 ${conflict ? 'ring-4 ring-rose-500 ring-offset-4 z-10 scale-[0.98]' : ''}
                             `}
@@ -149,16 +149,16 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                                </div>
                             )}
 
-                            <div className="font-black text-[14px] sm:text-[16.5px] leading-tight line-clamp-2 tracking-tight">
+                            <div className="font-black text-[16px] sm:text-[18px] leading-tight line-clamp-2 tracking-tight">
                                 {sub?.name || 'Unknown'}
                             </div>
 
                             <div className="mt-auto space-y-1">
-                                <div className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest opacity-60 ${styles.subtext}`}>
+                                <div className={`text-[11px] sm:text-[12px] font-black uppercase tracking-widest opacity-60 ${styles.subtext}`}>
                                     {slot.type === 'Practical' ? 'Lab Practice' : sub?.code || 'Gen Subject'}
                                 </div>
                                 <div className={`flex items-center justify-between`}>
-                                    <span className="text-[11px] sm:text-[12px] font-black opacity-80">{schedule.details.section ? `ROOM ${schedule.details.section}` : 'TBA'}</span>
+                                    <span className="text-[12px] sm:text-[13px] font-black opacity-80">{schedule.details.section ? `ROOM ${schedule.details.section}` : 'TBA'}</span>
                                     <div className={`h-1 w-4 sm:h-1.5 sm:w-6 rounded-full bg-current opacity-20`}></div>
                                 </div>
                             </div>
