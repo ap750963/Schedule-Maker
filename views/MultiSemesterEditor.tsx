@@ -123,6 +123,10 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     setEditingPeriod(null);
   };
 
+  const totalTableRows = useMemo(() => {
+      return DAYS.length * activeSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0);
+  }, [activeSchedules]);
+
   return (
     <div className="h-screen bg-white dark:bg-slate-950 flex flex-col transition-colors duration-300 overflow-hidden font-sans">
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 shadow-sm relative shrink-0">
@@ -192,15 +196,19 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                 </td>
                                                 {sch.periods.map((period, pIdx) => {
                                                     if (period.isBreak) {
-                                                      return (
-                                                        <td key={period.id} className="border-r border-b border-gray-100 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-800/20 text-center align-middle p-0">
-                                                          <div className="flex flex-col items-center justify-center leading-none">
-                                                              {"RECESS".split("").map((letter, i) => (
-                                                                  <span key={i} className="text-xl font-black text-gray-300 dark:text-slate-700/60">{letter}</span>
-                                                              ))}
-                                                          </div>
-                                                        </td>
-                                                      );
+                                                      // Merge break across all rows
+                                                      if (dIdx === 0 && sIdx === 0 && rIdx === 0) {
+                                                        return (
+                                                          <td key={period.id} rowSpan={totalTableRows} className="border-r border-b border-gray-100 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-800/20 text-center align-middle p-0">
+                                                            <div className="flex flex-col items-center justify-center leading-none">
+                                                                {"RECESS".split("").map((letter, i) => (
+                                                                    <span key={i} className="text-4xl font-black text-gray-300 dark:text-slate-700/60 my-2">{letter}</span>
+                                                                ))}
+                                                            </div>
+                                                          </td>
+                                                        );
+                                                      }
+                                                      return null;
                                                     }
                                                     
                                                     const slotBranch = sch.details.level === '1st-year' ? sub : undefined;

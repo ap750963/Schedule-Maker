@@ -61,21 +61,34 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
         {DAYS.map((day, dIdx) => (
             <React.Fragment key={day}>
+               {/* Day Label */}
                <div className="sticky left-0 z-10 bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-800 flex items-center justify-center h-36 w-16">
                    <span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em] -rotate-90">{day}</span>
                </div>
 
                {periods.map((period, pIdx) => {
                    if (period.isBreak) {
-                       return (
-                           <div key={period.id} className="h-36 rounded-[2.5rem] bg-gray-100/30 dark:bg-slate-900/20 border-2 border-dashed border-gray-100 dark:border-slate-800/50 flex flex-col items-center justify-center opacity-40 group hover:opacity-100 transition-opacity cursor-pointer" onClick={() => onPeriodClick(period)}>
-                               <div className="flex flex-col items-center justify-center leading-none">
-                                   {"RECESS".split("").map((letter, i) => (
-                                       <span key={i} className="text-xl font-black text-gray-300 dark:text-slate-700/60">{letter}</span>
-                                   ))}
+                       // Only render the break once, spanning all day rows
+                       if (dIdx === 0) {
+                           return (
+                               <div 
+                                   key={period.id} 
+                                   style={{ 
+                                       gridRow: `2 / span ${DAYS.length}`,
+                                       gridColumn: pIdx + 2 
+                                   }}
+                                   className="rounded-[2.5rem] bg-gray-100/30 dark:bg-slate-900/20 border-2 border-dashed border-gray-100 dark:border-slate-800/50 flex flex-col items-center justify-center opacity-40 group hover:opacity-100 transition-opacity cursor-pointer" 
+                                   onClick={() => onPeriodClick(period)}
+                               >
+                                   <div className="flex flex-col items-center justify-center leading-none py-10">
+                                       {"RECESS".split("").map((letter, i) => (
+                                           <span key={i} className="text-4xl font-black text-gray-300 dark:text-slate-700/60 my-2">{letter}</span>
+                                       ))}
+                                   </div>
                                </div>
-                           </div>
-                       );
+                           );
+                       }
+                       return null;
                    }
 
                    if (pIdx > 0) {
