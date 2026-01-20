@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Download, User, Users, Calendar, BookOpen, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Download, User, Users, Calendar, BookOpen, AlertTriangle, FileSpreadsheet } from 'lucide-react';
 import { Schedule, DAYS, Period, TimeSlot, Faculty } from '../types';
 import { Button } from '../components/ui/Button';
 import { CustomSelect } from '../components/ui/CustomSelect';
 import { exportToPDF } from '../utils/pdf';
+import { exportFacultyTimetableToExcel } from '../utils/excel';
 import { getColorClasses, getSubjectColorName } from '../utils';
 
 interface FacultyWiseViewProps {
@@ -57,6 +58,11 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
     setIsExporting(false);
   };
 
+  const handleExportExcel = () => {
+    if (!selectedFaculty) return;
+    exportFacultyTimetableToExcel(selectedFaculty.name, schedules, selectedFaculty.id, `${selectedFaculty.name}_Timetable.xlsx`);
+  };
+
   const facultyOptions = allFaculties.map(f => ({
       value: f.id,
       label: `${f.name} (${f.initials})`
@@ -80,8 +86,11 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+          <Button onClick={handleExportExcel} variant="secondary" icon={<FileSpreadsheet size={18} />} disabled={!selectedFacultyId} size="sm">
+            <span>Excel</span>
+          </Button>
           <Button onClick={handleExport} variant="secondary" icon={<Download size={18} />} disabled={isExporting || !selectedFacultyId} size="sm">
-            <span>{isExporting ? '...' : 'Export PDF'}</span>
+            <span>{isExporting ? '...' : 'PDF'}</span>
           </Button>
         </div>
       </div>

@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Save, Download } from 'lucide-react';
+import { ArrowLeft, Save, Download, FileSpreadsheet } from 'lucide-react';
 import { Schedule, DEFAULT_PERIODS, Period, TimeSlot } from '../types';
 import { Button } from '../components/ui/Button';
 import { generateId } from '../utils';
 import { exportToPDF } from '../utils/pdf';
+import { exportScheduleToExcel } from '../utils/excel';
 import { FacultyTable } from '../components/schedule/FacultyTable';
 import { PeriodModal } from '../components/schedule/PeriodModal';
 import { ClassModal } from '../components/schedule/ClassModal';
@@ -71,6 +72,7 @@ export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
           </div>
         </div>
         <div className="flex items-center gap-3 ml-auto">
+             <Button onClick={() => exportScheduleToExcel(currentSchedule, `${currentSchedule.details.className}_Schedule.xlsx`)} variant="secondary" icon={<FileSpreadsheet size={18} />} size="sm" className="rounded-2xl border-white/50 bg-white/50 backdrop-blur-sm hover:bg-white/80"><span className="hidden xs:inline">Excel</span></Button>
              <Button onClick={async () => { setIsExporting(true); await exportToPDF('schedule-grid', `${currentSchedule.details.className}.pdf`); setIsExporting(false); }} variant="secondary" icon={<Download size={18} />} disabled={isExporting} size="sm" className="rounded-2xl border-white/50 bg-white/50 backdrop-blur-sm hover:bg-white/80"><span>{isExporting ? '...' : 'PDF'}</span></Button>
             <Button size="sm" onClick={() => onSave(currentSchedule)} className="shadow-glow rounded-2xl px-6">Save</Button>
         </div>

@@ -118,16 +118,16 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                         {/* Type Toggle */}
                         <div>
                         <label className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-2 block ml-1">Class Type</label>
-                        <div className="bg-gray-100 dark:bg-slate-700 p-1.5 rounded-full flex relative">
+                        <div className="bg-gray-100 dark:bg-slate-700 p-1.5 rounded-[1.5rem] flex relative">
                             <button 
-                                className={`flex-1 py-4 text-sm font-black rounded-full transition-all flex items-center justify-center gap-2 ${tempSlotData.type === 'Theory' ? 'bg-white dark:bg-slate-800 text-orange-500 dark:text-orange-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5' : 'text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200'}`}
+                                className={`flex-1 py-4 text-sm font-black rounded-2xl transition-all flex items-center justify-center gap-2 ${tempSlotData.type === 'Theory' ? 'bg-white dark:bg-slate-800 text-orange-500 dark:text-orange-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5' : 'text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200'}`}
                                 onClick={() => setTempSlotData({ ...tempSlotData, type: 'Theory', facultyIds: [], duration: 1 })}
                             >
                                 <div className={`h-2 w-2 rounded-full ${tempSlotData.type === 'Theory' ? 'bg-orange-500 dark:bg-orange-400' : 'bg-gray-300 dark:bg-slate-600'}`} />
                                 Theory
                             </button>
                             <button 
-                                className={`flex-1 py-4 text-sm font-black rounded-full transition-all flex items-center justify-center gap-2 ${tempSlotData.type === 'Practical' ? 'bg-white dark:bg-slate-800 text-green-600 dark:text-green-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5' : 'text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200'}`}
+                                className={`flex-1 py-4 text-sm font-black rounded-2xl transition-all flex items-center justify-center gap-2 ${tempSlotData.type === 'Practical' ? 'bg-white dark:bg-slate-800 text-green-600 dark:text-green-400 shadow-sm ring-1 ring-black/5 dark:ring-white/5' : 'text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200'}`}
                                 onClick={() => {
                                     setTempSlotData({ ...tempSlotData, type: 'Practical', facultyIds: [] });
                                 }}
@@ -142,13 +142,13 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                                 <div className="mt-4 flex gap-2">
                                 <button
                                     onClick={() => setTempSlotData({ ...tempSlotData, duration: 1 })}
-                                    className={`flex-1 py-2 rounded-full text-xs font-bold border-2 transition-all ${tempSlotData.duration === 1 ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'border-gray-100 dark:border-slate-600 text-gray-400 dark:text-slate-400'}`}
+                                    className={`flex-1 py-2 rounded-xl text-xs font-bold border-2 transition-all ${tempSlotData.duration === 1 ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'border-gray-100 dark:border-slate-600 text-gray-400 dark:text-slate-400'}`}
                                 >
                                     1 Hour
                                 </button>
                                 <button
                                     onClick={() => setTempSlotData({ ...tempSlotData, duration: 2 })}
-                                    className={`flex-1 py-2 rounded-full text-xs font-bold border-2 transition-all ${tempSlotData.duration === 2 ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'border-gray-100 dark:border-slate-600 text-gray-400 dark:text-slate-400'}`}
+                                    className={`flex-1 py-2 rounded-xl text-xs font-bold border-2 transition-all ${tempSlotData.duration === 2 ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'border-gray-100 dark:border-slate-600 text-gray-400 dark:text-slate-400'}`}
                                 >
                                     2 Hours
                                 </button>
@@ -203,7 +203,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                                     const fac = schedule.faculties.find(f => f.id === fid);
                                     if (!fac) return null;
                                     return (
-                                        <div key={fid} className="bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-900/40 text-primary-700 dark:text-primary-300 pl-3 pr-2 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 animate-fade-in-up">
+                                        <div key={fid} className="bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-900/40 text-primary-700 dark:text-primary-300 pl-3 pr-2 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in-up">
                                             {fac.name} ({fac.initials})
                                             <button 
                                             onClick={() => setTempSlotData(prev => ({ 
@@ -246,7 +246,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                                 if (!conflict) return null;
                                 const fac = schedule.faculties.find(f => f.id === fid);
                                 return (
-                                    <div key={fid} className="text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 p-2.5 rounded-full border border-red-100 dark:border-red-900/30">
+                                    <div key={fid} className="text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 p-2.5 rounded-xl border border-red-100 dark:border-red-900/30">
                                         <AlertTriangle size={14} className="shrink-0"/> 
                                         <span>{fac?.initials} is busy in {conflict}</span>
                                     </div>
@@ -266,7 +266,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                     {tempSlotData.id && (
                         <button 
                             onClick={onDelete}
-                            className="h-14 w-14 shrink-0 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 border border-red-100 dark:border-red-900/30 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/30 transition-all active:scale-95"
+                            className="h-14 w-14 shrink-0 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 border border-red-100 dark:border-red-900/30 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/30 transition-all active:scale-95"
                             title="Delete Class"
                         >
                             <Trash2 size={24} />
@@ -277,7 +277,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                         fullWidth 
                         size="lg" 
                         disabled={!tempSlotData.subjectId} 
-                        className="shadow-glow rounded-full text-lg"
+                        className="shadow-glow rounded-2xl text-lg"
                     >
                         {tempSlotData.id ? 'Save Changes' : 'Add to Schedule'}
                     </Button>
