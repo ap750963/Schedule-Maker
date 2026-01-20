@@ -162,7 +162,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                     <th 
                                       key={p.id} 
                                       onClick={() => setEditingPeriod(p)}
-                                      className={`border-r border-b border-gray-200 dark:border-slate-700 p-4 text-center min-w-[180px] cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-colors group ${p.isBreak ? 'bg-gray-100/30 dark:bg-slate-800/40' : ''}`}
+                                      className={`border-r border-b border-gray-200 dark:border-slate-700 p-4 text-center min-w-[200px] cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-colors group ${p.isBreak ? 'bg-gray-100/30 dark:bg-slate-800/40' : ''}`}
                                     >
                                         {p.isBreak ? (
                                            <div className="flex flex-col items-center opacity-40">
@@ -201,14 +201,14 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                     </td>
                                                 )}
                                                 <td className="border-r border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-12 z-30 p-3 text-center shadow-sm">
-                                                    <div className="text-[10px] font-black text-primary-600 dark:text-primary-300 uppercase truncate max-w-[60px] tracking-tight bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded-lg border border-primary-100 dark:border-primary-900/50">{sch.details.level === '1st-year' ? sub : `SEM ${sub}`}</div>
+                                                    <div className="text-[10px] font-black text-primary-600 dark:text-primary-300 uppercase truncate max-w-[80px] tracking-tight bg-primary-50 dark:bg-primary-900/30 px-2 py-1.5 rounded-xl border border-primary-100 dark:border-primary-900/50">{sch.details.level === '1st-year' ? sub : `SEM ${sub}`}</div>
                                                 </td>
                                                 {sch.periods.map((period, pIdx) => {
                                                     if (period.isBreak) {
                                                       if (dIdx === 0 && sIdx === 0 && rIdx === 0) {
                                                         return (
-                                                          <td key={period.id} rowSpan={totalTableRows} className="border-r border-b border-gray-200 dark:border-slate-700 bg-gray-100/30 dark:bg-slate-800/30 text-center align-middle p-0">
-                                                            <div className="flex flex-col items-center justify-center leading-none">
+                                                          <td key={period.id} rowSpan={totalTableRows} className="border-r border-b border-gray-200 dark:border-slate-700 bg-gray-100/50 dark:bg-slate-800/20 text-center align-middle p-0">
+                                                            <div className="flex flex-col items-center justify-center leading-none py-10 opacity-40 hover:opacity-100 transition-opacity">
                                                                 {"RECESS".split("").map((letter, i) => (
                                                                     <span key={i} className="text-2xl sm:text-4xl font-black text-gray-400 dark:text-slate-400/80 my-2 drop-shadow-sm">{letter}</span>
                                                                 ))}
@@ -243,22 +243,22 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                     }
 
                                                     const conflict = slot && slot.facultyIds.map(fid => checkConflict(sch.id, day, period.id, fid, slotBranch)).find(c => c);
-                                                    const colorClasses = slot ? getColorClasses(getSubjectColorName(sch.subjects, slot.subjectId)) : null;
+                                                    const colorClasses = slot ? getColorClasses(getSubjectColorName(sch.subjects, slot.subjectId, slot.facultyIds)) : null;
 
                                                     return (
-                                                        <td key={period.id} colSpan={colSpan} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className="border-r border-b border-gray-200 dark:border-slate-700 p-2 cursor-pointer group/cell">
-                                                            <div className={`h-32 w-full rounded-[2rem] p-5 flex flex-col justify-between transition-all duration-300 border-2 ${slot ? `${colorClasses?.bg} ${colorClasses?.border} shadow-sm ${colorClasses?.hover}` : 'bg-white dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
+                                                        <td key={period.id} colSpan={colSpan} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className="border-r border-b border-gray-200 dark:border-slate-700 p-2 cursor-pointer group/cell overflow-hidden">
+                                                            <div className={`h-36 w-full rounded-[2.5rem] p-6 flex flex-col justify-between transition-all duration-300 border-2 ${slot ? `${colorClasses?.bg} ${colorClasses?.border} shadow-card ${colorClasses?.hover}` : 'bg-white dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
                                                                 {slot ? (
                                                                     <>
-                                                                        <div className={`font-black text-[15px] leading-tight dark:text-white line-clamp-2 tracking-tight ${colorClasses?.text}`}>{sch.subjects.find(s => s.id === slot.subjectId)?.name}</div>
+                                                                        <div className={`font-black text-[18px] sm:text-[20px] leading-tight dark:text-white line-clamp-2 tracking-tight ${colorClasses?.text}`}>{sch.subjects.find(s => s.id === slot.subjectId)?.name}</div>
                                                                         <div className="flex items-center justify-between mt-auto">
-                                                                            <span className={`text-[11px] font-black uppercase tracking-wider opacity-80 truncate max-w-[80px] ${colorClasses?.lightText}`}>{slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}</span>
-                                                                            {conflict && <AlertTriangle size={14} className="text-red-500 animate-pulse shrink-0" />}
+                                                                            <span className={`text-[12px] font-black uppercase tracking-wider opacity-80 truncate max-w-[120px] ${colorClasses?.lightText}`}>{slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}</span>
+                                                                            {conflict && <AlertTriangle size={16} className="text-red-600 animate-pulse shrink-0" />}
                                                                         </div>
                                                                     </>
                                                                 ) : (
                                                                     <div className="h-full w-full flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity">
-                                                                      <div className="h-10 w-10 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-gray-300 group-hover:text-primary-500 transition-all"><Plus size={20} strokeWidth={3} /></div>
+                                                                      <div className="h-12 w-12 bg-gray-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-300 group-hover:text-primary-500 transition-all scale-90 group-hover:scale-100"><Plus size={24} strokeWidth={3} /></div>
                                                                     </div>
                                                                 )}
                                                             </div>

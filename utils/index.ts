@@ -64,15 +64,15 @@ export const to24Hour = (timeStr: string) => {
 export const getColorClasses = (colorName?: string) => {
   const color = colorName || 'gray';
   const createPalette = (c: string) => ({
-      // Enhanced glassmorphism: slightly higher opacity and richer gradients
-      bg: `bg-${c}-500/15 dark:bg-${c}-400/20 backdrop-blur-xl`,
-      gradient: `bg-gradient-to-br from-${c}-400/10 to-${c}-600/10`,
-      border: `border-${c}-300 dark:border-${c}-500/50`,
-      text: `text-${c}-900 dark:text-${c}-50`,
-      lightText: `text-${c}-700/80 dark:text-${c}-300/80`,
-      pill: `bg-${c}-500/20 text-${c}-800 dark:text-${c}-200`,
-      hover: `hover:bg-${c}-500/25 dark:hover:bg-${c}-400/30 hover:scale-[1.03] hover:shadow-xl hover:shadow-${c}-500/20`,
-      icon: `text-${c}-600 dark:text-${c}-400`
+      // Enhanced glassmorphism: more playful, brighter gradients and deeper blurs
+      bg: `bg-${c}-500/20 dark:bg-${c}-400/25 backdrop-blur-2xl`,
+      gradient: `bg-gradient-to-br from-${c}-400/30 via-${c}-500/10 to-${c}-600/30`,
+      border: `border-${c}-300/80 dark:border-${c}-500/60`,
+      text: `text-${c}-950 dark:text-${c}-50`,
+      lightText: `text-${c}-800/90 dark:text-${c}-200/90`,
+      pill: `bg-${c}-500/30 text-${c}-900 dark:text-${c}-100`,
+      hover: `hover:bg-${c}-500/30 dark:hover:bg-${c}-400/40 hover:scale-[1.04] hover:shadow-2xl hover:shadow-${c}-500/30 hover:rotate-[0.5deg]`,
+      icon: `text-${c}-700 dark:text-${c}-300`
   });
   const styles: Record<string, any> = {
     rose: createPalette('rose'), orange: createPalette('orange'), amber: createPalette('amber'),
@@ -88,20 +88,28 @@ export const getColorClasses = (colorName?: string) => {
 export const getSolidColorClasses = (colorName?: string) => {
   const c = colorName || 'gray';
   return {
-    bg: `bg-${c}-100 dark:bg-${c}-900/40 backdrop-blur-md`,
-    text: `text-${c}-900 dark:text-${c}-50`,
-    subtext: `text-${c}-700 dark:text-${c}-300`,
-    border: `border-${c}-300/60 dark:border-${c}-500/40`,
-    hover: `hover:bg-${c}-200 dark:hover:bg-${c}-800/80`
+    bg: `bg-${c}-200/80 dark:bg-${c}-800/60 backdrop-blur-2xl`,
+    text: `text-${c}-950 dark:text-${c}-50`,
+    subtext: `text-${c}-800 dark:text-${c}-200`,
+    border: `border-${c}-400/50 dark:border-${c}-500/60`,
+    hover: `hover:bg-${c}-300 dark:hover:bg-${c}-700/80 hover:scale-[1.02]`
   };
 };
 
-export const getSubjectColorName = (subjects: Subject[], subjectId: string): string => {
+/**
+ * Gets a consistent color based on subject and assigned faculties.
+ * This ensures the same subject with different teachers has a distinct color.
+ */
+export const getSubjectColorName = (subjects: Subject[], subjectId: string, facultyIds?: string[]): string => {
   const subj = subjects.find(s => s.id === subjectId);
-  if (subj?.color) return subj.color;
+  if (subj?.color && (!facultyIds || facultyIds.length === 0)) return subj.color;
+  
+  // Create a combined key for hashing
+  const colorKey = subjectId + (facultyIds ? [...facultyIds].sort().join('') : '');
+  
   let hash = 0;
-  for (let i = 0; i < subjectId.length; i++) {
-      hash = subjectId.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < colorKey.length; i++) {
+      hash = colorKey.charCodeAt(i) + ((hash << 5) - hash);
   }
   const index = Math.abs(hash) % SUBJECT_COLORS.length;
   return SUBJECT_COLORS[index];

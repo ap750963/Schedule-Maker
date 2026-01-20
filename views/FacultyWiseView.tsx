@@ -138,11 +138,11 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
                 <table className="w-full border-collapse text-left">
                   <thead className="bg-gray-50/90 dark:bg-slate-800/90 backdrop-blur-md sticky top-0 z-20">
                     <tr>
-                      <th className="p-4 border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 sticky left-0 z-30 w-28 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                      <th className="p-4 border-b border-r border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 sticky left-0 z-30 w-32 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                         <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Time / Day</span>
                       </th>
                       {DAYS.map(day => (
-                        <th key={day} className="p-4 border-b border-r border-gray-100 dark:border-slate-700 min-w-[180px]">
+                        <th key={day} className="p-4 border-b border-r border-gray-100 dark:border-slate-700 min-w-[200px]">
                           <span className="text-sm font-black text-gray-700 dark:text-slate-200 uppercase tracking-widest">{day}</span>
                         </th>
                       ))}
@@ -151,13 +151,13 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
                   <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                     {masterPeriods.map((period, pIdx) => (
                       <tr key={period.id} className="group hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                        <td className="p-4 border-r border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-0 z-10 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                        <td className="p-6 border-r border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-0 z-10 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                           {period.isBreak ? (
                             <div className="flex flex-col items-center">
                                 <span className="text-[10px] font-black text-gray-300 dark:text-slate-600 uppercase tracking-widest rotate-90 my-2">Recess</span>
                             </div>
                           ) : (
-                            <span className="text-xs font-bold text-gray-500 dark:text-slate-400 font-mono bg-gray-50 dark:bg-slate-800 px-2 py-1 rounded-lg">{period.time}</span>
+                            <span className="text-xs font-bold text-gray-500 dark:text-slate-400 font-mono bg-gray-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">{period.time}</span>
                           )}
                         </td>
                         {DAYS.map(day => {
@@ -167,40 +167,40 @@ export const FacultyWiseView: React.FC<FacultyWiseViewProps> = ({ schedules, onB
                           const hasConflict = matches.length > 1;
 
                           return (
-                            <td key={day} className="p-2 border-r border-gray-100 dark:border-slate-700 align-top">
+                            <td key={day} className="p-3 border-r border-gray-100 dark:border-slate-700 align-top">
                               {matches.map(({ slot, schedule }, mIdx) => {
                                 const subject = schedule.subjects.find(s => s.id === slot.subjectId);
-                                const colorName = getSubjectColorName(schedule.subjects, slot.subjectId);
+                                const colorName = getSubjectColorName(schedule.subjects, slot.subjectId, slot.facultyIds);
                                 const styles = getColorClasses(colorName);
                                 
                                 return (
                                   <div 
                                     key={slot.id} 
                                     className={`
-                                      p-3 rounded-2xl mb-2 last:mb-0 transition-all border shadow-sm relative overflow-hidden
-                                      ${styles.bg} ${styles.border}
-                                      ${hasConflict ? 'ring-2 ring-red-500 ring-offset-1 z-10' : ''}
+                                      p-4 rounded-[1.5rem] mb-3 last:mb-0 transition-all border shadow-sm relative overflow-hidden
+                                      ${styles.bg} ${styles.border} ${styles.hover}
+                                      ${hasConflict ? 'ring-4 ring-red-500 ring-offset-2 z-10' : ''}
                                     `}
                                   >
-                                    <div className="flex justify-between items-start mb-1">
-                                      <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${styles.pill}`}>
+                                    <div className="flex justify-between items-start mb-2">
+                                      <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg ${styles.pill}`}>
                                         {schedule.details.semester} Sem
                                       </span>
-                                      {hasConflict && <AlertTriangle size={12} className="text-red-500 animate-pulse" />}
+                                      {hasConflict && <AlertTriangle size={14} className="text-red-600 animate-pulse" />}
                                     </div>
-                                    <div className={`font-bold text-sm leading-tight line-clamp-2 ${styles.text}`}>
+                                    <div className={`font-black text-[16px] leading-tight line-clamp-2 ${styles.text}`}>
                                       {subject?.name}
                                     </div>
-                                    <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-black/5 dark:border-white/10">
-                                      <Calendar size={10} className={styles.lightText} />
-                                      <span className={`text-[10px] font-bold ${styles.lightText}`}>
-                                        {schedule.details.className} - {schedule.details.section}
+                                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-black/5 dark:border-white/10">
+                                      <Calendar size={12} className={styles.lightText} />
+                                      <span className={`text-[11px] font-black ${styles.lightText} uppercase tracking-tight`}>
+                                        {schedule.details.className} • {schedule.details.section}
                                       </span>
                                     </div>
                                     {slot.type === 'Practical' && (
-                                      <div className="mt-1 flex items-center gap-1">
-                                        <BookOpen size={10} className={styles.lightText} />
-                                        <span className={`text-[9px] font-black uppercase ${styles.lightText}`}>Lab Session</span>
+                                      <div className="mt-2 flex items-center gap-1.5">
+                                        <BookOpen size={12} className={styles.lightText} />
+                                        <span className={`text-[10px] font-black uppercase ${styles.lightText}`}>Lab Session</span>
                                       </div>
                                     )}
                                   </div>
