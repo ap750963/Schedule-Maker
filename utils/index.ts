@@ -76,13 +76,13 @@ export const to12Hour = (time24: string): string => {
 export const getColorClasses = (colorName?: string) => {
   const color = colorName || 'gray';
   const createPalette = (c: string) => ({
-      // Glassmorphism: Light mode uses soft tints, Dark mode uses glowing borders
-      bg: `bg-${c}-500/10 dark:bg-${c}-500/15 backdrop-blur-2xl`,
-      border: `border-${c}-200 dark:border-${c}-500/50 shadow-[0_0_15px_rgba(var(--color-${c}-500),0.1)]`,
-      text: `text-${c}-900 dark:text-${c}-300`,
-      accentText: `text-${c}-600 dark:text-${c}-400 font-black uppercase tracking-widest text-[10px]`,
-      subText: `text-${c}-800/60 dark:text-${c}-100/40 font-medium text-[11px]`,
-      hover: `hover:scale-[1.04] hover:shadow-2xl hover:shadow-${c}-500/20 transition-all duration-300`,
+      // Vibrant Glassmorphism: Increased opacity and saturation
+      bg: `bg-${c}-100 dark:bg-${c}-500/20 backdrop-blur-md`,
+      border: `border-${c}-300 dark:border-${c}-500/50 shadow-[0_4px_20px_-4px_rgba(var(--color-${c}-500),0.2)]`,
+      text: `text-${c}-950 dark:text-${c}-100`,
+      accentText: `text-${c}-800 dark:text-${c}-200 font-black uppercase tracking-widest text-[10px]`,
+      subText: `text-${c}-800/70 dark:text-${c}-200/60 font-medium text-[11px]`,
+      hover: `hover:scale-[1.02] hover:shadow-2xl hover:shadow-${c}-500/30 hover:bg-${c}-200 dark:hover:bg-${c}-500/30 transition-all duration-300`,
   });
   
   const styles: Record<string, any> = {
@@ -99,12 +99,13 @@ export const getColorClasses = (colorName?: string) => {
 export const getSolidColorClasses = (colorName?: string) => {
   const c = colorName || 'gray';
   return {
-    bg: `bg-${c}-50 dark:bg-${c}-900/40 backdrop-blur-2xl`,
-    text: `text-${c}-900 dark:text-${c}-200`,
-    accentText: `text-${c}-700 dark:text-${c}-400 font-black uppercase tracking-[0.2em] text-[10px]`,
-    subtext: `text-${c}-800/50 dark:text-${c}-300/40 text-[11px] font-bold`,
-    border: `border-${c}-200 dark:border-${c}-500/40`,
-    hover: `hover:bg-${c}-100 dark:hover:bg-${c}-800/80 hover:scale-[1.03]`
+    // Solid/Grid View: More saturated backgrounds for vibrancy
+    bg: `bg-${c}-100 dark:bg-${c}-900/60 backdrop-blur-xl`,
+    text: `text-${c}-950 dark:text-${c}-50`,
+    accentText: `text-${c}-900 dark:text-${c}-200 font-black uppercase tracking-[0.2em] text-[10px]`,
+    subtext: `text-${c}-900/70 dark:text-${c}-300/70 text-[11px] font-bold`,
+    border: `border-${c}-300 dark:border-${c}-500/60`,
+    hover: `hover:bg-${c}-200 dark:hover:bg-${c}-800/80 hover:scale-[1.03] hover:shadow-lg hover:shadow-${c}-500/20`
   };
 };
 
