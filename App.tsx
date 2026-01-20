@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Schedule, ViewState, Faculty } from './types.ts';
 import { Home } from './views/Home.tsx';
@@ -79,15 +80,9 @@ const App: React.FC = () => {
   const handleGlobalFacultyUpdate = (updatedFaculties: Faculty[]) => {
     setGlobalFaculties(updatedFaculties);
 
-    // Propagate changes (name/initials updates) to all schedules that reference these faculties
     setSchedules(prevSchedules => prevSchedules.map(schedule => {
-      // Create a new list of faculties for the schedule by merging with global updates
       const updatedScheduleFaculties = schedule.faculties.map(schFac => {
-        // Find if the local faculty exists in the updated global list
         const globalMatch = updatedFaculties.find(gf => gf.id === schFac.id);
-        
-        // If found, update local copy with global details (preserves local existence)
-        // If not found (globally deleted), keep the local copy as is to preserve historical data
         return globalMatch ? { ...schFac, ...globalMatch } : schFac;
       });
 
@@ -150,6 +145,7 @@ const App: React.FC = () => {
       {view === 'master-editor' && (
         <MultiSemesterEditor 
           schedules={filteredSchedulesForMaster} 
+          allSchedules={schedules}
           onSaveAll={handleUpdateAllSchedules} 
           onBack={() => setView('dashboard')} 
         />

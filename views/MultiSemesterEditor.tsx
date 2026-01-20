@@ -10,14 +10,21 @@ import { PeriodModal } from '../components/schedule/PeriodModal';
 import { ClassModal } from '../components/schedule/ClassModal';
 
 interface MultiSemesterEditorProps {
-  schedules: Schedule[];
+  schedules: Schedule[]; // Current active/filtered view schedules
+  allSchedules: Schedule[]; // Full context for global conflict checking
   onSaveAll: (updatedSchedules: Schedule[]) => void;
   onBack: () => void;
 }
 
-export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedules, onSaveAll, onBack }) => {
+export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedules, allSchedules, onSaveAll, onBack }) => {
   const [localSchedules, setLocalSchedules] = useState<Schedule[]>(JSON.parse(JSON.stringify(schedules)));
-  const activeSchedules = localSchedules; 
+
+  // Combine local edits with global context for accurate conflict detection
+  const schedulesForConflict = useMemo(() => {
+    const localIds = new Set(localSchedules.map(s => s.id));
+    const nonEdited = allSchedules.filter(s => !localIds.has(s.id));
+    return [...localSchedules, ...nonEdited];
+  }, [localSchedules, allSchedules]);
 
   const allFaculties = useMemo(() => {
     const map = new Map<string, Faculty>();
@@ -29,7 +36,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     return Array.from(map.values());
   }, [localSchedules]);
 
-  const masterPeriods = activeSchedules[0]?.periods || [];
+  const masterPeriods = localSchedules[0]?.periods || [];
 
   const [editingCell, setEditingCell] = useState<{
     scheduleId: string;
@@ -95,8 +102,8 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   };
 
   const totalTableRows = useMemo(() => {
-      return DAYS.length * activeSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0);
-  }, [activeSchedules]);
+      return DAYS.length * localSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0);
+  }, [localSchedules]);
 
   return (
     <div className="h-screen bg-white dark:bg-slate-950 flex flex-col transition-colors duration-300 overflow-hidden font-sans text-slate-900 dark:text-white">
@@ -105,11 +112,11 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                 <button onClick={onBack} className="h-9 w-9 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-gray-500 hover:text-primary-600 transition-all shadow-sm"><ArrowLeft size={18} /></button>
                 <div className="flex items-baseline gap-2">
                     <h1 className="text-lg font-black leading-none tracking-tight">Master Schedule</h1>
-                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{activeSchedules[0]?.details.session || '2024-25'}</span>
+                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{localSchedules[0]?.details.session || '2024-25'}</span>
                 </div>
             </div>
             <div className="flex items-center gap-2">
-                 <Button onClick={() => exportMasterToExcel(activeSchedules)} variant="secondary" icon={<FileSpreadsheet size={18} />} size="sm" className="rounded-xl w-9 h-9 !p-0" title="Export to Excel" />
+                 <Button onClick={() => exportMasterToExcel(localSchedules)} variant="secondary" icon={<FileSpreadsheet size={18} />} size="sm" className="rounded-xl w-9 h-9 !p-0" title="Export to Excel" />
                  <Button onClick={() => onSaveAll(localSchedules)} icon={<Save size={18} />} size="sm" className="rounded-xl shadow-glow w-9 h-9 !p-0" title="Save All" />
             </div>
         </div>
@@ -149,13 +156,13 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                         <tbody>
                             {DAYS.map((day, dIdx) => {
                                 const rowCoveredMap: Record<string, Set<number>> = {};
-                                const dayTotalSubrows = activeSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0);
+                                const dayTotalSubrows = localSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0);
                                 let daySubrowCounter = 0;
                                 const isEvenDay = dIdx % 2 === 0;
 
                                 return (
                                 <React.Fragment key={day}>
-                                    {activeSchedules.map((sch, sIdx) => {
+                                    {localSchedules.map((sch, sIdx) => {
                                         const subRows = sch.details.level === '1st-year' ? (sch.details.branches || ['Batch A']) : [sch.details.semester];
                                         return subRows.map((sub, rIdx) => {
                                             const rowKey = `${sch.id}-${sub}`;
@@ -220,11 +227,11 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                          }
                                                     }
 
-                                                    // Use robust checker
+                                                    // Use robust global checker with full context
                                                     let conflictLabel = null;
                                                     if (slot) {
                                                         for (const fid of slot.facultyIds) {
-                                                            const conflict = checkGlobalFacultyConflict(fid, day, slot, sch.periods, sch.id, localSchedules);
+                                                            const conflict = checkGlobalFacultyConflict(fid, day, slot, sch.periods, sch.id, schedulesForConflict);
                                                             if (conflict) {
                                                                 conflictLabel = `${conflict.scheduleName} | Sem ${conflict.semester}`;
                                                                 break;
@@ -237,7 +244,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                     return (
                                                         <td key={period.id} colSpan={colSpan} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className={`border-r ${dayBlockBorder} p-1.5 cursor-pointer group/cell overflow-hidden`}>
                                                             {slot ? (
-                                                                <div className={`h-28 w-full rounded-[1.75rem] p-4 flex flex-col justify-between transition-all duration-300 border-2 ${colorClasses?.bg} ${colorClasses?.border} shadow-card ${colorClasses?.hover} ${conflictLabel ? 'ring-2 ring-red-500 ring-offset-1' : ''}`}>
+                                                                <div className={`h-28 w-full rounded-[1.75rem] p-4 flex flex-col justify-between transition-all duration-300 border-2 ${colorClasses?.bg} ${colorClasses?.border} shadow-card ${colorClasses?.hover} ${conflictLabel ? 'ring-4 ring-rose-500 ring-offset-2 z-10 scale-[0.98] animate-pulse' : ''}`}>
                                                                     <div className="space-y-0.5">
                                                                         <div className={`font-black text-[13px] leading-tight line-clamp-2 tracking-tight ${colorClasses?.text}`}>
                                                                             {sch.subjects.find(s => s.id === slot.subjectId)?.name}
@@ -251,7 +258,11 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                                         <span className={`${colorClasses?.accentText} text-[9px] truncate max-w-[100px]`}>
                                                                             {slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}
                                                                         </span>
-                                                                        {conflictLabel && <AlertTriangle size={12} className="text-red-600 animate-pulse shrink-0" title={conflictLabel} />}
+                                                                        {conflictLabel && (
+                                                                          <div className="bg-rose-500 p-1 rounded-full shadow-lg animate-bounce">
+                                                                            <AlertTriangle size={12} className="text-white" title={`Conflict: ${conflictLabel}`} />
+                                                                          </div>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             ) : (
@@ -284,13 +295,13 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
             <ClassModal 
                 data={tempSlot} 
                 schedule={localSchedules.find(s => s.id === editingCell.scheduleId)!} 
-                allSchedules={localSchedules}
+                allSchedules={schedulesForConflict}
                 day={editingCell.day} 
                 onClose={() => setEditingCell(null)} 
                 onSave={handleSaveSlot} 
                 onDelete={() => handleSaveSlot({ subjectId: '' })}
                 onCheckConflict={(fid, currentSlotData) => {
-                  const conflict = checkGlobalFacultyConflict(fid, editingCell.day, currentSlotData, localSchedules.find(s => s.id === editingCell.scheduleId)!.periods, editingCell.scheduleId, localSchedules);
+                  const conflict = checkGlobalFacultyConflict(fid, editingCell.day, currentSlotData, localSchedules.find(s => s.id === editingCell.scheduleId)!.periods, editingCell.scheduleId, schedulesForConflict);
                   return conflict ? `${conflict.scheduleName} | Sem ${conflict.semester}` : null;
                 }}
             />
