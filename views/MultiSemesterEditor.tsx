@@ -8,7 +8,6 @@ import { FacultyTable } from '../components/schedule/FacultyTable';
 import { PeriodModal } from '../components/schedule/PeriodModal';
 import { ClassModal } from '../components/schedule/ClassModal';
 
-// Define the missing MultiSemesterEditorProps interface
 interface MultiSemesterEditorProps {
   schedules: Schedule[];
   onSaveAll: (updatedSchedules: Schedule[]) => void;
@@ -157,7 +156,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                         <thead className="bg-gray-100/90 dark:bg-slate-800/90 sticky top-0 z-40">
                             <tr>
                                 <th className="border-r border-b border-gray-200 dark:border-slate-700 p-4 w-12 sticky left-0 bg-gray-100 dark:bg-slate-800 text-[11px] font-black uppercase text-gray-400 tracking-widest">Day</th>
-                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-4 w-20 sticky left-12 bg-gray-100 dark:bg-slate-800 text-[11px] font-black uppercase text-gray-400 tracking-widest text-center">Context</th>
+                                <th className="border-r border-b border-gray-200 dark:border-slate-700 p-4 w-24 sticky left-12 bg-gray-100 dark:bg-slate-800 text-[11px] font-black uppercase text-gray-400 tracking-widest text-center">Context</th>
                                 {masterPeriods.map(p => (
                                     <th 
                                       key={p.id} 
@@ -184,7 +183,10 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                         <tbody>
                             {DAYS.map((day, dIdx) => {
                                 const rowCoveredMap: Record<string, Set<number>> = {};
-                                
+                                const dayTotalSubrows = activeSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0);
+                                let daySubrowCounter = 0;
+                                const isEvenDay = dIdx % 2 === 0;
+
                                 return (
                                 <React.Fragment key={day}>
                                     {activeSchedules.map((sch, sIdx) => {
@@ -192,16 +194,26 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                         return subRows.map((sub, rIdx) => {
                                             const rowKey = `${sch.id}-${sub}`;
                                             if (!rowCoveredMap[rowKey]) rowCoveredMap[rowKey] = new Set();
+                                            daySubrowCounter++;
+                                            const isLastRowOfDay = daySubrowCounter === dayTotalSubrows;
                                             
+                                            const dayBlockBg = isEvenDay 
+                                                ? 'bg-white dark:bg-slate-900' 
+                                                : 'bg-gray-50/40 dark:bg-slate-800/10';
+
+                                            const dayBlockBorder = isLastRowOfDay 
+                                                ? 'border-b-4 border-gray-200 dark:border-slate-700' 
+                                                : 'border-b border-gray-100 dark:border-slate-800';
+
                                             return (
-                                            <tr key={rowKey} className="group hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                            <tr key={rowKey} className={`group hover:bg-primary-500/5 transition-colors ${dayBlockBg} ${dayBlockBorder}`}>
                                                 {sIdx === 0 && rIdx === 0 && (
-                                                    <td rowSpan={activeSchedules.reduce((acc, curr) => acc + (curr.details.level === '1st-year' ? (curr.details.branches?.length || 1) : 1), 0)} className="border-r border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-0 z-30 text-center font-black text-gray-400 text-[12px] uppercase p-0">
+                                                    <td rowSpan={dayTotalSubrows} className={`border-r ${dayBlockBorder} bg-white dark:bg-slate-900 sticky left-0 z-30 text-center font-black text-gray-400 text-[12px] uppercase p-0 ${!isEvenDay ? '!bg-gray-100/20 dark:!bg-slate-800/20' : ''}`}>
                                                         <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }} className="mx-auto py-6 tracking-[0.5em]">{day}</div>
                                                     </td>
                                                 )}
-                                                <td className="border-r border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-12 z-30 p-3 text-center shadow-sm">
-                                                    <div className="text-[10px] font-black text-primary-600 dark:text-primary-300 uppercase truncate max-w-[80px] tracking-tight bg-primary-50 dark:bg-primary-900/30 px-2 py-1.5 rounded-xl border border-primary-100 dark:border-primary-900/50">{sch.details.level === '1st-year' ? sub : `SEM ${sub}`}</div>
+                                                <td className={`border-r ${dayBlockBorder} bg-white dark:bg-slate-900 sticky left-12 z-30 p-3 text-center shadow-sm ${!isEvenDay ? '!bg-gray-100/20 dark:!bg-slate-800/20' : ''}`}>
+                                                    <div className="text-[10px] font-black text-primary-600 dark:text-primary-300 uppercase truncate max-w-[80px] tracking-tight bg-primary-50 dark:bg-primary-900/30 px-3 py-2 rounded-2xl border border-primary-100 dark:border-primary-900/50">{sch.details.level === '1st-year' ? sub : `SEM ${sub}`}</div>
                                                 </td>
                                                 {sch.periods.map((period, pIdx) => {
                                                     if (period.isBreak) {
@@ -246,26 +258,36 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                     const colorClasses = slot ? getColorClasses(getSubjectColorName(sch.subjects, slot.subjectId, slot.facultyIds)) : null;
 
                                                     return (
-                                                        <td key={period.id} colSpan={colSpan} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className="border-r border-b border-gray-200 dark:border-slate-700 p-2 cursor-pointer group/cell overflow-hidden">
-                                                            <div className={`h-36 w-full rounded-[2.5rem] p-6 flex flex-col justify-between transition-all duration-300 border-2 ${slot ? `${colorClasses?.bg} ${colorClasses?.border} shadow-card ${colorClasses?.hover}` : 'bg-white dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
-                                                                {slot ? (
-                                                                    <>
-                                                                        <div className={`font-black text-[18px] sm:text-[20px] leading-tight dark:text-white line-clamp-2 tracking-tight ${colorClasses?.text}`}>{sch.subjects.find(s => s.id === slot.subjectId)?.name}</div>
-                                                                        <div className="flex items-center justify-between mt-auto">
-                                                                            <span className={`text-[12px] font-black uppercase tracking-wider opacity-80 truncate max-w-[120px] ${colorClasses?.lightText}`}>{slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}</span>
-                                                                            {conflict && <AlertTriangle size={16} className="text-red-600 animate-pulse shrink-0" />}
+                                                        <td key={period.id} colSpan={colSpan} onClick={() => handleCellClick(sch, day, period.id, slotBranch)} className={`border-r ${dayBlockBorder} p-2 cursor-pointer group/cell overflow-hidden`}>
+                                                            {slot ? (
+                                                                <div className={`h-40 w-full rounded-[2.5rem] p-6 flex flex-col justify-between transition-all duration-300 border-2 ${colorClasses?.bg} ${colorClasses?.border} shadow-card ${colorClasses?.hover}`}>
+                                                                    <div className="space-y-1">
+                                                                        <div className={`font-black text-[16px] leading-tight dark:text-white line-clamp-2 tracking-tight ${colorClasses?.text}`}>
+                                                                            {sch.subjects.find(s => s.id === slot.subjectId)?.name}
                                                                         </div>
-                                                                    </>
-                                                                ) : (
-                                                                    <div className="h-full w-full flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity">
-                                                                      <div className="h-12 w-12 bg-gray-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-300 group-hover:text-primary-500 transition-all scale-90 group-hover:scale-100"><Plus size={24} strokeWidth={3} /></div>
+                                                                        <div className={`${colorClasses?.subText}`}>
+                                                                            {sch.details.section ? `Room ${sch.details.section}` : 'General Hall'}
+                                                                        </div>
                                                                     </div>
-                                                                )}
-                                                            </div>
+                                                                    
+                                                                    <div className="flex items-center justify-between mt-auto">
+                                                                        <span className={`${colorClasses?.accentText} truncate max-w-[120px]`}>
+                                                                            {slot.facultyIds.map(fid => sch.faculties.find(f => f.id === fid)?.initials).join(', ')}
+                                                                        </span>
+                                                                        {conflict && <AlertTriangle size={16} className="text-red-600 animate-pulse shrink-0" />}
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="h-40 w-full rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-slate-800 flex items-center justify-center opacity-40 hover:opacity-100 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                                                                  <div className="h-10 w-10 bg-gray-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-300 group-hover:text-primary-500 transition-all">
+                                                                    <Plus size={24} strokeWidth={3} />
+                                                                  </div>
+                                                                </div>
+                                                            )}
                                                         </td>
                                                     );
                                                 })}
-                                                <td className="border-b border-gray-200 dark:border-slate-700 bg-gray-50/10 dark:bg-slate-900/10"></td>
+                                                <td className={`border-b ${dayBlockBorder} bg-gray-50/10 dark:bg-slate-900/10`}></td>
                                             </tr>
                                         );
                                       });

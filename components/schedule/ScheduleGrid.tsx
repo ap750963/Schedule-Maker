@@ -60,13 +60,11 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
 
         {DAYS.map((day, dIdx) => {
-            // Track columns that are covered by spanning slots in this day
             const coveredPeriods = new Set<number>();
 
             return (
               <React.Fragment key={day}>
-                {/* Day Label */}
-                <div className="sticky left-0 z-[35] bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] shadow-sm border border-gray-200 dark:border-slate-700/80 flex items-center justify-center h-40 sm:h-44 w-14 sm:w-16">
+                <div className="sticky left-0 z-[35] bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-gray-200 dark:border-slate-700/80 flex items-center justify-center h-48 sm:h-52 w-14 sm:w-16">
                     <span className="text-[11px] sm:text-[13px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em] -rotate-90">{day}</span>
                 </div>
 
@@ -77,7 +75,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                                 <div 
                                     key={period.id} 
                                     style={{ gridRow: `2 / span ${DAYS.length}`, gridColumn: pIdx + 2 }}
-                                    className="rounded-[2.5rem] sm:rounded-[3rem] bg-gray-100/50 dark:bg-slate-800/20 border-2 border-dashed border-gray-200 dark:border-slate-700/50 flex flex-col items-center justify-center opacity-40 group hover:opacity-100 transition-opacity cursor-pointer" 
+                                    className="rounded-[3rem] bg-gray-100/50 dark:bg-slate-800/20 border-2 border-dashed border-gray-200 dark:border-slate-700/50 flex flex-col items-center justify-center opacity-40 group hover:opacity-100 transition-opacity cursor-pointer" 
                                     onClick={() => onPeriodClick(period)}
                                 >
                                     <div className="flex flex-col items-center justify-center leading-none py-10">
@@ -91,7 +89,6 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                         return null;
                     }
 
-                    // If this period is covered by a spanning slot from earlier in the row, skip rendering
                     if (coveredPeriods.has(period.id)) return null;
 
                     const slot = findSlot(day, period.id);
@@ -119,10 +116,10 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                             <div 
                                 key={period.id} 
                                 onClick={() => onCellClick(day, period.id)}
-                                className="h-40 sm:h-44 rounded-[2rem] sm:rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/40 hover:bg-white dark:hover:bg-slate-800 hover:border-primary-200 dark:hover:border-primary-500 transition-all cursor-pointer flex items-center justify-center group"
+                                className="h-48 sm:h-52 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/40 hover:bg-white dark:hover:bg-slate-800 hover:border-primary-200 dark:hover:border-primary-500 transition-all cursor-pointer flex items-center justify-center group"
                             >
-                                <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gray-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-200 dark:text-slate-700 group-hover:text-primary-400 group-hover:scale-110 transition-all duration-300">
-                                   <Plus size={24} strokeWidth={3} />
+                                <div className="h-12 w-12 sm:h-14 sm:w-14 bg-gray-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-200 dark:text-slate-700 group-hover:text-primary-400 group-hover:scale-110 transition-all duration-300">
+                                   <Plus size={28} strokeWidth={3} />
                                 </div>
                             </div>
                         );
@@ -137,36 +134,37 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                             key={period.id}
                             onClick={() => onCellClick(day, period.id)}
                             className={`
-                                h-40 sm:h-44 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl relative overflow-hidden group border-2 ${styles.border}
+                                h-48 sm:h-52 rounded-[3rem] p-8 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl relative overflow-hidden group border-2 ${styles.border}
                                 ${styles.bg} ${styles.text}
                                 ${conflict ? 'ring-4 ring-rose-500 ring-offset-4 z-10 scale-[0.98]' : ''}
                             `}
                             style={{ gridColumn: `span ${colSpan}` }}
                         >
                             {conflict && (
-                               <div className="absolute top-3 right-3 sm:top-4 sm:right-4 h-8 w-8 sm:h-10 sm:w-10 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-xl animate-pulse z-10" title={`Conflict: ${conflict}`}>
-                                 <AlertTriangle size={18} strokeWidth={2.5} />
+                               <div className="absolute top-4 right-4 h-10 w-10 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-xl animate-pulse z-10">
+                                 <AlertTriangle size={20} strokeWidth={2.5} />
                                </div>
                             )}
 
-                            <div className="font-black text-[18px] sm:text-[22px] leading-tight line-clamp-2 tracking-tight">
-                                {sub?.name || 'Unknown'}
+                            <div className="space-y-1.5">
+                                <div className="font-black text-[20px] sm:text-[24px] leading-tight line-clamp-2 tracking-tight">
+                                    {sub?.name || 'Unknown'}
+                                </div>
+                                <div className={`${styles.subtext}`}>
+                                    {schedule.details.section ? `Room ${schedule.details.section}` : 'General Hall'}
+                                </div>
                             </div>
 
-                            <div className="mt-auto space-y-2">
-                                <div className={`text-[12px] sm:text-[14px] font-black uppercase tracking-widest opacity-60 ${styles.subtext}`}>
-                                    {slot.type === 'Practical' ? 'Lab Practice' : sub?.code || 'Gen Subject'}
-                                </div>
-                                <div className={`flex items-center justify-between`}>
-                                    <span className="text-[13px] sm:text-[15px] font-black opacity-90">{schedule.details.section ? `ROOM ${schedule.details.section}` : 'TBA'}</span>
-                                    <div className={`h-1.5 w-6 sm:h-2 sm:w-8 rounded-full bg-current opacity-20`}></div>
+                            <div className="mt-auto">
+                                <div className={`${styles.accentText} truncate max-w-[180px]`}>
+                                    {slot.facultyIds.map(fid => schedule.faculties.find(f => f.id === fid)?.initials).join(', ')}
                                 </div>
                             </div>
                         </div>
                     );
                 })}
 
-                <div className="h-40 sm:h-44 bg-transparent" />
+                <div className="h-48 sm:h-52 bg-transparent" />
               </React.Fragment>
             );
         })}
