@@ -2,19 +2,43 @@ import { SUBJECT_COLORS, Schedule, Subject, Faculty } from '../types';
 
 export const generateId = () => Math.random().toString(36).substring(2, 9);
 
+/**
+ * Converts "HH:MM" string to minutes from midnight
+ * Handles both "10:30" and "01:30" correctly assuming school context
+ */
+export const timeStrToMinutes = (timeStr: string): number => {
+    if (!timeStr) return 0;
+    const cleanStr = timeStr.trim().toLowerCase();
+    
+    // Check if it already has am/pm
+    let isPM = cleanStr.includes('pm');
+    const [rawH, rawM] = cleanStr.replace(/[ap]m/, '').split(':').map(n => parseInt(n));
+    
+    let h = rawH;
+    let m = rawM || 0;
+
+    // Academic Heuristic: 1-6 are usually PM in college timing
+    if (!isPM && h >= 1 && h <= 6) isPM = true;
+    
+    if (isPM && h < 12) h += 12;
+    if (!isPM && h === 12) h = 0;
+
+    return h * 60 + m;
+};
+
+/**
+ * Core Overlap Logic: Max(S1, S2) < Min(E1, E2)
+ */
+export const isTimeOverlap = (s1: number, e1: number, s2: number, e2: number): boolean => {
+    return Math.max(s1, s2) < Math.min(e1, e2);
+};
+
 // Heuristic to parse "10:30" or "01:00" (pm) to "13:00" for input
 export const to24Hour = (timeStr: string) => {
     if (!timeStr) return '';
-    let parts = timeStr.trim().split(':');
-    if (parts.length !== 2) return '';
-    let h = parseInt(parts[0]);
-    let m = parseInt(parts[1]);
-    if (isNaN(h) || isNaN(m)) return '';
-    
-    // Heuristic: if hour is 1-6, assume PM (school hours typically 8am-6pm)
-    // This allows "01:00" to become "13:00"
-    if (h >= 1 && h <= 6) h += 12;
-    
+    const mins = timeStrToMinutes(timeStr);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 };
 

@@ -31,6 +31,7 @@ export interface ClassDetails {
   section: string;
   session: string;
   semester: string;
+  level?: '1st-year' | 'higher-year'; // Added to distinguish structure
 }
 
 export interface Period {
@@ -38,6 +39,8 @@ export interface Period {
   label: string;
   time: string;
   isBreak?: boolean;
+  startMinutes?: number; // Minutes from midnight
+  endMinutes?: number;   // Minutes from midnight
 }
 
 export interface TimeSlot {
@@ -70,12 +73,24 @@ export const SUBJECT_COLORS = [
   'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'fuchsia', 'pink', 'slate'
 ];
 
-export const DEFAULT_PERIODS: Period[] = [
-  { id: 1, label: 'Hour 1', time: '10:30 - 11:30' },
-  { id: 2, label: 'Hour 2', time: '11:30 - 12:30' },
-  { id: 3, label: 'Recess', time: '12:30 - 01:00', isBreak: true },
-  { id: 4, label: 'Hour 3', time: '01:00 - 02:00' },
-  { id: 5, label: 'Hour 4', time: '02:00 - 03:00' },
-  { id: 6, label: 'Hour 5', time: '03:15 - 04:15' },
-  { id: 7, label: 'Hour 6', time: '04:15 - 05:15' },
+export const FIRST_YEAR_PERIODS: Period[] = [
+  { id: 1, label: 'Hour 1', time: '10:00 - 11:00', startMinutes: 600, endMinutes: 660 },
+  { id: 2, label: 'Hour 2', time: '11:00 - 12:00', startMinutes: 660, endMinutes: 720 },
+  { id: 3, label: 'Hour 3', time: '12:00 - 01:00', startMinutes: 720, endMinutes: 780 },
+  { id: 4, label: 'Recess', time: '01:00 - 01:30', startMinutes: 780, endMinutes: 810, isBreak: true },
+  { id: 5, label: 'Hour 4', time: '01:30 - 02:30', startMinutes: 810, endMinutes: 870 },
+  { id: 6, label: 'Hour 5', time: '02:30 - 03:30', startMinutes: 870, endMinutes: 930 },
+  { id: 7, label: 'Hour 6', time: '03:30 - 04:00', startMinutes: 930, endMinutes: 960 },
 ];
+
+export const HIGHER_YEAR_PERIODS: Period[] = [
+  { id: 1, label: 'Hour 1', time: '10:30 - 11:30', startMinutes: 630, endMinutes: 690 },
+  { id: 2, label: 'Hour 2', time: '11:30 - 12:30', startMinutes: 690, endMinutes: 750 },
+  { id: 3, label: 'Hour 3', time: '12:30 - 01:30', startMinutes: 750, endMinutes: 810 },
+  { id: 4, label: 'Recess', time: '01:30 - 02:00', startMinutes: 810, endMinutes: 840, isBreak: true },
+  { id: 5, label: 'Hour 4', time: '02:00 - 03:00', startMinutes: 840, endMinutes: 900 },
+  { id: 6, label: 'Hour 5', time: '03:15 - 04:15', startMinutes: 915, endMinutes: 975 },
+  { id: 7, label: 'Hour 6', time: '04:15 - 05:00', startMinutes: 975, endMinutes: 1020 },
+];
+
+export const DEFAULT_PERIODS: Period[] = HIGHER_YEAR_PERIODS;

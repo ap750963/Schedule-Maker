@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, User, Plus, Edit2, Coffee, Download, AlertTriangle, Building, Trash2, FileSpreadsheet } from 'lucide-react';
 import { Schedule, DAYS, Period, TimeSlot, Faculty } from '../types';
 import { Button } from '../components/ui/Button';
-import { generateId, getColorClasses, getSubjectColorName } from '../utils';
+import { generateId, getColorClasses, getSubjectColorName, isTimeOverlap } from '../utils';
 import { exportToPDF } from '../utils/pdf';
 import { exportMasterToExcel } from '../utils/excel';
 import { FacultyTable } from '../components/schedule/FacultyTable';
@@ -13,7 +12,6 @@ import { ExternalBusyModal } from '../components/schedule/ExternalBusyModal';
 
 const RECESS_LETTERS = ['R', 'E', 'C', 'E', 'S', 'S'];
 
-// Added missing interface for MultiSemesterEditorProps
 interface MultiSemesterEditorProps {
   schedules: Schedule[];
   onSaveAll: (schedules: Schedule[]) => void;
@@ -40,7 +38,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
         s.faculties.forEach(f => {
             if (!map.has(f.id)) map.set(f.id, f);
             else {
-                 // Merge external slots if any exist in duplications to preserve latest state
                  const existing = map.get(f.id)!;
                  if ((f.externalSlots?.length || 0) > (existing.externalSlots?.length || 0)) {
                      map.set(f.id, f);
@@ -66,20 +63,53 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
     return schedule.timeSlots.find(s => s.day === day && s.period === periodId);
   };
 
+  /**
+   * GLOBAL CONFLICT CHECKER (Time-Interval Based)
+   */
   const checkConflict = (scheduleId: string, day: string, periodId: number, facultyId: string) => {
-    // 1. Internal Conflict (Other loaded schedules)
+    const targetFaculty = allFaculties.find(f => f.id === facultyId);
+    if (!targetFaculty) return null;
+
+    const currentSchedule = localSchedules.find(s => s.id === scheduleId);
+    const currentPeriod = currentSchedule?.periods.find(p => p.id === periodId);
+    if (!currentPeriod || currentPeriod.startMinutes === undefined) return null;
+
+    // Iterate through all loaded schedules
     for (const s of localSchedules) {
-        if (s.id === scheduleId) continue;
-        const slot = s.timeSlots.find(ts => ts.day === day && ts.period === periodId);
-        if (slot && slot.facultyIds.includes(facultyId)) {
-            return `${s.details.semester} Sem (Internal)`;
+        // Find if this specific faculty is busy in any slot of the other schedule
+        for (const slot of s.timeSlots) {
+            if (slot.day !== day) continue;
+
+            // Robust initials matching
+            const hasTeacherMatch = slot.facultyIds.some(fid => {
+                const facInSlot = s.faculties.find(f => f.id === fid);
+                return facInSlot && facInSlot.initials === targetFaculty.initials;
+            });
+
+            if (hasTeacherMatch) {
+                // Check if it's actually a different record
+                const isSelf = s.id === scheduleId && slot.period === periodId;
+                if (isSelf) continue;
+
+                // Time Interval Overlap Check
+                const slotPeriod = s.periods.find(p => p.id === slot.period);
+                if (slotPeriod && slotPeriod.startMinutes !== undefined) {
+                    const overlap = isTimeOverlap(
+                        currentPeriod.startMinutes, currentPeriod.endMinutes!,
+                        slotPeriod.startMinutes, slotPeriod.endMinutes!
+                    );
+
+                    if (overlap) {
+                        return `${s.details.className} (${s.details.level === '1st-year' ? '1st' : 'H'} Yr)`;
+                    }
+                }
+            }
         }
     }
 
-    // 2. External Conflict (Marked busy in other depts)
-    const faculty = allFaculties.find(f => f.id === facultyId);
-    if (faculty?.externalSlots) {
-        const extSlot = faculty.externalSlots.find(s => s.day === day && s.periodId === periodId);
+    // External Conflict (Hard-coded busy slots)
+    if (targetFaculty.externalSlots) {
+        const extSlot = targetFaculty.externalSlots.find(s => s.day === day && s.periodId === periodId);
         if (extSlot) {
             return `${extSlot.details.department} - ${extSlot.details.semester} Sem (${extSlot.details.subject})`;
         }
@@ -101,13 +131,11 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   const facultyStats = useMemo(() => {
     return allFaculties.map(fac => {
         let total = 0;
-        // Internal Hours
         localSchedules.forEach(s => {
              s.timeSlots
-                .filter(slot => slot.facultyIds.includes(fac.id))
+                .filter(slot => slot.facultyIds.some(fid => s.faculties.find(f => f.id === fid)?.initials === fac.initials))
                 .forEach(slot => { total += (slot.duration || 1); });
         });
-        // External Hours
         if (fac.externalSlots) {
             total += fac.externalSlots.length;
         }
@@ -116,7 +144,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   }, [localSchedules, allFaculties]);
 
   const handleCellClick = (schedule: Schedule, day: string, periodId: number) => {
-    const period = masterPeriods.find(p => p.id === periodId);
+    const period = schedule.periods.find(p => p.id === periodId);
     if (period?.isBreak) return;
 
     const existing = findSlot(schedule, day, periodId);
@@ -140,10 +168,10 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
         let newSlots = sch.timeSlots.filter(s => !(s.day === editingCell.day && s.period === editingCell.periodId));
         
         if (data.type === 'Practical' && (data.duration || 1) > 1) {
-             const pIndex = masterPeriods.findIndex(p => p.id === editingCell.periodId);
-             if (pIndex !== -1 && pIndex < masterPeriods.length - 1) {
-                 const nextPeriodId = masterPeriods[pIndex + 1].id;
-                 if (!masterPeriods[pIndex+1].isBreak) {
+             const pIndex = sch.periods.findIndex(p => p.id === editingCell.periodId);
+             if (pIndex !== -1 && pIndex < sch.periods.length - 1) {
+                 const nextPeriodId = sch.periods[pIndex + 1].id;
+                 if (!sch.periods[pIndex+1].isBreak) {
                      newSlots = newSlots.filter(s => !(s.day === editingCell.day && s.period === nextPeriodId));
                  }
              }
@@ -153,7 +181,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
             newSlots.push({
                 ...data as TimeSlot,
                 id: data.id || generateId(),
-                startTime: masterPeriods.find(p => p.id === editingCell.periodId)?.time || ''
+                startTime: sch.periods.find(p => p.id === editingCell.periodId)?.time || ''
             });
         }
 
@@ -175,30 +203,30 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
 
   const handleSavePeriod = (updatedPeriod: Period, start: string, end: string) => {
       const timeString = `${start} - ${end}`;
-      let newPeriods = [...masterPeriods];
       
-      if (updatedPeriod.id === 0) { 
-          const maxId = Math.max(0, ...newPeriods.map(p => p.id));
-          newPeriods.push({ ...updatedPeriod, id: maxId + 1, time: timeString });
-      } else { 
-          newPeriods = newPeriods.map(p => p.id === updatedPeriod.id ? { ...updatedPeriod, time: timeString } : p);
-      }
-      
-      setLocalSchedules(prev => prev.map(s => ({
-          ...s,
-          periods: newPeriods,
-          timeSlots: updatedPeriod.isBreak 
-            ? s.timeSlots.filter(ts => ts.period !== updatedPeriod.id)
-            : s.timeSlots
-      })));
+      setLocalSchedules(prev => prev.map(s => {
+          let newPeriods = [...s.periods];
+          if (updatedPeriod.id === 0) {
+              const maxId = Math.max(0, ...newPeriods.map(p => p.id));
+              newPeriods.push({ ...updatedPeriod, id: maxId + 1, time: timeString });
+          } else {
+              newPeriods = newPeriods.map(p => p.id === updatedPeriod.id ? { ...updatedPeriod, time: timeString } : p);
+          }
+          return {
+              ...s,
+              periods: newPeriods,
+              timeSlots: updatedPeriod.isBreak 
+                ? s.timeSlots.filter(ts => ts.period !== updatedPeriod.id)
+                : s.timeSlots
+          };
+      }));
       setEditingPeriod(null);
   };
 
   const handleDeletePeriod = (id: number) => {
-      const newPeriods = masterPeriods.filter(p => p.id !== id);
       setLocalSchedules(prev => prev.map(s => ({
           ...s,
-          periods: newPeriods,
+          periods: s.periods.filter(p => p.id !== id),
           timeSlots: s.timeSlots.filter(ts => ts.period !== id)
       })));
       setEditingPeriod(null);
@@ -213,7 +241,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
      });
   };
 
-  // External Engagement Handlers
   const handleSaveExternalBusy = (facultyIds: string[], day: string, periodId: number, details: { department: string; semester: string; subject: string }) => {
       setLocalSchedules(prev => prev.map(sch => ({
           ...sch,
@@ -255,7 +282,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   };
 
   const currentEditingSchedule = localSchedules.find(s => s.id === editingCell?.scheduleId);
-  // Merge all faculties for the modal selection
   const mergedScheduleForModal = currentEditingSchedule ? {
       ...currentEditingSchedule,
       faculties: allFaculties
@@ -264,7 +290,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   return (
     <div className="h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans relative overflow-hidden transition-colors duration-300">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-100 dark:bg-primary-900/30 rounded-full blur-3xl opacity-40 pointer-events-none" />
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/20 rounded-full blur-3xl opacity-40 pointer-events-none" />
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-blue-100 dark:bg-blue-900/10 rounded-full blur-3xl opacity-40 pointer-events-none" />
 
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-5 py-3 flex justify-between items-center shrink-0 z-50 shadow-sm relative flex-wrap gap-4">
             <div className="flex items-center gap-3">
@@ -272,7 +298,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                     <ArrowLeft size={18} className="text-gray-600 dark:text-slate-300"/>
                 </button>
                 <div>
-                    <h1 className="text-lg font-black text-gray-900 dark:text-white leading-none">Department Master Schedule</h1>
+                    <h1 className="text-lg font-black text-gray-900 dark:text-white leading-none">College Master Schedule</h1>
                     <p className="text-[10px] font-medium text-gray-500 dark:text-slate-400 mt-0.5">
                         {localSchedules[0]?.details.className} • {localSchedules[0]?.details.session}
                     </p>
@@ -288,26 +314,12 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                  >
                     Busy Slots
                  </Button>
-                 <button onClick={() => { setExternalModalDefaults({}); setShowExternalModal(true); }} className="sm:hidden h-8 w-8 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center border border-rose-200 dark:border-rose-900/50">
-                    <Building size={14} />
-                 </button>
 
-                 <Button 
-                    onClick={handleExportExcel} 
-                    variant="secondary" 
-                    icon={<FileSpreadsheet size={16} />} 
-                    size="sm"
-                 >
+                 <Button onClick={handleExportExcel} variant="secondary" icon={<FileSpreadsheet size={16} />} size="sm">
                     <span className="hidden xs:inline">Excel</span>
                  </Button>
 
-                 <Button 
-                    onClick={handleExport} 
-                    variant="secondary" 
-                    icon={<Download size={16} />} 
-                    disabled={isExporting}
-                    size="sm"
-                 >
+                 <Button onClick={handleExport} variant="secondary" icon={<Download size={16} />} disabled={isExporting} size="sm">
                     <span className="hidden xs:inline">{isExporting ? 'Generating...' : 'PDF'}</span>
                     <span className="xs:hidden">{isExporting ? '...' : 'PDF'}</span>
                  </Button>
@@ -331,6 +343,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                         className={`
                                             border-r border-b border-gray-100 dark:border-slate-700 p-1 text-center relative group cursor-pointer transition-colors hover:bg-white dark:hover:bg-slate-700
                                             ${p.isBreak ? 'bg-gray-100/50 dark:bg-slate-700/50 w-12 min-w-[48px]' : 'min-w-[130px]'}
+                                            ${p.label.includes('Hour') ? 'bg-primary-50/30' : ''}
                                         `}
                                         onClick={() => setEditingPeriod(p)}
                                     >
@@ -381,31 +394,27 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                             <td className="border-r border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-900 sticky left-10 z-30 p-1 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                                                 <div className="font-bold text-gray-800 dark:text-slate-200 text-xs">{sch.details.semester}</div>
                                                 <div className="text-[8px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Sem</div>
+                                                <div className="text-[7px] font-black text-primary-500 uppercase tracking-tighter mt-0.5">{sch.details.level === '1st-year' ? '1st Yr' : 'Higher'}</div>
                                             </td>
 
-                                            {masterPeriods.map((period, pIndex) => {
+                                            {sch.periods.map((period, pIndex) => {
                                                 if (period.isBreak) {
-                                                    if (index === 0) {
-                                                        const letter = RECESS_LETTERS[dayIndex] || '';
-                                                        return (
-                                                            <td 
-                                                                key={period.id} 
-                                                                rowSpan={sortedSchedules.length + 1}
-                                                                className="bg-gray-50 dark:bg-slate-800/50 border-r border-b border-gray-100 dark:border-slate-700 align-middle text-center p-0"
-                                                            >
-                                                                <div className="h-full flex items-center justify-center">
-                                                                    <span className="text-gray-400 dark:text-slate-600 font-black text-xl select-none">
-                                                                        {letter}
-                                                                    </span>
-                                                                </div>
-                                                            </td>
-                                                        );
-                                                    }
-                                                    return null;
+                                                    // In a true multi-level schedule, recess times might differ. 
+                                                    // This handles standard rendering for break cells.
+                                                    return (
+                                                        <td 
+                                                            key={period.id} 
+                                                            className="bg-gray-50 dark:bg-slate-800/50 border-r border-b border-gray-100 dark:border-slate-700 align-middle text-center p-0"
+                                                        >
+                                                            <div className="h-full flex items-center justify-center opacity-30">
+                                                                <Coffee size={12} />
+                                                            </div>
+                                                        </td>
+                                                    );
                                                 }
 
                                                 if (pIndex > 0) {
-                                                    const prevPeriod = masterPeriods[pIndex - 1];
+                                                    const prevPeriod = sch.periods[pIndex - 1];
                                                     const prevSlot = findSlot(sch, day, prevPeriod.id);
                                                     if (prevSlot && prevSlot.type === 'Practical' && (prevSlot.duration || 1) > 1) {
                                                         return null;
@@ -439,7 +448,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                                 ? `${colorClasses.bg} border border-transparent hover:border-${colorClasses.border.split('-')[1]}-300 p-3 justify-between shadow-sm hover:shadow-md hover:-translate-y-0.5` 
                                                                 : 'bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-800 justify-center items-center hover:shadow-soft'
                                                             }
-                                                            ${conflict ? 'ring-2 ring-red-500 ring-offset-1' : ''}
+                                                            ${conflict ? 'ring-2 ring-red-500 ring-offset-1 shadow-lg shadow-red-500/20' : ''}
                                                         `}>
                                                             {slot ? (
                                                                 <>
@@ -467,7 +476,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                                     </div>
 
                                                                     {conflict && (
-                                                                        <div className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow-sm animate-pulse" title={`Conflict in ${conflict}`}>
+                                                                        <div className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow-sm animate-pulse" title={`Conflict: ${conflict}`}>
                                                                             <AlertTriangle size={8} />
                                                                         </div>
                                                                     )}
@@ -487,9 +496,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                         </tr>
                                     ))}
                                     
-                                    {/* --- External Busy Row --- */}
                                     <tr className="bg-rose-50/10 dark:bg-rose-900/5">
-                                        {/* Label Cell */}
                                         <td className="border-r border-b border-gray-100 dark:border-slate-700 bg-rose-50/30 dark:bg-rose-900/10 sticky left-10 z-30 p-1 text-center align-middle shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                                             <div className="flex flex-col items-center justify-center h-full gap-0.5">
                                                 <div className="h-5 w-5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center">
@@ -499,9 +506,8 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                             </div>
                                         </td>
 
-                                        {/* Period Cells */}
                                         {masterPeriods.map(period => {
-                                            if (period.isBreak) return null; // Handled by rowspan
+                                            if (period.isBreak) return null;
 
                                             const busyFaculties = allFaculties.flatMap(f => 
                                                 (f.externalSlots || [])
@@ -553,7 +559,6 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                                 </td>
                                             );
                                         })}
-                                        {/* Filler cell for the Add Period column */}
                                         <td className="border-b border-gray-100 dark:border-slate-700 bg-gray-50/20 dark:bg-slate-900/50"></td>
                                     </tr>
                                 </React.Fragment>
@@ -571,11 +576,12 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                 data={tempSlot}
                 schedule={mergedScheduleForModal}
                 day={editingCell.day}
-                periodLabel={masterPeriods.find(p => p.id === editingCell.periodId)?.label}
+                periodLabel={mergedScheduleForModal.periods.find(p => p.id === editingCell.periodId)?.label}
                 onClose={() => setEditingCell(null)}
                 onSave={handleSaveSlot}
                 onDelete={handleDeleteSlot}
                 conflicts={getConflictsForCell()}
+                onCheckConflict={(fid) => checkConflict(editingCell.scheduleId, editingCell.day, editingCell.periodId, fid)}
             />
         )}
 

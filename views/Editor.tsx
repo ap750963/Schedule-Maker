@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Download, FileSpreadsheet } from 'lucide-react';
 import { Schedule, DEFAULT_PERIODS, Period, TimeSlot } from '../types';
 import { Button } from '../components/ui/Button';
-import { generateId } from '../utils';
+import { generateId, isTimeOverlap } from '../utils';
 import { exportToPDF } from '../utils/pdf';
 import { exportScheduleToExcel } from '../utils/excel';
 import { FacultyTable } from '../components/schedule/FacultyTable';
@@ -12,11 +12,12 @@ import { ScheduleGrid } from '../components/schedule/ScheduleGrid';
 
 interface EditorProps {
   schedule: Schedule;
+  allSchedules: Schedule[]; // Added to check for cross-dept conflicts
   onSave: (schedule: Schedule) => void;
   onBack: () => void;
 }
 
-export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
+export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, onBack }) => {
   const [currentSchedule, setCurrentSchedule] = useState<Schedule>(schedule);
   const [editingSlot, setEditingSlot] = useState<{ day: string, period: number } | null>(null);
   const [editingPeriod, setEditingPeriod] = useState<Period | null>(null);
@@ -32,6 +33,59 @@ export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
         return { ...fac, totalDuration: total };
     });
   }, [currentSchedule.timeSlots, currentSchedule.faculties]);
+
+  // Global Conflict Checker using Time Intervals
+  const checkGlobalConflict = (day: string, periodId: number, facultyId: string) => {
+    const targetFac = currentSchedule.faculties.find(f => f.id === facultyId);
+    if (!targetFac) return null;
+
+    const currentPeriod = periods.find(p => p.id === periodId);
+    if (!currentPeriod || currentPeriod.startMinutes === undefined) return null;
+
+    for (const s of allSchedules) {
+      const isSameSchedule = s.id === currentSchedule.id;
+      
+      // Iterate over all filled slots in the external schedule
+      for (const slot of s.timeSlots) {
+        if (slot.day !== day) continue;
+        
+        // Find matching teacher by initials
+        const hasMatch = slot.facultyIds.some(fid => {
+          const facInSlot = s.faculties.find(f => f.id === fid);
+          return facInSlot && facInSlot.initials === targetFac.initials;
+        });
+
+        if (hasMatch) {
+          // If initials match, check if times overlap
+          const slotPeriod = s.periods.find(p => p.id === slot.period);
+          if (slotPeriod && slotPeriod.startMinutes !== undefined) {
+             const overlap = isTimeOverlap(
+                 currentPeriod.startMinutes, currentPeriod.endMinutes!,
+                 slotPeriod.startMinutes, slotPeriod.endMinutes!
+             );
+             
+             // Ignore if it's the exact same record we are currently editing
+             const isSelf = isSameSchedule && slot.id === currentSchedule.timeSlots.find(ts => ts.day === day && ts.period === periodId)?.id;
+
+             if (overlap && !isSelf) {
+               return `${s.details.className} (${s.details.level === '1st-year' ? '1st Yr' : 'Higher Yr'})`;
+             }
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const getConflictsForEditing = (facultyIds?: string[]) => {
+    if (!editingSlot || !facultyIds) return {};
+    const confs: Record<string, string> = {};
+    facultyIds.forEach(fid => {
+      const c = checkGlobalConflict(editingSlot.day, editingSlot.period, fid);
+      if (c) confs[fid] = c;
+    });
+    return confs;
+  };
 
   const handleSaveSlot = (data: Partial<TimeSlot>) => {
     if (!data.subjectId || !data.facultyIds?.length) return;
@@ -50,14 +104,14 @@ export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
     setEditingSlot(null);
   };
 
+  const editingData = editingSlot ? (currentSchedule.timeSlots.find(s => s.day === editingSlot.day && s.period === editingSlot.period) || { day: editingSlot.day, period: editingSlot.period, type: 'Theory', subjectId: '', facultyIds: [], duration: 1 }) : null;
+
   return (
     <div className="h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans relative overflow-hidden transition-colors duration-300">
-      {/* Ambient Background Blobs - Enhanced for Glass Effect */}
       <div className="absolute -top-20 -right-20 w-[40rem] h-[40rem] bg-primary-200/40 dark:bg-primary-900/20 rounded-full blur-[100px] opacity-60 pointer-events-none animate-pulse" />
       <div className="absolute top-40 -left-20 w-[30rem] h-[30rem] bg-blue-200/40 dark:bg-blue-900/20 rounded-full blur-[80px] opacity-60 pointer-events-none" />
       <div className="absolute bottom-0 right-20 w-[25rem] h-[25rem] bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-[80px] opacity-50 pointer-events-none" />
 
-      {/* Header */}
       <div className="px-6 py-6 z-20 flex items-center justify-between shrink-0 flex-wrap gap-4 bg-white/10 dark:bg-slate-900/10 backdrop-blur-sm border-b border-white/20 dark:border-slate-800/50">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="h-12 w-12 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-full shadow-soft flex items-center justify-center text-gray-500 dark:text-slate-300 hover:text-primary-600 hover:scale-110 transition-all border border-white/50 dark:border-slate-700/50">
@@ -79,7 +133,6 @@ export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 sm:p-6 space-y-8 relative z-10 scroll-smooth">
-        {/* Grid Component handles its own horizontal scroll */}
         <div id="schedule-grid" className="w-full">
             <ScheduleGrid 
                 schedule={currentSchedule} 
@@ -87,24 +140,30 @@ export const Editor: React.FC<EditorProps> = ({ schedule, onSave, onBack }) => {
                 onCellClick={(day, periodId) => setEditingSlot({day, period: periodId})}
                 onPeriodClick={setEditingPeriod}
                 onAddPeriod={() => setEditingPeriod({ id: 0, label: 'New Hour', time: '09:00 - 10:00' })}
+                getConflictStatus={(day, periodId) => {
+                  const slot = currentSchedule.timeSlots.find(ts => ts.day === day && ts.period === periodId);
+                  if (!slot) return null;
+                  return slot.facultyIds.map(fid => checkGlobalConflict(day, periodId, fid)).find(c => c);
+                }}
             />
         </div>
         
         <FacultyTable stats={facultyStats} />
         
-        {/* Spacer for scrolling */}
         <div className="h-20" />
       </div>
 
-      {editingSlot && (
+      {editingSlot && editingData && (
         <ClassModal 
-          data={currentSchedule.timeSlots.find(s => s.day === editingSlot.day && s.period === editingSlot.period) || { day: editingSlot.day, period: editingSlot.period, type: 'Theory', subjectId: '', facultyIds: [], duration: 1 }}
+          data={editingData}
           schedule={currentSchedule}
           day={editingSlot.day}
           periodLabel={periods.find(p => p.id === editingSlot.period)?.label}
           onClose={() => setEditingSlot(null)}
           onSave={handleSaveSlot}
           onDelete={() => { setCurrentSchedule({...currentSchedule, timeSlots: currentSchedule.timeSlots.filter(s => !(s.day === editingSlot.day && s.period === editingSlot.period))}); setEditingSlot(null); }}
+          conflicts={getConflictsForEditing(editingData.facultyIds)}
+          onCheckConflict={(fid) => checkGlobalConflict(editingSlot.day, editingSlot.period, fid)}
         />
       )}
 

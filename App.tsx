@@ -109,7 +109,12 @@ const App: React.FC = () => {
       )}
       
       {view === 'editor' && activeSchedule && (
-        <Editor schedule={activeSchedule} onSave={handleUpdateSchedule} onBack={() => setView('dashboard')} />
+        <Editor 
+          schedule={activeSchedule} 
+          allSchedules={schedules}
+          onSave={handleUpdateSchedule} 
+          onBack={() => setView('dashboard')} 
+        />
       )}
 
       {view === 'master-editor' && (

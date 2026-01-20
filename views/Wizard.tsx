@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { ChevronLeft, GraduationCap, Users, Book, Beaker, Minus, Plus, Trash2, ArrowRight, User, CalendarRange } from 'lucide-react';
+import { ChevronLeft, GraduationCap, Users, Book, Beaker, Minus, Plus, Trash2, ArrowRight, User, CalendarRange, Clock } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Subject, Faculty, Schedule, DEFAULT_PERIODS } from '../types';
+import { Subject, Faculty, Schedule, FIRST_YEAR_PERIODS, HIGHER_YEAR_PERIODS } from '../types';
 import { generateId, generateInitials, getRandomColor } from '../utils';
 
 interface WizardProps {
@@ -16,6 +16,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
   const [step, setStep] = useState(1);
   const [deptName, setDeptName] = useState('');
   const [session, setSession] = useState('');
+  const [academicLevel, setAcademicLevel] = useState<'1st-year' | 'higher-year'>('higher-year');
   const [selectedSemesters, setSelectedSemesters] = useState<number[]>([]);
   const [subjectsBySem, setSubjectsBySem] = useState<Record<number, Subject[]>>({});
   const [activeSemTab, setActiveSemTab] = useState<number | null>(null);
@@ -34,12 +35,19 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
   };
 
   const finishWizard = () => {
+    const periods = academicLevel === '1st-year' ? FIRST_YEAR_PERIODS : HIGHER_YEAR_PERIODS;
     const newSchedules: Schedule[] = selectedSemesters.map(sem => ({
         id: generateId(),
-        details: { className: deptName, section: 'A', session: session, semester: sem.toString() },
+        details: { 
+            className: deptName, 
+            section: 'A', 
+            session: session, 
+            semester: sem.toString(),
+            level: academicLevel 
+        },
         subjects: subjectsBySem[sem] || [],
         faculties: faculties,
-        periods: DEFAULT_PERIODS,
+        periods: periods,
         timeSlots: [],
         lastModified: Date.now(),
     }));
@@ -72,15 +80,39 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish }) => {
         <div className="max-w-xl mx-auto w-full animate-fade-in-up">
           {step === 1 && (
             <div className="pt-4">
-              <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Department Setup</h2>
-              <p className="text-gray-400 dark:text-slate-500 font-medium text-lg mb-10">Define your department and active semesters.</p>
+              <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-2">College Setup</h2>
+              <p className="text-gray-400 dark:text-slate-500 font-medium text-lg mb-10">Define your department structure and timing.</p>
+              
               <div className="space-y-8">
-                <Input label="Department Name" placeholder="Department Name" value={deptName} onChange={(e) => setDeptName(e.target.value)} icon={<GraduationCap size={24} />} autoFocus />
-                <Input label="Academic Session" placeholder="Academic Session" value={session} onChange={(e) => setSession(e.target.value)} icon={<CalendarRange size={24} />} />
+                <Input label="Department / Branch Name" placeholder="e.g. Mechanical Engineering" value={deptName} onChange={(e) => setDeptName(e.target.value)} icon={<GraduationCap size={24} />} autoFocus />
+                <Input label="Academic Session" placeholder="e.g. 2024-25" value={session} onChange={(e) => setSession(e.target.value)} icon={<CalendarRange size={24} />} />
+                
+                <div>
+                    <label className="block text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3 ml-4">Academic Level (Timing Profile)</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button 
+                            onClick={() => { setAcademicLevel('1st-year'); setSelectedSemesters([1, 2]); }}
+                            className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${academicLevel === '1st-year' ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-white border-gray-100 text-gray-400'}`}
+                        >
+                            <Users size={24} />
+                            <span className="font-bold text-sm">1st Year (Combined)</span>
+                            <span className="text-[10px] uppercase font-black opacity-60 italic">10 AM - 4 PM</span>
+                        </button>
+                        <button 
+                            onClick={() => setAcademicLevel('higher-year')}
+                            className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${academicLevel === 'higher-year' ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-white border-gray-100 text-gray-400'}`}
+                        >
+                            <Beaker size={24} />
+                            <span className="font-bold text-sm">Higher Years</span>
+                            <span className="text-[10px] uppercase font-black opacity-60 italic">10:30 AM - 5 PM</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div>
                     <label className="block text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-4 ml-4">Select Active Semesters</label>
                     <div className="grid grid-cols-4 gap-3">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(sem => (
+                        {(academicLevel === '1st-year' ? [1, 2] : [3, 4, 5, 6]).map(sem => (
                             <button key={sem} onClick={() => setSelectedSemesters(prev => prev.includes(sem) ? prev.filter(s => s !== sem).sort((a,b) => a-b) : [...prev, sem].sort((a,b) => a-b))} className={`h-16 rounded-2xl font-black text-xl flex items-center justify-center transition-all duration-200 ${selectedSemesters.includes(sem) ? 'bg-primary-600 text-white shadow-glow scale-105' : 'bg-white dark:bg-slate-800 text-gray-400 dark:text-slate-400 border-2 border-gray-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-800 hover:text-primary-500'}`}>{sem}</button>
                         ))}
                     </div>

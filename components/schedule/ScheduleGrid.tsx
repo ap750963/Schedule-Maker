@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Coffee, AlertCircle } from 'lucide-react';
+import { Plus, Coffee, AlertTriangle } from 'lucide-react';
 import { DAYS, Period, Schedule } from '../../types';
 import { getSubjectColorName, getSolidColorClasses } from '../../utils';
 
@@ -9,10 +9,11 @@ interface ScheduleGridProps {
   onCellClick: (day: string, periodId: number) => void;
   onPeriodClick: (period: Period) => void;
   onAddPeriod: () => void;
+  getConflictStatus?: (day: string, periodId: number) => string | null;
 }
 
 export const ScheduleGrid: React.FC<ScheduleGridProps> = ({ 
-  schedule, periods, onCellClick, onPeriodClick, onAddPeriod 
+  schedule, periods, onCellClick, onPeriodClick, onAddPeriod, getConflictStatus 
 }) => {
   const findSlot = (day: string, period: number) => 
     schedule.timeSlots.find(s => s.day === day && s.period === period);
@@ -24,15 +25,11 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
       <div 
         className="grid gap-3 min-w-max"
         style={{
-           // First col: Day (60px), Others: Periods (min 130px), Last: Add Button (50px)
            gridTemplateColumns: `60px repeat(${periods.length}, minmax(130px, 1fr)) 50px`
         }}
       >
-        {/* === HEADER ROW === */}
-        {/* Corner Spacer */}
         <div className="sticky left-0 top-0 z-30 bg-gray-50/0 backdrop-blur-sm rounded-xl"></div>
         
-        {/* Period Headers */}
         {periods.map(p => (
            <div 
              key={p.id} 
@@ -57,21 +54,17 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
            </div>
         ))}
         
-        {/* Add Period Header */}
         <div className="sticky top-0 z-20 flex items-end justify-center pb-3 bg-gray-50/90 dark:bg-slate-900/90 backdrop-blur-sm">
              <button onClick={onAddPeriod} className="p-1.5 text-gray-300 hover:text-primary-500 transition-colors"><Plus size={18} /></button>
         </div>
 
 
-        {/* === DATA ROWS === */}
         {DAYS.map((day, dIdx) => (
             <React.Fragment key={day}>
-               {/* Day Label Column */}
                <div className="sticky left-0 z-10 bg-white dark:bg-slate-800 rounded-[1.5rem] shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center h-32 w-14">
                    <span className="text-[10px] font-black text-gray-800 dark:text-white uppercase tracking-[0.2em] -rotate-90">{day}</span>
                </div>
 
-               {/* Slots */}
                {periods.map((period, pIdx) => {
                    if (period.isBreak) {
                        return (
@@ -81,19 +74,19 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                        );
                    }
 
-                   // Check previous span
                    if (pIdx > 0) {
                        const prevP = periods[pIdx - 1];
                        if (!prevP.isBreak) {
                            const prevSlot = findSlot(day, prevP.id);
                            if (prevSlot && prevSlot.type === 'Practical' && (prevSlot.duration || 1) > 1) {
-                               return null; // Consumed by span
+                               return null;
                            }
                        }
                    }
 
                    const slot = findSlot(day, period.id);
                    const colSpan = slot?.type === 'Practical' ? (slot.duration || 1) : 1;
+                   const conflict = getConflictStatus ? getConflictStatus(day, period.id) : null;
                    
                    if (!slot) {
                        return (
@@ -116,17 +109,22 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                            key={period.id}
                            onClick={() => onCellClick(day, period.id)}
                            className={`
-                               h-32 rounded-[1.5rem] p-3.5 flex flex-col justify-between cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg
+                               h-32 rounded-[1.5rem] p-3.5 flex flex-col justify-between cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg relative overflow-hidden
                                ${styles.bg} ${styles.text}
+                               ${conflict ? 'ring-4 ring-rose-500 ring-offset-2' : ''}
                            `}
                            style={{ gridColumn: `span ${colSpan}` }}
                        >
-                           {/* Header: Subject Name */}
+                           {conflict && (
+                              <div className="absolute top-2 right-2 h-6 w-6 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse z-10" title={`Conflict: ${conflict}`}>
+                                <AlertTriangle size={14} />
+                              </div>
+                           )}
+
                            <div className="font-bold text-sm leading-tight line-clamp-2">
                                {sub?.name || 'Unknown'}
                            </div>
 
-                           {/* Footer: Details */}
                            <div className="mt-auto space-y-0.5">
                                <div className={`text-[10px] font-bold uppercase tracking-wide opacity-80 ${styles.subtext}`}>
                                    {slot.type === 'Practical' ? 'Lab Session' : sub?.code || 'No Code'}
@@ -139,7 +137,6 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                    );
                })}
 
-               {/* Filler for Add Button Column */}
                <div className="h-32 bg-transparent" />
             </React.Fragment>
         ))}
