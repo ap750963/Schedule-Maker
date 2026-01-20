@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Download, FileSpreadsheet } from 'lucide-react';
 import { Schedule, DEFAULT_PERIODS, Period, TimeSlot } from '../types';
 import { Button } from '../components/ui/Button';
-import { generateId, isTimeOverlap } from '../utils';
+import { generateId, isTimeOverlap, getSlotInterval } from '../utils';
 import { exportToPDF } from '../utils/pdf';
 import { exportScheduleToExcel } from '../utils/excel';
 import { FacultyTable } from '../components/schedule/FacultyTable';
@@ -12,7 +12,7 @@ import { ScheduleGrid } from '../components/schedule/ScheduleGrid';
 
 interface EditorProps {
   schedule: Schedule;
-  allSchedules: Schedule[]; // Added to check for cross-dept conflicts
+  allSchedules: Schedule[];
   onSave: (schedule: Schedule) => void;
   onBack: () => void;
 }
@@ -34,41 +34,56 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
     });
   }, [currentSchedule.timeSlots, currentSchedule.faculties]);
 
-  // Global Conflict Checker using Time Intervals
   const checkGlobalConflict = (day: string, periodId: number, facultyId: string) => {
     const targetFac = currentSchedule.faculties.find(f => f.id === facultyId);
     if (!targetFac) return null;
 
-    const currentPeriod = periods.find(p => p.id === periodId);
-    if (!currentPeriod || currentPeriod.startMinutes === undefined) return null;
+    // Determine the interval of the slot being checked
+    const currentSlot = currentSchedule.timeSlots.find(ts => ts.day === day && ts.period === periodId);
+    const interval = currentSlot 
+        ? getSlotInterval(currentSlot, periods) 
+        : getSlotInterval({ day, period: periodId, duration: 1 } as TimeSlot, periods);
 
+    if (!interval) return null;
+
+    // 1. Check Internal Conflicts (within the current schedule's state)
+    // We compare against other slots in the current editing state
+    for (const slot of currentSchedule.timeSlots) {
+        if (slot.day !== day) continue;
+        if (slot.id === currentSlot?.id) continue; // Skip self
+
+        if (slot.facultyIds.includes(facultyId)) {
+            const slotInterval = getSlotInterval(slot, periods);
+            if (slotInterval && isTimeOverlap(interval.start, interval.end, slotInterval.start, slotInterval.end)) {
+                return `Self (Internal Overlap)`;
+            }
+        }
+    }
+
+    // 2. Check External Conflicts (against other schedules in the system)
     for (const s of allSchedules) {
-      const isSameSchedule = s.id === currentSchedule.id;
+      // Skip the current schedule entirely to avoid stale state comparisons
+      if (s.id === currentSchedule.id) continue;
       
-      // Iterate over all filled slots in the external schedule
+      // Only check conflicts in the SAME session
+      if (s.details.session !== currentSchedule.details.session) continue;
+      
       for (const slot of s.timeSlots) {
         if (slot.day !== day) continue;
         
-        // Find matching teacher by initials
         const hasMatch = slot.facultyIds.some(fid => {
+          // Resolve faculty ID to initials/name to match across schedules if IDs differ but person is same
+          // Assuming Global Faculty IDs are consistent. If not, match by initials.
           const facInSlot = s.faculties.find(f => f.id === fid);
           return facInSlot && facInSlot.initials === targetFac.initials;
         });
 
         if (hasMatch) {
-          // If initials match, check if times overlap
-          const slotPeriod = s.periods.find(p => p.id === slot.period);
-          if (slotPeriod && slotPeriod.startMinutes !== undefined) {
-             const overlap = isTimeOverlap(
-                 currentPeriod.startMinutes, currentPeriod.endMinutes!,
-                 slotPeriod.startMinutes, slotPeriod.endMinutes!
-             );
-             
-             // Ignore if it's the exact same record we are currently editing
-             const isSelf = isSameSchedule && slot.id === currentSchedule.timeSlots.find(ts => ts.day === day && ts.period === periodId)?.id;
-
-             if (overlap && !isSelf) {
-               return `${s.details.className} (${s.details.level === '1st-year' ? '1st Yr' : 'Higher Yr'})`;
+          const slotInterval = getSlotInterval(slot, s.periods);
+          if (slotInterval) {
+             const overlap = isTimeOverlap(interval.start, interval.end, slotInterval.start, slotInterval.end);
+             if (overlap) {
+               return `${s.details.className} (Sem ${s.details.semester})`;
              }
           }
         }
@@ -90,14 +105,7 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
   const handleSaveSlot = (data: Partial<TimeSlot>) => {
     if (!data.subjectId || !data.facultyIds?.length) return;
     let newSlots = currentSchedule.timeSlots.filter(s => !(s.day === editingSlot?.day && s.period === editingSlot?.period));
-    const duration = data.duration || 1;
-    if (data.type === 'Practical' && duration > 1) {
-         const pIdx = periods.findIndex(p => p.id === editingSlot?.period);
-         if (pIdx < periods.length - 1 && !periods[pIdx+1].isBreak) {
-            newSlots = newSlots.filter(s => !(s.day === editingSlot?.day && s.period === periods[pIdx+1].id));
-         }
-    }
-    newSlots.push({ ...data as TimeSlot, id: data.id || generateId(), duration });
+    newSlots.push({ ...data as TimeSlot, id: data.id || generateId() });
     const updated = { ...currentSchedule, timeSlots: newSlots, lastModified: Date.now() };
     setCurrentSchedule(updated);
     onSave(updated);
@@ -110,8 +118,7 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
     <div className="h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans relative overflow-hidden transition-colors duration-300">
       <div className="absolute -top-20 -right-20 w-[40rem] h-[40rem] bg-primary-200/40 dark:bg-primary-900/20 rounded-full blur-[100px] opacity-60 pointer-events-none animate-pulse" />
       <div className="absolute top-40 -left-20 w-[30rem] h-[30rem] bg-blue-200/40 dark:bg-blue-900/20 rounded-full blur-[80px] opacity-60 pointer-events-none" />
-      <div className="absolute bottom-0 right-20 w-[25rem] h-[25rem] bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-[80px] opacity-50 pointer-events-none" />
-
+      
       <div className="px-6 py-6 z-20 flex items-center justify-between shrink-0 flex-wrap gap-4 bg-white/10 dark:bg-slate-900/10 backdrop-blur-sm border-b border-white/20 dark:border-slate-800/50">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="h-12 w-12 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-full shadow-soft flex items-center justify-center text-gray-500 dark:text-slate-300 hover:text-primary-600 hover:scale-110 transition-all border border-white/50 dark:border-slate-700/50">
@@ -126,7 +133,7 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
           </div>
         </div>
         <div className="flex items-center gap-3 ml-auto">
-             <Button onClick={() => exportScheduleToExcel(currentSchedule, `${currentSchedule.details.className}_Schedule.xlsx`)} variant="secondary" icon={<FileSpreadsheet size={18} />} size="sm" className="rounded-2xl border-white/50 bg-white/50 backdrop-blur-sm hover:bg-white/80"><span className="hidden xs:inline">Excel</span></Button>
+             <Button onClick={() => exportScheduleToExcel(currentSchedule)} variant="secondary" icon={<FileSpreadsheet size={18} />} size="sm" className="rounded-2xl border-white/50 bg-white/50 backdrop-blur-sm hover:bg-white/80"><span className="hidden xs:inline">Excel</span></Button>
              <Button onClick={async () => { setIsExporting(true); await exportToPDF('schedule-grid', `${currentSchedule.details.className}.pdf`); setIsExporting(false); }} variant="secondary" icon={<Download size={18} />} disabled={isExporting} size="sm" className="rounded-2xl border-white/50 bg-white/50 backdrop-blur-sm hover:bg-white/80"><span>{isExporting ? '...' : 'PDF'}</span></Button>
             <Button size="sm" onClick={() => onSave(currentSchedule)} className="shadow-glow rounded-2xl px-6">Save</Button>
         </div>
@@ -142,14 +149,16 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
                 onAddPeriod={() => setEditingPeriod({ id: 0, label: 'New Hour', time: '09:00 - 10:00' })}
                 getConflictStatus={(day, periodId) => {
                   const slot = currentSchedule.timeSlots.find(ts => ts.day === day && ts.period === periodId);
-                  if (!slot) return null;
-                  return slot.facultyIds.map(fid => checkGlobalConflict(day, periodId, fid)).find(c => c);
+                  const facs = slot ? slot.facultyIds : [];
+                  for (const fid of facs) {
+                    const c = checkGlobalConflict(day, periodId, fid);
+                    if (c) return c;
+                  }
+                  return null;
                 }}
             />
         </div>
-        
         <FacultyTable stats={facultyStats} />
-        
         <div className="h-20" />
       </div>
 

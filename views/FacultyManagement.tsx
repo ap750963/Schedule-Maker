@@ -65,7 +65,7 @@ export const FacultyManagement: React.FC<FacultyManagementProps> = ({ faculties,
 
       <div className="px-6 py-6 border-b border-gray-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between sticky top-0 z-50">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="h-10 w-10 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-500 hover:text-primary-600 transition-colors shadow-sm">
+            <button onClick={onBack} className="h-10 w-10 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-500 hover:text-primary-500 transition-colors shadow-sm">
                 <ArrowLeft size={20} />
             </button>
             <h1 className="text-xl font-black dark:text-white">Global Faculty</h1>
@@ -127,7 +127,7 @@ export const FacultyManagement: React.FC<FacultyManagementProps> = ({ faculties,
       {/* Floating Action Button */}
       <button 
         onClick={handleOpenModal}
-        className="fixed bottom-8 right-8 h-16 w-16 bg-primary-600 text-white rounded-full shadow-glow flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60]"
+        className="fixed bottom-8 right-8 h-16 w-16 bg-primary-500 text-white rounded-full shadow-glow flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60]"
         title="Add New Faculty"
       >
         <Plus size={32} strokeWidth={2.5} />
@@ -148,7 +148,7 @@ export const FacultyManagement: React.FC<FacultyManagementProps> = ({ faculties,
                         <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Add New Faculty</h3>
                         <p className="text-sm text-gray-400 dark:text-slate-500 font-medium">Enter details to add to college registry.</p>
                     </div>
-                    <button onClick={() => setIsAddModalOpen(false)} className="p-2 bg-gray-50 dark:bg-slate-700 rounded-full text-gray-400 hover:text-primary-600 transition-colors">
+                    <button onClick={() => setIsAddModalOpen(false)} className="p-2 bg-gray-50 dark:bg-slate-700 rounded-full text-gray-400 hover:text-primary-500 transition-colors">
                         <X size={20} strokeWidth={2.5} />
                     </button>
                 </div>

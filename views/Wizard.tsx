@@ -100,7 +100,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans transition-colors duration-300">
       <div className="px-6 py-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between sticky top-0 z-50">
-          <button onClick={() => step > 1 ? setStep(step - 1) : onCancel()} className="h-12 w-12 bg-gray-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-500 hover:text-primary-600 transition-all">
+          <button onClick={() => step > 1 ? setStep(step - 1) : onCancel()} className="h-12 w-12 bg-gray-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-500 hover:text-primary-500 transition-all">
               <ChevronLeft size={24} />
           </button>
           <div className="flex gap-2">
@@ -123,7 +123,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                         <p className="text-sm text-gray-400 mt-2 font-medium leading-relaxed">Single common timetable for all branches together.</p>
                     </button>
                     <button onClick={() => handleLevelSelect('higher-year')} className="p-8 bg-gray-50/50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-transparent hover:border-primary-500 hover:bg-white dark:hover:bg-slate-800 transition-all text-left group shadow-soft">
-                        <Beaker className="h-12 w-12 text-indigo-500 mb-6" />
+                        <Beaker className="h-12 w-12 text-primary-500 mb-6" />
                         <h4 className="text-2xl font-black dark:text-white tracking-tight">Higher Years (Branch-wise)</h4>
                         <p className="text-sm text-gray-400 mt-2 font-medium leading-relaxed">Separate departmental schedules for 2nd and 3rd years.</p>
                     </button>
@@ -144,14 +144,20 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                               <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-3">Select Semester</label>
                               <div className="grid grid-cols-2 gap-3">
                                   {[1, 2].map(s => (
-                                      <button key={s} onClick={() => setSemester(s)} className={`h-14 rounded-2xl border-2 font-bold transition-all text-sm ${semester === s ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-gray-50/50 border-gray-100 text-gray-400'}`}>Sem {s}</button>
+                                      <button 
+                                        key={s} 
+                                        onClick={() => setSemester(s)} 
+                                        className={`h-12 rounded-2xl font-bold transition-all text-sm ${semester === s ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 scale-105' : 'bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                                      >
+                                        Sem {s}
+                                      </button>
                                   ))}
                               </div>
                           </div>
                           <div>
                               <div className="flex justify-between items-center mb-3 px-3">
                                   <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400">Branches for Combined Batch</label>
-                                  <button onClick={() => setBranches([...branches, ''])} className="text-primary-600 text-[10px] font-black uppercase hover:underline">+ Add Branch</button>
+                                  <button onClick={() => setBranches([...branches, ''])} className="text-primary-500 text-[10px] font-black uppercase hover:underline">+ Add Branch</button>
                               </div>
                               <div className="space-y-3">
                                   {branches.map((b, i) => (
@@ -170,7 +176,13 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                               <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-3">Active Semesters</label>
                               <div className="grid grid-cols-4 gap-3">
                                   {[3, 4, 5, 6].map(s => (
-                                      <button key={s} onClick={() => setActiveSemesters(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s].sort())} className={`h-14 rounded-2xl border-2 font-bold flex items-center justify-center transition-all text-sm ${activeSemesters.includes(s) ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-gray-50/50 border-gray-100 text-gray-400'}`}>{s}</button>
+                                      <button 
+                                        key={s} 
+                                        onClick={() => setActiveSemesters(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s].sort())} 
+                                        className={`h-12 rounded-2xl font-bold flex items-center justify-center transition-all text-sm ${activeSemesters.includes(s) ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30' : 'bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                                      >
+                                        {s}
+                                      </button>
                                   ))}
                               </div>
                           </div>
@@ -192,7 +204,13 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                 {academicLevel === 'higher-year' && (
                     <div className="flex gap-3 mb-8 overflow-x-auto no-scrollbar pb-2">
                         {activeSemesters.map(sem => (
-                            <button key={sem} onClick={() => setActiveSubTab(sem.toString())} className={`px-6 py-2.5 rounded-full text-xs font-black transition-all whitespace-nowrap ${activeSubTab === sem.toString() ? 'bg-slate-900 text-white shadow-lg' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>Semester {sem}</button>
+                            <button 
+                              key={sem} 
+                              onClick={() => setActiveSubTab(sem.toString())} 
+                              className={`px-6 py-2.5 rounded-full text-xs font-black transition-all whitespace-nowrap shadow-sm ${activeSubTab === sem.toString() ? 'bg-primary-500 text-white shadow-primary-500/30' : 'bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-400 hover:border-primary-200'}`}
+                            >
+                              Semester {sem}
+                            </button>
                         ))}
                     </div>
                 )}
@@ -209,7 +227,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                                     <span className="text-[10px] font-black uppercase text-gray-400">Theory</span>
                                     <div className="flex items-center gap-4">
                                         <button onClick={() => updateSubject(activeSubTab, sub.id, { theoryCount: Math.max(0, sub.theoryCount - 1) })} className="p-1 hover:text-primary-500 transition-colors"><Minus size={18} /></button>
-                                        <span className="font-black text-sm w-4 text-center">{sub.theoryCount}</span>
+                                        <span className="font-black text-sm w-4 text-center dark:text-white">{sub.theoryCount}</span>
                                         <button onClick={() => updateSubject(activeSubTab, sub.id, { theoryCount: sub.theoryCount + 1 })} className="p-1 hover:text-primary-500 transition-colors"><Plus size={18} /></button>
                                     </div>
                                 </div>
@@ -217,7 +235,7 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                                     <span className="text-[10px] font-black uppercase text-gray-400">Lab</span>
                                     <div className="flex items-center gap-4">
                                         <button onClick={() => updateSubject(activeSubTab, sub.id, { practicalCount: Math.max(0, sub.practicalCount - 1) })} className="p-1 hover:text-primary-500 transition-colors"><Minus size={18} /></button>
-                                        <span className="font-black text-sm w-4 text-center">{sub.practicalCount}</span>
+                                        <span className="font-black text-sm w-4 text-center dark:text-white">{sub.practicalCount}</span>
                                         <button onClick={() => updateSubject(activeSubTab, sub.id, { practicalCount: sub.practicalCount + 1 })} className="p-1 hover:text-primary-500 transition-colors"><Plus size={18} /></button>
                                     </div>
                                 </div>
@@ -248,9 +266,9 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                         globalFaculties.map(f => {
                             const selected = selectedFaculties.includes(f.id);
                             return (
-                                <button key={f.id} onClick={() => setSelectedFaculties(prev => selected ? prev.filter(id => id !== f.id) : [...prev, f.id])} className={`p-5 rounded-[2rem] border-2 flex items-center justify-between transition-all ${selected ? 'bg-primary-50 border-primary-500' : 'bg-gray-50/50 border-gray-100 hover:border-gray-300 text-gray-500'}`}>
+                                <button key={f.id} onClick={() => setSelectedFaculties(prev => selected ? prev.filter(id => id !== f.id) : [...prev, f.id])} className={`p-5 rounded-[2rem] border-2 flex items-center justify-between transition-all ${selected ? 'bg-primary-50 border-primary-500 dark:bg-primary-900/20 dark:border-primary-500' : 'bg-gray-50/50 border-gray-100 hover:border-gray-300 dark:bg-slate-900/50 dark:border-slate-800 text-gray-500'}`}>
                                     <div className="flex items-center gap-5">
-                                        <div className="h-14 w-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm border border-gray-100 dark:border-slate-700">{f.initials}</div>
+                                        <div className="h-14 w-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm border border-gray-100 dark:border-slate-700 text-slate-800 dark:text-slate-200">{f.initials}</div>
                                         <div className="text-left">
                                             <span className="font-black text-gray-900 dark:text-white block">{f.name}</span>
                                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{f.initials} Registry</span>

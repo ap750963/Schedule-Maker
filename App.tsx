@@ -4,6 +4,7 @@ import { Home } from './views/Home.tsx';
 import { Wizard } from './views/Wizard.tsx';
 import { Editor } from './views/Editor.tsx';
 import { MultiSemesterEditor } from './views/MultiSemesterEditor.tsx';
+import { MasterSelection } from './views/MasterSelection.tsx';
 import { FacultyWiseView } from './views/FacultyWiseView.tsx';
 import { FacultyManagement } from './views/FacultyManagement.tsx';
 import { applyTheme } from './utils/index.ts';
@@ -13,6 +14,7 @@ const App: React.FC = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [globalFaculties, setGlobalFaculties] = useState<Faculty[]>([]);
   const [activeScheduleId, setActiveScheduleId] = useState<string | null>(null);
+  const [masterFilter, setMasterFilter] = useState<'1st-year' | 'higher-year' | null>(null);
   
   // Theme State
   const [theme, setTheme] = useState<string>(() => localStorage.getItem('scholarTime_theme') || 'teal');
@@ -54,6 +56,7 @@ const App: React.FC = () => {
   const handleFinishWizard = (newSchedules: Schedule[]) => {
     setSchedules(prev => [...newSchedules, ...prev]);
     if (newSchedules.length > 0) {
+        setMasterFilter(newSchedules[0].details.level);
         setView('master-editor');
     } else {
         setView('dashboard');
@@ -74,6 +77,7 @@ const App: React.FC = () => {
   };
 
   const activeSchedule = schedules.find(s => s.id === activeScheduleId);
+  const filteredSchedulesForMaster = schedules.filter(s => masterFilter ? s.details.level === masterFilter : true);
 
   return (
     <div className="h-full w-full">
@@ -82,7 +86,7 @@ const App: React.FC = () => {
           schedules={schedules} 
           onCreateNew={() => setView('wizard')} 
           onSelectSchedule={(id) => { setActiveScheduleId(id); setView('editor'); }}
-          onOpenMaster={() => setView('master-editor')}
+          onOpenMaster={() => setView('master-selection')}
           onOpenFacultyWise={() => setView('faculty-wise')}
           onOpenFacultyManagement={() => setView('faculty-management')}
           onDeleteSchedule={(id) => setSchedules(prev => prev.filter(s => s.id !== id))}
@@ -110,9 +114,19 @@ const App: React.FC = () => {
         />
       )}
 
+      {view === 'master-selection' && (
+        <MasterSelection 
+          onBack={() => setView('dashboard')}
+          onSelect={(level) => {
+            setMasterFilter(level);
+            setView('master-editor');
+          }}
+        />
+      )}
+
       {view === 'master-editor' && (
         <MultiSemesterEditor 
-          schedules={schedules} 
+          schedules={filteredSchedulesForMaster} 
           onSaveAll={handleUpdateAllSchedules} 
           onBack={() => setView('dashboard')} 
         />

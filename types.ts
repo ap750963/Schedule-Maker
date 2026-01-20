@@ -66,7 +66,7 @@ export interface Schedule {
   lastModified: number;
 }
 
-export type ViewState = 'dashboard' | 'wizard' | 'editor' | 'master-editor' | 'faculty-wise' | 'faculty-management';
+export type ViewState = 'dashboard' | 'wizard' | 'editor' | 'master-editor' | 'master-selection' | 'faculty-wise' | 'faculty-management';
 
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
