@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Plus, Coffee, FileSpreadsheet, AlertTriangle } from 'lucide-react';
 import { Schedule, DAYS, Period, TimeSlot, Faculty } from '../types';
 import { Button } from '../components/ui/Button';
-import { generateId, getColorClasses, getSubjectColorName, isTimeOverlap, getSlotInterval } from '../utils';
+import { generateId, getColorClasses, getSubjectColorName, isTimeOverlap, getSlotInterval, to12Hour } from '../utils';
 import { exportMasterToExcel } from '../utils/excel';
 import { FacultyTable } from '../components/schedule/FacultyTable';
 import { PeriodModal } from '../components/schedule/PeriodModal';
@@ -115,7 +115,7 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
   };
 
   const handleSavePeriod = (updatedPeriod: Period, startTime: string, endTime: string) => {
-    const time = `${startTime} - ${endTime}`;
+    const time = `${to12Hour(startTime)} - ${to12Hour(endTime)}`;
     setLocalSchedules(prev => prev.map(s => {
         let list = [...s.periods];
         if (updatedPeriod.id === 0) {
@@ -135,17 +135,17 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
 
   return (
     <div className="h-screen bg-white dark:bg-slate-950 flex flex-col transition-colors duration-300 overflow-hidden font-sans text-slate-900 dark:text-white">
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 shadow-sm relative shrink-0">
-            <div className="flex items-center gap-4">
-                <button onClick={onBack} className="h-10 w-10 bg-gray-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-gray-500 hover:text-primary-600 transition-all shadow-sm"><ArrowLeft size={22} /></button>
-                <div>
-                    <h1 className="text-xl font-black leading-none tracking-tight">College Master Schedule</h1>
-                    <p className="text-[11px] text-gray-400 font-black uppercase mt-1.5 tracking-[0.2em]">{activeSchedules[0]?.details.session || '2024-25'}</p>
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-4 py-3 flex justify-between items-center z-50 shadow-sm relative shrink-0">
+            <div className="flex items-center gap-3">
+                <button onClick={onBack} className="h-9 w-9 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-gray-500 hover:text-primary-600 transition-all shadow-sm"><ArrowLeft size={18} /></button>
+                <div className="flex items-baseline gap-2">
+                    <h1 className="text-lg font-black leading-none tracking-tight">Master Schedule</h1>
+                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{activeSchedules[0]?.details.session || '2024-25'}</span>
                 </div>
             </div>
-            <div className="flex items-center gap-3">
-                 <Button onClick={() => exportMasterToExcel(activeSchedules)} variant="secondary" icon={<FileSpreadsheet size={18} />} size="sm" className="rounded-2xl">Excel</Button>
-                 <Button onClick={() => onSaveAll(localSchedules)} icon={<Save size={18} />} size="sm" className="rounded-2xl shadow-glow">Save All</Button>
+            <div className="flex items-center gap-2">
+                 <Button onClick={() => exportMasterToExcel(activeSchedules)} variant="secondary" icon={<FileSpreadsheet size={18} />} size="sm" className="rounded-xl w-9 h-9 !p-0" title="Export to Excel" />
+                 <Button onClick={() => onSaveAll(localSchedules)} icon={<Save size={18} />} size="sm" className="rounded-xl shadow-glow w-9 h-9 !p-0" title="Save All" />
             </div>
         </div>
 
@@ -169,14 +169,15 @@ export const MultiSemesterEditor: React.FC<MultiSemesterEditorProps> = ({ schedu
                                               <span className="text-[10px] font-black uppercase tracking-widest dark:text-slate-300">Recess</span>
                                            </div>
                                         ) : (
-                                          <div className="flex flex-col items-center">
-                                            <div className="text-xs font-black uppercase tracking-[0.05em] mb-1 group-hover:scale-105 transition-transform">{p.time}</div>
+                                          <div className="flex flex-col items-center group-hover:scale-105 transition-transform">
+                                            <div className="text-[10px] font-black uppercase tracking-[0.05em] text-gray-900 dark:text-white">{p.time.split('-')[0].trim()}</div>
+                                            <div className="text-[9px] font-bold uppercase tracking-[0.05em] text-gray-400 dark:text-slate-500 mt-0.5">{p.time.split('-')[1].trim()}</div>
                                           </div>
                                         )}
                                     </th>
                                 ))}
                                 <th className="border-b border-gray-200 dark:border-slate-700 p-2 bg-gray-100 dark:bg-slate-800">
-                                  <button onClick={() => setEditingPeriod({ id: 0, label: 'New', time: '09:00 - 10:00', isBreak: false })} className="p-2 text-gray-300 hover:text-primary-500 transition-colors"><Plus size={20} strokeWidth={3} /></button>
+                                  <button onClick={() => setEditingPeriod({ id: 0, label: 'New', time: '09:00 AM - 10:00 AM', isBreak: false })} className="p-2 text-gray-300 hover:text-primary-500 transition-colors"><Plus size={20} strokeWidth={3} /></button>
                                 </th>
                             </tr>
                         </thead>

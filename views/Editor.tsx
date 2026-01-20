@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Download, FileSpreadsheet } from 'lucide-react';
 import { Schedule, DEFAULT_PERIODS, Period, TimeSlot } from '../types';
 import { Button } from '../components/ui/Button';
-import { generateId, isTimeOverlap, getSlotInterval } from '../utils';
+import { generateId, isTimeOverlap, getSlotInterval, to12Hour } from '../utils';
 import { exportToPDF } from '../utils/pdf';
 import { exportScheduleToExcel } from '../utils/excel';
 import { FacultyTable } from '../components/schedule/FacultyTable';
@@ -146,7 +146,7 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
                 periods={periods} 
                 onCellClick={(day, periodId) => setEditingSlot({day, period: periodId})}
                 onPeriodClick={setEditingPeriod}
-                onAddPeriod={() => setEditingPeriod({ id: 0, label: 'New Hour', time: '09:00 - 10:00' })}
+                onAddPeriod={() => setEditingPeriod({ id: 0, label: 'New Hour', time: '09:00 AM - 10:00 AM' })}
                 getConflictStatus={(day, periodId) => {
                   const slot = currentSchedule.timeSlots.find(ts => ts.day === day && ts.period === periodId);
                   const facs = slot ? slot.facultyIds : [];
@@ -180,7 +180,7 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
         <PeriodModal 
           period={editingPeriod} 
           onSave={(p, s, e) => {
-            const time = `${s} - ${e}`;
+            const time = `${to12Hour(s)} - ${to12Hour(e)}`;
             let list = [...periods];
             if (p.id === 0) list.push({...p, id: Math.max(0, ...list.map(x=>x.id))+1, time});
             else list = list.map(x => x.id === p.id ? {...p, time} : x);

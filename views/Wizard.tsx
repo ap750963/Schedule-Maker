@@ -222,21 +222,21 @@ export const Wizard: React.FC<WizardProps> = ({ onCancel, onFinish, globalFacult
                                 <Input label="Subject Name" value={sub.name} onChange={e => updateSubject(activeSubTab || '1', sub.id, { name: e.target.value })} />
                                 <button onClick={() => setSubjectsByGroup(prev => ({ ...prev, [activeSubTab]: prev[activeSubTab].filter(s => s.id !== sub.id) }))} className="text-red-200 hover:text-red-500 mt-8 transition-colors"><Trash2 size={24} /></button>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="flex items-center justify-between bg-gray-50 dark:bg-slate-800/50 p-3 px-5 rounded-2xl">
-                                    <span className="text-[11px] font-black uppercase text-gray-400">Theory</span>
-                                    <div className="flex items-center gap-4">
-                                        <button onClick={() => updateSubject(activeSubTab, sub.id, { theoryCount: Math.max(0, sub.theoryCount - 1) })} className="p-1 hover:text-primary-500 transition-colors"><Minus size={18} /></button>
+                            <div className="flex gap-3">
+                                <div className="flex-1 flex items-center justify-between bg-orange-50/60 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-500/10 p-3 px-4 rounded-2xl">
+                                    <span className="text-[10px] font-black uppercase text-orange-400 dark:text-orange-300">Theory</span>
+                                    <div className="flex items-center gap-3">
+                                        <button onClick={() => updateSubject(activeSubTab, sub.id, { theoryCount: Math.max(0, sub.theoryCount - 1) })} className="p-1 text-orange-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"><Minus size={16} /></button>
                                         <span className="font-black text-sm w-4 text-center dark:text-white">{sub.theoryCount}</span>
-                                        <button onClick={() => updateSubject(activeSubTab, sub.id, { theoryCount: sub.theoryCount + 1 })} className="p-1 hover:text-primary-500 transition-colors"><Plus size={18} /></button>
+                                        <button onClick={() => updateSubject(activeSubTab, sub.id, { theoryCount: sub.theoryCount + 1 })} className="p-1 text-orange-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"><Plus size={16} /></button>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between bg-gray-50 dark:bg-slate-800/50 p-3 px-5 rounded-2xl">
-                                    <span className="text-[11px] font-black uppercase text-gray-400">Lab</span>
-                                    <div className="flex items-center gap-4">
-                                        <button onClick={() => updateSubject(activeSubTab, sub.id, { practicalCount: Math.max(0, sub.practicalCount - 1) })} className="p-1 hover:text-primary-500 transition-colors"><Minus size={18} /></button>
+                                <div className="flex-1 flex items-center justify-between bg-emerald-50/60 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-500/10 p-3 px-4 rounded-2xl">
+                                    <span className="text-[10px] font-black uppercase text-emerald-400 dark:text-emerald-300">Lab</span>
+                                    <div className="flex items-center gap-3">
+                                        <button onClick={() => updateSubject(activeSubTab, sub.id, { practicalCount: Math.max(0, sub.practicalCount - 1) })} className="p-1 text-emerald-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"><Minus size={16} /></button>
                                         <span className="font-black text-sm w-4 text-center dark:text-white">{sub.practicalCount}</span>
-                                        <button onClick={() => updateSubject(activeSubTab, sub.id, { practicalCount: sub.practicalCount + 1 })} className="p-1 hover:text-primary-500 transition-colors"><Plus size={18} /></button>
+                                        <button onClick={() => updateSubject(activeSubTab, sub.id, { practicalCount: sub.practicalCount + 1 })} className="p-1 text-emerald-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"><Plus size={16} /></button>
                                     </div>
                                 </div>
                             </div>

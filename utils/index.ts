@@ -61,6 +61,18 @@ export const to24Hour = (timeStr: string) => {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 };
 
+export const to12Hour = (time24: string): string => {
+  if (!time24) return '';
+  const [hStr, mStr] = time24.split(':');
+  let h = parseInt(hStr, 10);
+  const m = parseInt(mStr, 10);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12;
+  h = h ? h : 12; // the hour '0' should be '12'
+  const minutes = m < 10 ? '0' + m : m;
+  return `${h}:${minutes} ${ampm}`;
+};
+
 export const getColorClasses = (colorName?: string) => {
   const color = colorName || 'gray';
   const createPalette = (c: string) => ({
