@@ -135,7 +135,7 @@ export const Home: React.FC<HomeProps> = ({
                           <div className="flex justify-between items-start mb-4">
                             <div className="flex-1">
                                 <span className="text-[10px] font-black uppercase tracking-wider bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 px-3 py-1 rounded-full mb-3 inline-block">
-                                    {schedule.details.semester} Sem • {schedule.details.level === '1st-year' ? 'Combined' : 'Dept'}
+                                    {schedule.details.semester} Sem • {schedule.details.level === '1st-year' ? '1st Year' : 'Department'}
                                 </span>
                                 <h3 className="text-xl font-black text-slate-900 dark:text-white line-clamp-2 tracking-tight leading-snug">{schedule.details.className}</h3>
                             </div>

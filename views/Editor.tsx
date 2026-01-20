@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Save, Download, FileSpreadsheet } from 'lucide-react';
-import { Schedule, DEFAULT_PERIODS, Period, TimeSlot } from '../types';
+import { Schedule, DEFAULT_PERIODS, Period, TimeSlot, FIRST_YEAR_PERIODS, HIGHER_YEAR_PERIODS } from '../types';
 import { Button } from '../components/ui/Button';
 import { generateId, isTimeOverlap, getSlotInterval, to12Hour } from '../utils';
 import { exportToPDF } from '../utils/pdf';
@@ -23,7 +23,13 @@ export const Editor: React.FC<EditorProps> = ({ schedule, allSchedules, onSave, 
   const [editingPeriod, setEditingPeriod] = useState<Period | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  const periods = currentSchedule.periods || DEFAULT_PERIODS;
+  // Use the specific default periods based on the level if custom periods aren't set
+  const periods = useMemo(() => {
+    if (currentSchedule.periods && currentSchedule.periods.length > 0) {
+      return currentSchedule.periods;
+    }
+    return currentSchedule.details.level === '1st-year' ? FIRST_YEAR_PERIODS : HIGHER_YEAR_PERIODS;
+  }, [currentSchedule.periods, currentSchedule.details.level]);
 
   const facultyStats = useMemo(() => {
     return currentSchedule.faculties.map(fac => {
